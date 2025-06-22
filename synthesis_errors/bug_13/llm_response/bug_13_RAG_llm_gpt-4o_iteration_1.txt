@@ -1,0 +1,89 @@
+The error message "ERROR: [Synth 8-2715] syntax error near endmodule" is indicating a syntax error in your Verilog code, specifically related to the `endmodule` statement. The root cause of this issue stems from the line before `endmodule` where the assignment is made:
+
+```verilog
+assign c = a & b
+```
+
+This line is missing a semicolon (`;`) at the end, which is required to terminate the Verilog statement properly. The absence of the semicolon leads to a syntax error, which is why the tool is unable to correctly parse the `endmodule` and gives the error near it.
+
+To fix this bug, simply add a semicolon at the end of the assignment statement:
+
+```verilog
+assign c = a & b;
+```
+
+With this correction, the code should compile successfully without syntax errors, resolving the issue encountered during simulation.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: 43
+44 endmodule
+45 //
+--------------------------------------------------------------------
+16...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\verilog_2001_ref_guide.pdf: `ifdef RTL 
+    wire  y = a & b; 
+`else 
+    and #1 (y,a,b); 
+`endif 
+`include “file_name” 
+File inclusion. The contents of another Verilog HDL source file is inserted
+where the `include directive appears.
+`celldefine 
+`endcelldefine 
+Flags the Verilog source code between the two directives as a cell.  Some
+tools, such as a delay calculator for an ASIC, need to distinguish between a
+module that represents an ASIC cell and other modules in the design.
+`default_nettype net_data_type...
+
+- source_documents\Quick Start Guide to Verilog.pdf: #10
+A_TB¼0; B_TB¼0; C_TB¼1;
+#10
+A_TB¼0; B_TB¼1; C_TB¼0;
+#10
+A_TB¼0; B_TB¼1; C_TB¼1;
+#10
+A_TB¼1; B_TB¼0; C_TB¼0;
+#10
+A_TB¼1; B_TB¼0; C_TB¼1;
+#10
+A_TB¼1; B_TB¼1; C_TB¼0;
+#10
+A_TB¼1; B_TB¼1; C_TB¼1;
+$display("Simulation stopping at time: %t", $time);
+end
+This example will result in the following statements printed to the simulator transcript:
+Stimulus starting at time:
+0.00ns
+Simulation stopping at time: 80.00ns
+CONCEPT CHECK
+CC5.3...
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...

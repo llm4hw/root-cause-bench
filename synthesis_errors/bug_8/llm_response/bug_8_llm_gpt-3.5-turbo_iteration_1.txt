@@ -1,0 +1,5 @@
+The bug in this code is that the signal `signal2` is being assigned a value without being declared in the entity or architecture of the `top8` module. This causes an error during simulation as the signal is unknown to the RTL code. The error message indicates that `signal2` is not declared, which aligns with the issue mentioned.
+
+To fix this bug, the signal `signal2` needs to be properly declared in the architecture declaration section along with `signal1`. Once `signal2` is declared, the assignment statement `signal2 <= '0';` will work correctly during simulation.
+
+Make sure to declare `signal2` in the architecture section, similar to how `signal1` is declared, and ensure that it aligns with your design requirements. This will resolve the error related to `signal2` not being declared.

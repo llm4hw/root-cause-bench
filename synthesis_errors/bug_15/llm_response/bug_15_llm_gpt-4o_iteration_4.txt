@@ -1,0 +1,12 @@
+The error message you encounter indicates a synthesis issue where you are attempting to perform a procedural assignment (using the non-blocking assignment operator `<=`) to an object declared as `wire`. In Verilog, wires are used to represent connections between different elements in your design and cannot store state. Only objects declared as `reg` or other memory types can store state and be the target of procedural assignments within an `always` block.
+
+In your code, `data` is declared as a `wire`, but you are trying to assign it a value inside an `always` block, which results in the synthesis error. The `always` block typically requires the variables on the left-hand side of assignments to be of type `reg` (or equivalent storage types) because they need to hold a state over time.
+
+Here is why the bug is occurring:
+- The variable `data` is declared as a `wire`, which means it cannot remember or hold its value.
+- The error message is triggered by attempting to assign a new value to `data` with a procedural assignment (`<=`), which is not allowed for `wire` types.
+
+To resolve this issue:
+- You need to change the declaration of `data` from `wire` to `reg`. This would allow `data` to store a value and enable it to be used as the target of a procedural assignment within the `always` block.
+
+Keep in mind that while the solution involves changing the type from `wire` to `reg`, it is essential to understand the broader implications on design, such as the physical hardware interpretation and behavior consistency. If `data` is meant to be connected to other combinational logic (without needing to store state beyond its life cycle within the `always` block), ensure that its usage as a `reg` is appropriate for your design's intentions.

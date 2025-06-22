@@ -1,0 +1,3 @@
+The issue is that a semicolon is missing at the end of the continuous assignment statement. Specifically, the line where the output is driven (using the bitwise AND) ends without a terminating semicolon. This disrupts the parser’s expectation when it encounters the endmodule declaration, so it reports a syntax error near endmodule. 
+
+Because the hardware description language (HDL) requires each statement to be correctly terminated, the missing semicolon prevents the toolchain from correctly parsing the module’s code. By ensuring every statement, especially continuous assignments, is properly terminated, you will resolve this syntax issue.

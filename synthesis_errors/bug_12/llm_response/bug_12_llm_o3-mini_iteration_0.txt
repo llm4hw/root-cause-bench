@@ -1,0 +1,5 @@
+The error occurs because a signal of type std_logic is being initialized with a string literal ("0") rather than a single character literal. In VHDL, a std_logic signal must be assigned a single character (using single quotes) rather than a multi‐character string (using double quotes). Here, initializing the signal with the string literal "0" leads to a type mismatch since "0" is interpreted as a one-character string rather than a std_logic value.
+
+This bug is flagged at the simulation stage because the type checking enforced by the synthesis tool detects that you are trying to assign a string to a std_logic type. To fix this issue, you need to use the correct literal format (a single character enclosed by single quotes) when initializing a signal of the std_logic type.
+
+Remember, for any initialization of std_logic values, using single quotes is mandatory to ensure the literal is interpreted correctly.

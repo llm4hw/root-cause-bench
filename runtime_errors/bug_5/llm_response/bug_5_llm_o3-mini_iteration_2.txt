@@ -1,0 +1,5 @@
+The problem is that the code always compares every input and updates min when a lower value is found. The intended behavior is to use b, then c, then d in order and select the first one that is smaller than a. However, the current code isn’t stopping after it finds the first value that satisfies the condition. Instead, once min is updated to, say, b or c, later comparisons can update min further. This is why in Test Case 3 the expected output was 8 (taken from c, which is the first value in order that is lower than a), but the code later sees that d is even lower and updates min to 7.
+
+The root cause is that all the comparisons are independent “if” statements. They do not form an exclusive chain. Even when c is chosen as the first smaller value, the subsequent “if” for d still checks and can change min if d is even smaller.
+
+To fix this, you would need to ensure that once a smaller value is found, the later comparisons are skipped. In other words, you would need mutually exclusive conditions (for example, by using an if-else chain or nested conditionals) so that once b (or c) qualifies as the first smaller value, d is not considered.

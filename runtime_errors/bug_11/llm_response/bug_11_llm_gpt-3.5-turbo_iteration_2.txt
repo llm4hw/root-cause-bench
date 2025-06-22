@@ -1,0 +1,5 @@
+The bug in the code is due to the way the `valid` signal is being handled in the design. In the sequential logic of the FSM, when the input number is not in the range '0' to '9', the `valid` signal is being set to 1. However, the expected behavior is that `valid` should be 0 for any input number outside the valid range.
+
+This bug is occurring because the state is directly assigned to `num_in`, which could potentially hold values outside the range '0' to '9'. When an invalid number is given as input, it is not properly detected and the `valid` signal incorrectly indicates that the input is valid.
+
+To fix this bug, you need to add logic that explicitly checks whether the input number is within the valid range before setting the `valid` signal. This check should be done in the FSM logic to ensure that only valid inputs result in setting `valid` to 1, while invalid inputs keep `valid` at 0.

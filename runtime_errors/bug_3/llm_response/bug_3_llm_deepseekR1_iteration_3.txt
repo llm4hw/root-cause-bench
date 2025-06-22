@@ -1,0 +1,7 @@
+The bug is in the calculation of `o_carry`. The full adder's carry-out should be the logical **OR** of the two intermediate carry signals (`w_carry1` and `w_carry2`), not an **AND**. 
+
+**Why it occurs:**  
+The full adder is constructed using two half-adders. The first half-adder computes the sum of `i_a` and `i_b`, producing `w_carry1` (the carry from `i_a & i_b`). The second half-adder computes the sum of the intermediate result (`w_sum1`) and `i_cin`, producing `w_carry2` (the carry from `w_sum1 & i_cin`). The final carry (`o_carry`) should be **1 if either `w_carry1` or `w_carry2` is 1**, since either of these indicates a carry is generated. However, the code incorrectly uses `w_carry1 & w_carry2`, which only produces 1 if both carries are 1, leading to an incorrect `o_carry` in cases where only one carry is active (e.g., Test Case 3). 
+
+**Fix:**  
+Replace the AND operation (`&`) with an OR operation (`|`) in the assignment of `o_carry`.

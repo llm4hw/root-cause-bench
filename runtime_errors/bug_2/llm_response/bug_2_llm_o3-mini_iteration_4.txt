@@ -1,0 +1,3 @@
+The issue occurs because the output q is computed as a bitwise AND between a and the constant 0 (i.e., a & 0), which will always result in 0 regardless of the inputs. In the test bench, Test Case 4 expects q to be 1 when both a and b are 1, but since the logic completely ignores b and forces the result to 0, the test case fails.
+
+In summary, the bug is happening because the module's assignment doesn't implement the intended logic—it uses "a & 0" (producing a constant 0) instead of incorporating input b and the intended Boolean operation. To address this, the logic expression for q must be corrected to use the proper combination of inputs so that when both controllers are on, q evaluates to 1.

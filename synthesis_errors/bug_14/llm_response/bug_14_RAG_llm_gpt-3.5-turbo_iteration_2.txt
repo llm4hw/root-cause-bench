@@ -1,0 +1,87 @@
+The error message indicates that the variable `data` is not declared in the Verilog code, specifically in the `always @(posedge clk)` block where `out1` is assigned to `data`. Since `data` is not defined or declared in the module, the synthesis tool throws an error.
+
+To fix this issue, you need to declare and define the `data` variable in the module so that it can be used in the assignment to `out1`. Here is an example of how you can declare and use `data` in your `top14` module:
+
+```verilog
+module top14(
+    input wire clk,
+    output reg out1
+);
+
+reg data; // Declaration of the data variable
+
+always @(posedge clk)
+begin
+    // Assigning a value to data, this can be based on your design
+    // data <= some_signal_or_value;
+
+    out1 <= data;
+end
+
+endmodule
+```
+
+In this modified code snippet, the `data` variable is declared before using it in the `always @(posedge clk)` block. You need to also define what `data` should be assigned, based on your design requirements. By properly declaring and defining `data`, you should be able to fix the error mentioned.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: data_out ¼ rom_data_out;
+else if ( (address >¼ 128) && (address <¼ 223) )
+data_out ¼ rw_data_out;
+else if (address ¼¼ 8’hF0) data_out ¼ port_in_00;
+else if (address ¼¼ 8’hF1) data_out ¼ port_in_01;
+else if (address ¼¼ 8’hF2) data_out ¼ port_in_02;
+else if (address ¼¼ 8’hF3) data_out ¼ port_in_03;
+else if (address ¼¼ 8’hF4) data_out ¼ port_in_04;
+else if (address ¼¼ 8’hF5) data_out ¼ port_in_05;
+else if (address ¼¼ 8’hF6) data_out ¼ port_in_06;
+else if (address ¼¼ 8’hF7) data_out ¼ port_in_07;...
+
+- source_documents\Quick Start Guide to Verilog.pdf: assignments will be attempted for addresses outside of the deﬁned range of the ROM array. This enable
+line can now be used in the behavioral model for the ROM as follows:
+always @ (posedge clock)
+begin
+if (EN)
+data_out ¼ ROM[address];
+end
+11.3.3.2 Data Memory Implementation in Verilog
+The data memory is created using a similar strategy as the program memory. An array signal is
+declared with an address range corresponding to the memory map for the computer system (i.e., 128 to...
+
+- source_documents\Quick Start Guide to Verilog.pdf: ROM to data_out when a valid address is entered. Consider the following Verilog to create an internal
+enable (EN) that will only be asserted when the address falls within the valid program memory range of
+0 to 127.
+always @ (address)
+begin
+if ( (address >¼ 0) && (address <¼ 127) )
+EN ¼ 1’b1;
+else
+EN ¼ 1’b0;
+end
+If this enable signal is not created, the simulation and synthesis will fail because data_out...
+
+- source_documents\Quick Start Guide to Verilog.pdf: else if (address ¼¼ 8’hF7) data_out ¼ port_in_07;
+else if (address ¼¼ 8’hF8) data_out ¼ port_in_08;
+else if (address ¼¼ 8’hF9) data_out ¼ port_in_09;
+else if (address ¼¼ 8’hFA) data_out ¼ port_in_10;
+else if (address ¼¼ 8’hFB) data_out ¼ port_in_11;
+else if (address ¼¼ 8’hFC) data_out ¼ port_in_12;
+else if (address ¼¼ 8’hFD) data_out ¼ port_in_13;
+else if (address ¼¼ 8’hFE) data_out ¼ port_in_14;
+else if (address ¼¼ 8’hFF) data_out ¼ port_in_15;
+end
+11.3.4 CPU Implementation...

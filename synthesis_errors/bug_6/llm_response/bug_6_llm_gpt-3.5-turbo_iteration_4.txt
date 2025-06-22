@@ -1,0 +1,5 @@
+The bug in the provided code is due to the usage of a variable (`variable1`) outside of a process or subprogram that is not declared as `shared`. In VHDL, variables declared at the architecture level are only allowed to be accessed within processes or function procedures unless marked as `shared`. 
+
+In this case, the variable `variable1` is declared at the architecture level and is being assigned and read directly within the process, which is not allowed in VHDL.
+
+To fix this issue, you can either move the variable declaration inside the process where it is being used or mark it as `shared` to make it accessible from the architecture level. This will resolve the error related to the variable being outside of a subprogram or process without being marked as shared.

@@ -1,0 +1,11 @@
+The error comes from the fact that when the state machine is in the pedestrian (Ped) state and the longTimeHold signal is asserted, the module’s output is being set to the binary constant that represents a lower value (101) instead of a value higher than 110 as the test bench expects.
+
+More specifically, in the combinational block that determines the three‐bit output for each state, the Ped state uses a conditional assignment:
+ • If longTimeHold is true, outResult is set to 101.
+ • Otherwise, it is set to 110.
+
+The test bench for test case 6 asserts that when pedControl is asserted and longTimeHold is true, the output should be greater than 110 (i.e. the expected output should be something like 111 or any value above the binary number 110). The fact that the design assigns 101 when longTimeHold is true causes the condition “outResult > 110” to fail. In other words, the assigned constant for the Ped state's “long hold” condition is too low.
+
+This mismatch in the expected versus the assigned constant value is the root cause of the bug. The bug is occurring because the designer’s intent for the output value in the Ped state under a long time hold condition was not correctly translated into the constant values compared against by the test bench.
+
+The fix is to adjust the constant values used for the pedestrian state (in the output-determining block) so that when longTimeHold is true the output is a value that satisfies the condition expected by the test bench (a value greater than binary 110) and when false it matches the intended behavior.

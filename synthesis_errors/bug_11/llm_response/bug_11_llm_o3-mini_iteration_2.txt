@@ -1,0 +1,5 @@
+The error comes from the fact that the case statement does not cover every possible value of the 2‑bit input. Although a 2‑bit vector has four possible values (“00”, “01”, “10”, and “11”), only three of those choices are explicitly handled. The error message points out that the value corresponding to “11” (shown in the error as a 32‑bit literal representing the binary value 3) is missing, so when the simulation applies that input, the case statement doesn’t know how to respond.
+
+This issue is occurring because the tool (or test bench) expects a complete specification for all possible input values. When it encounters the missing “11” case, it flags an error since the design does not describe what should happen for that input.
+
+The fix is to modify the design so that every potential input, including “11”, is covered. One common method to do this is to include an “others” branch (or explicitly provide a case for “11”), ensuring that no matter what value the selector takes, the behavior is defined.

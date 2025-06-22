@@ -1,0 +1,13 @@
+The error occurs because the continuous assignment statement `assign c = a & b` is missing a terminating semicolon (`;`). Verilog requires all statements within a module to end with a semicolon. 
+
+**Why this causes a syntax error at `endmodule`:**
+1. The parser expects a semicolon after the assignment expression
+2. When it encounters `endmodule` without seeing the expected semicolon, it interprets this as a syntax error at the `endmodule` keyword
+3. The line number points to `endmodule` because that's where the parser realizes the statement wasn't properly terminated
+
+**How to fix:**
+Add the missing semicolon at the end of the assignment line:
+```verilog
+assign c = a & b;
+```
+This will properly terminate the assignment statement before the `endmodule` declaration. The parser will then recognize `endmodule` as the correct closing construct for the module.

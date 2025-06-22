@@ -1,0 +1,40 @@
+### Root Cause Analysis
+
+The bug occurs because the current implementation incorrectly **finds the global minimum** among all inputs (a, b, c, d) rather than following the specified requirement:  
+*"Assign the first value smaller than `a` to `min` in the order of b→c→d (else `min = a`)"*.
+
+### Key Issues:
+1. **Incorrect Comparison Logic**:  
+   The code compares each subsequent value against the *current* `min` (which may have been updated) instead of comparing against the original `a`.  
+   Example in Test Case 3:  
+   - `a=10`, `b=15` → `min` remains 10 (correct since 15 ≮ 10)  
+   - `c=8` → `min=10 > 8` → `min` updates to 8  
+   - **Bug**: Now `d=7` is compared against the *updated* `min=8` → `8 > 7` → `min` incorrectly updates to 7.
+
+2. **Violation of "First Match" Requirement**:  
+   The requirement dictates that once the first value smaller than `a` is found in the sequence (b→c→d), further values should **not** be considered. The current logic always checks all inputs (b, c, d), leading to incorrect updates if a later value is smaller than an earlier match.
+
+### Why This Fails Test Case 3:
+- **Inputs**: `a=10`, `b=15`, `c=8`, `d=7`  
+- **Expected Behavior**:  
+  - `b=15` (not < `a=10`) → skip  
+  - `c=8` (< `a=10`) → `min` should be set to `8` and **stop checking** `d`  
+- **Actual Behavior**:  
+  - After setting `min=8` from `c`, it checks `d=7` → `8 > 7` → sets `min=7` (violates "first match" rule).
+
+### Fix Direction:
+To resolve this, the logic must:  
+1. **Compare values directly against `a`** (not the current `min`).  
+2. **Terminate early** after the first value in the sequence (b→c→d) is found smaller than `a`.  
+   Example fix structure:  
+   ```verilog
+   min = a;
+   if (b < a)       min = b;
+   else if (c < a)  min = c;
+   else if (d < a)  min = d;
+   ```  
+   This ensures only the *first* smaller value in the b→c→d order is assigned, and later values are ignored.
+
+--- 
+
+**Note**: The testbench correctly validates the requirement by checking for the first smaller value in the sequence (not the global minimum), exposing the algorithmic flaw in the design.

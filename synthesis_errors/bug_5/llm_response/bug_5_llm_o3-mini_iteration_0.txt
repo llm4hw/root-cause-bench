@@ -1,0 +1,15 @@
+The error is caused by attempting to index an expression that is the direct result of a type conversion function call. In this case, the simulator (or synthesis tool) does not allow treating the outcome of the conversion (namely, the vector produced by converting an integer to an unsigned and then to a std_logic_vector) as an array on which you can immediately apply an index.
+
+To explain in detail:
+• The expression std_logic_vector(to_unsigned(counter, 8)) produces a temporary vector value.
+• You then try to extract bit 7 with (7), but some VHDL tools will not allow an index operation directly on the result of the function call because it’s considered a transient (unnamed) composite expression.
+• This limitation causes the error "cannot index the result of a type conversion."
+
+The underlying reason is that the synthesis process has difficulty handling the indexing of an expression that is not stored in a definite intermediate signal. VHDL requires that the evaluation of an indexed element be done on a stable array (typically a signal or variable) rather than a temporary value produced inline.
+
+While not providing a fixed code solution, the typical way to fix this issue would be to assign the output of the type conversion to an intermediate signal or variable and then index that signal. This gives the tool a stable array to work with for the indexing operation.
+
+In summary:
+• Bug: Indexing on the result of the type conversion is not allowed.
+• Why: The conversion creates a temporary value that the tool cannot index.
+• How to fix: Break out the conversion’s result into an intermediate signal (or variable) and then index that signal.

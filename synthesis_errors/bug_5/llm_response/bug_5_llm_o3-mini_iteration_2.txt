@@ -1,0 +1,7 @@
+The error arises because the code is trying to index the result of a type conversion expression directly. In other words, the conversion function returns a temporary value (the converted vector), and the synthesis tool does not allow you to apply an index operation (i.e. taking element (7)) directly to that anonymous result.
+
+The root cause is that, in VHDL, when you convert the integer value to an unsigned vector and then to a std_logic_vector, the result is not a named signal or variable but an immediate (temporary) value. Some synthesis tools have restrictions against immediately indexing such transient values since they cannot "see" it as a stable, addressable object.
+
+The issue can be fixed by separating the conversion and the indexing into two distinct steps. That is, first assign the result of the conversion to an intermediate signal or variable and then index that named object to drive out1.
+
+This explanation of what’s going wrong and why a synthesis error is generated helps pinpoint the problem without directly proposing a code fix.

@@ -1,0 +1,7 @@
+The bug in the code is in the comparison condition in the always block of the 'faulty_comparator' module. 
+
+The issue lies in the comparison `if (a == 5'b10101)`. In this condition, the code is checking if input 'a' is equal to binary value 10101 which is decimal 21, not 9. The condition should be `if (a == 4'b1001)` to correctly compare input 'a' with decimal value 9.
+
+To fix the bug, you need to update the comparison condition in the 'always' block to `if (a == 4'b1001)`. After making this change, the module should compare input 'a' with the correct value (decimal 9) and pass the test cases accordingly.
+
+Additionally, I recommend updating the testbench to reflect the correction in the comparison value to ensure accurate testing.

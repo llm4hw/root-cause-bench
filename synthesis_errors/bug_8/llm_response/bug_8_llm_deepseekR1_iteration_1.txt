@@ -1,0 +1,17 @@
+The bug occurs because the signal `signal2` is referenced in the reset logic but has not been declared in the architecture. Here's why:
+
+1. **Undeclared Signal**: The architecture only declares `signal1` (line 33), but the reset block attempts to assign to `signal2` (line 46). VHDL requires all signals to be explicitly declared before use.
+
+2. **Scope Issue**: Signals must be declared in the architecture's declarative region (between `architecture` and `begin`). Since `signal2` is missing there, the synthesis tool throws an undeclared identifier error.
+
+3. **Design Intent**: Given that:
+   - `signal1` drives the output `out1`
+   - The clock process toggles `signal1`
+   - `signal2` is only referenced during reset  
+   This suggests `signal2` is likely a typo and should be `signal1`.
+
+**Fix Approach**:
+- If `signal2` is intentional: Declare it properly in the architecture (e.g., `signal signal2 : STD_LOGIC;`)
+- If not (most probable): Replace `signal2` with `signal1` in the reset assignment to maintain design consistency, as `signal1` is the only registered signal affecting outputs.
+
+The root cause is a missing signal declaration or identifier typo in the reset logic, violating VHDL's strict declaration-before-use rules.

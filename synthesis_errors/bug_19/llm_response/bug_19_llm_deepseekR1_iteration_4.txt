@@ -1,0 +1,23 @@
+### Bug Explanation
+The error occurs due to an **invalid binary literal** in the assignment `y = 2'b2;` (line 34). Here's why:
+
+1. **Syntax Violation**:  
+   In Verilog, binary literals must use **only `0`, `1`, `x`, or `z`** digits after the `'b` prefix. The digit `2` is illegal in binary representation.
+
+2. **The Faulty Literal**:  
+   `2'b2` attempts to represent a 2-bit binary value but uses `2`—a decimal digit that doesn’t exist in binary. This violates Verilog syntax rules.
+
+3. **Tool Response**:  
+   The synthesizer (Synth 8-2108) flags this as an "illegal character" because `2` is not a valid binary digit. The error halts synthesis/simulation.
+
+### Root Cause
+- **Misuse of Base Prefix**:  
+  The designer likely intended to assign the **decimal value `2`** but incorrectly used a binary prefix (`'b`). Binary literals cannot express the digit `2`—they can only represent `0`/`1` (or `x`/`z` for unknowns/high-impedance).
+
+### Fix Required
+Replace `2'b2` with a **valid representation of the decimal value `2`** using either:
+- **Binary literal**: `2'b10` (binary `10` = decimal `2`), or  
+- **Decimal literal**: `2'd2` (explicitly decimal).
+
+### Additional Note
+The rest of the code uses binary literals (e.g., `2'b00`, `2'b01`). For consistency, use `2'b10` in the `else` branch. This resolves the syntax error while maintaining the intended behavior (assigning `2` when `a` is `10` or `11`).

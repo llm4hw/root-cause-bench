@@ -1,0 +1,24 @@
+The error message you're encountering, "ERROR: Expected Red (00), but got 11," indicates a mismatch between the expected and actual states during the simulation of your Verilog code. Let's examine what's happening in the design and the testbench to identify the root cause.
+
+### Detection in the Code:
+
+1. **State Definition Mismatch**: In the `top_module`, the state transitions are managed by parameters `Red`, `Green`, `Yellow`, and `Ped`, assigned values 0, 1, 2, and 3, respectively. These parameters are used in the `always` blocks to define state transitions.
+
+2. **Testbench Expectations**: In the testbench code, the state machine is expected to follow this sequence:
+   - `Red` (00)
+   - `Ped` (11)
+   - `Green` (01)
+   - `Yellow` (10)
+   - Back to `Red` (00)
+
+3. **Assignment Error**: The testbench assumes `Ped` corresponds to the binary value `11` (`2'b11`). However, in the `top_module`, the binary representation of `Ped` is implicitly 3 (`2'b11`).
+
+4. **Mismatch Cause**: The root issue here lies in both the design transition logic and possibly your understanding of state representations. Your design logic sets `next` to `Ped` immediately after `Red`, expecting it to naturally transition to `Red` again. However, due to likely misinterpretation or incorrect assumption in the state transition from `Red` to `Ped`, the representation might fail to validate.
+
+### Solution Explanation:
+
+- The mismatch occurs when the state/output `Ped` is expected to be `11`, but the transition logic in the testbench or in understanding expects something different before reaching `Ped` or possibly misrepresents it at some stage.
+  
+- To resolve this issue, ensure that your `next` state assignments correctly reflect the intended transitions and that the state assignments are consistent with these expectations. Double-check that the "mapping" of symbolic names to binary values is respected and implemented as expected in both the design and testbench.
+
+Essentially, make sure both the design implementation and the testbench have a matching interpretation of what `Ped` should be in terms of binary value. Reinforce comprehensions with proper comments/documentation, preventing misalignments between intended states and their binary representations. The error might stem from an address error during the assignment in either state description, parameter valuing, or in state expectations within the test framework.

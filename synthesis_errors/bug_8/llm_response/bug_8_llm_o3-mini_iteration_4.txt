@@ -1,0 +1,7 @@
+The error message tells you that "signal2" is being referenced when assigning a value, but it has not been declared anywhere in the design. In this code, only "signal1" is declared in the architecture, while "signal2" appears by mistake in the reset branch of your process.
+
+The bug is occurring because the synthesizer cannot find a declaration for "signal2" when it encounters the assignment statement. This mismatch leads to a compilation (or synthesis) error during simulation.
+
+To fix the issue, you need to ensure that every signal you reference is declared in your architecture. This may involve either removing or renaming the assignment to "signal2" if it was intended to operate on "signal1", or declaring "signal2" appropriately if a separate signal was desired.
+
+By addressing this inconsistency between the signal declaration and its usage, the error will be resolved.

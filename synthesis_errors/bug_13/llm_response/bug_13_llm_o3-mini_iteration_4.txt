@@ -1,0 +1,5 @@
+The issue is that the assignment statement is missing a semicolon at its end. In Verilog, every statement must be terminated with a semicolon. Because the semicolon is missing after the expression for output c, the simulator gets confused when it reaches the "endmodule" line, resulting in the syntax error.
+
+This bug is occurring because the parser continues to expect further code on the same statement line and finds the module ending instead, which violates the syntax rules of Verilog.
+
+To fix the issue, you need to add a semicolon at the end of the assignment statement, so that the line is properly terminated.

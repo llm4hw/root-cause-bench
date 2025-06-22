@@ -1,0 +1,5 @@
+The problem is that a signal of type std_logic is being given an initializer in the form of a string literal instead of a character literal. In VHDL, a std_logic is defined as a single character signal, so it expects its value to be written with single quotes (like '0') rather than the double quotes used for strings (like "0"). The error is flagged at the point where the signal is initialized because the string literal does not match the expected std_logic type.
+
+This issue typically happens when a designer mistakenly uses double quotes, which are meant for string literals, to assign a value to a scalar of type std_logic. Even though a string literal of length one might seem similar, VHDL’s type system distinguishes between characters and strings.
+
+The solution is to change the literal to the proper character format. (Remember, in this explanation I’m not providing the exact corrected code, just describing the cause and what kind of change is needed.)

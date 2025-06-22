@@ -1,0 +1,19 @@
+The error stems from the incorrect handling of the `num_in` input, which attempts to validate and accept values outside of the defined states '0' to '9'. Here's a breakdown of what is happening and why the error occurs:
+
+1. **Code Explanation:**  
+   The state machine is defined for the states numbered from `S0` to `S9`, corresponding to the numbers '0' through '9'. If the state machine is given an input (`num_in`) in this range, it assigns that to the FSM's state and sets the valid flag. Otherwise, it's expected to indicate invalid input.
+
+2. **Error Cause:**  
+   The FSM immediately assigns the `state` to `num_in` without any condition to check if `num_in` is within the valid range ('0' to '9'). This means that any value from '0' to '15', which can be represented in 4 bits, will be assigned to `state`, and `valid` is set to '1', falsely indicating that all inputs from '0' to '15' are valid.
+
+3. **Symptoms in Testbench:**  
+   When the testbench sets `num_in = 4'd10` and `num_in = 4'd15`, the `fsm_mealy_0_to_9` still marks the `valid` flag as '1', which contradicts the requirement that inputs outside '0' to '9' should be invalid. The expected behavior for these inputs is that the `valid` flag is '0', and perhaps `output_data` should default to zero or remain unchanged, but the implementation does not incorporate any range checking logic to enforce this.
+
+4. **Explanation of the Fix:**  
+   To correct this issue, you need to add range-checking logic to ensure that only inputs from '0' to '9' result in valid output states:
+
+   - Implement a conditional check before assigning `state` and setting the `valid` flag. Only assign `state = num_in` and set `valid = 1;` if `num_in` is between '0' and '9'.
+   
+   - For inputs outside of this valid range, you need to ensure that `valid = 0`. Also, consider setting `output_data = 0` or managing it so the output is clearly representing an invalid condition.
+
+This enhanced logic will ensure that any input outside of '0' to '9' does not satisfy the conditions to be considered valid and will resolve the error indicated by the testbench message.

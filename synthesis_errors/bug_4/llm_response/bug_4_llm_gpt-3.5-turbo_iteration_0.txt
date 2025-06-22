@@ -1,0 +1,5 @@
+The error message "width mismatch in assignment; target has 4 bits, source has 3 bits" indicates that there is a mismatch between the widths of the signals being assigned. In this case, the `output` signal is defined as `STD_LOGIC_VECTOR(3 downto 0)` which has 4 bits, while the `input1` signal is defined as `std_logic_vector(2 downto 0)` which has 3 bits. 
+
+The error is occurring because you are trying to assign a 3-bit signal (`input1`) to a 4-bit signal (`output`), causing a width mismatch.
+
+To fix this issue, you need to ensure that the signals being assigned have the same width or perform a proper conversion if necessary to match the widths.

@@ -1,0 +1,5 @@
+The problem isn’t with the test bench syntax or simulation setup—it’s with the FSM’s logic. In the sequential block of the FSM, the valid signal is always being set to true (or 1) regardless of the actual value on num_in. This causes the test that applies an input of 10 (or 15) to fail its expectation (i.e. that valid should be false and output_data should be 0 for an invalid input). 
+
+The error occurs because the FSM is not checking whether the 4‐bit number is between 0 and 9; instead, it simply assigns num_in to the state and sets valid to 1. Since 4’d10 or 4’d15 will still be valid 4-bit numbers (even though they are outside the intended range), the FSM treats them as valid even though they should be flagged as invalid per the test bench’s requirements.
+
+In summary, the bug is that the FSM logic does not include any condition to mark inputs outside the expected range as invalid, which is why the error message “Invalid input should not be valid” is generated during simulation.

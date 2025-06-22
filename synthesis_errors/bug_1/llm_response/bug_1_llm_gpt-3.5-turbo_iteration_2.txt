@@ -1,0 +1,3 @@
+The error is occurring because the `if-elsif` structure in the process statement of the VHDL code is missing a semicolon at the end of the line where `data_out <= (others => '0')` is assigned. 
+
+To fix this issue, simply add a semicolon at the end of `data_out <= (others => '0')` in the process statement before the `elsif rising_edge(clk) then` line. This will correct the syntax error near `elsif` and allow the code to compile and simulate properly.

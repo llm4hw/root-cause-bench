@@ -1,0 +1,27 @@
+### Bug Explanation:
+The error occurs because the variable `variable1` is declared in the architecture's declarative region (outside any process or subprogram). In VHDL, variables must be **local to a process, function, or procedure**. Variables declared in an architecture's declarative region must use the `shared` keyword (for shared variables), but this is rarely appropriate for typical design patterns and can lead to non-deterministic behavior.
+
+### Why It's Happening:
+1. **VHDL Scoping Rules**:  
+   Variables are designed for temporary storage within sequential code blocks (processes/subprograms). They cannot exist freely in the architecture declarative region like signals.
+   
+2. **Synthesis Limitation**:  
+   The synthesis tool flags this because hardware implementation requires clear scope for variables. Variables outside processes imply undefined behavior for registers/combinational logic.
+
+3. **Usage Context**:  
+   `variable1` is only accessed inside the `process(clk, rst)`, confirming it should be local to that process.
+
+### How to Fix:
+1. **Move the variable declaration** inside the process where it's used:  
+   ```vhdl
+   process (clk, rst)
+     variable variable1 : STD_LOGIC := '0'; -- Correct placement
+   begin
+     ...
+   end process;
+   ```
+
+2. **Remove the global declaration** of `variable1` from the architecture body.
+
+### Additional Note:
+The initialization `:= '0'` for the variable inside the process is valid and synthesizable. It ensures `variable1` starts at `'0'` during simulation. The reset logic (`rst = '1'`) will override it when needed, matching typical hardware reset behavior.

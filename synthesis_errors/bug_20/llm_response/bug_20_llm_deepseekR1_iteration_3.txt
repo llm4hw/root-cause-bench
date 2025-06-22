@@ -1,0 +1,23 @@
+### Bug Explanation:
+The error occurs because the `while (flag)` loop in the combinational `always @*` block creates an **infinite loop** during synthesis. Here's why:
+
+1. **Static Condition**:
+   - `flag` is initialized to `1'b1` (true) and never modified elsewhere in the code. The loop condition `while (flag)` is always true, creating an endless loop.
+
+2. **Combinational Loop**:
+   - The `always @*` block implies combinational logic, which must complete execution in zero simulation time. The infinite loop violates this requirement, causing the synthesis tool to attempt unrolling the loop indefinitely until it hits the 65,536 iteration limit.
+
+3. **Non-Blocking Assignment Issue**:
+   - `out <= ~out` schedules a value change but **doesn't update `out` immediately**. Since `out` isn't re-evaluated during the loop (due to non-blocking semantics), the loop never detects any change to break its condition.
+
+4. **Missing Timing Control**:
+   - Combinational blocks (`always @*`) cannot contain time-consuming constructs like infinite loops. The design lacks clock-driven logic (no `posedge clk`), forcing the tool to interpret the loop as combinational.
+
+### Fix Approach:
+To resolve this:
+1. **Replace the combinational `always @*` with a clock-synchronous block** (e.g., `always @(posedge clk)`) to allow sequential execution per clock cycle.
+2. **Remove the `while` loop** entirely. For a toggling output, use a simple non-blocking assignment (e.g., `out <= ~out`) inside the synchronous block.
+3. **Initialize `out`** via a reset mechanism or initial block to avoid undefined starting state.
+4. **Leverage the unused `clk` input** to synchronize the toggling behavior, ensuring synthesis can infer a flip-flop.
+
+This restructure eliminates the infinite combinational loop while achieving the intended toggling behavior using hardware-feasible sequential logic.

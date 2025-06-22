@@ -1,0 +1,176 @@
+The error is stemming from the attempt to assign a value to `input1`, which is defined as an input port in the `top3` entity. In VHDL, you cannot assign values to an `in` port directly within the architecture body, as input ports are meant to receive values from the external environment (e.g., another module or a test bench) rather than being driven internally.
+
+**Root Cause:**
+- The line `input1 <= '0';` is trying to drive a value onto `input1`, which is defined as an input port (signified by `in`) and thus cannot be driven by the architecture that declares it. Input ports are typically driven by signals from outside the entity.
+
+**Fix:**
+To resolve this error, you need to remove or revise the line `input1 <= '0';` so that you're not erroneously trying to drive an input port within the module. Instead, ensure that the test bench or another module properly provides a value for `input1` when the design is instantiated. For example, in the test bench, you'll instantiate the `top3` module and connect it with a signal to drive `input1`.
+
+Here's an example fix by assuming you plan on using `input1` within a test bench setup:
+1. Remove the line `input1 <= '0';` from the `Behavioral` architecture.
+
+2. In your test bench, declare a signal that will drive `input1` and stimulate it accordingly.
+
+```vhdl
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity top3_test is
+end top3_test;
+
+architecture testbench of top3_test is
+
+    signal input1_signal : STD_LOGIC := '0';  -- Give initial value or drive it within the process
+    signal output_signal : STD_LOGIC;
+
+    -- Instantiate the Unit Under Test (UUT)
+    component top3
+        Port ( input1 : in  STD_LOGIC;
+               output : out STD_LOGIC);
+    end component;
+
+begin
+
+    -- Connect the test bench signal to the UUT input
+    uut: top3 
+        Port map (
+            input1 => input1_signal,
+            output => output_signal
+        );
+
+    -- Drive the input1_signal for testing purposes
+    process
+    begin
+        -- Example stimulus
+        input1_signal <= '0';
+        wait for 10 ns;
+        input1_signal <= '1';
+        wait for 10 ns;
+        -- Add further test scenarios
+    end process;
+
+end testbench;
+```
+
+This setup introduces a test bench where `input1_signal` is used to stimulate `input1`, aligning with the VHDL design principles and fixing the synthesis issue.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: begin
+if (!reset)
+port_out_00 <¼ 8’h00;
+else
+if ((address ¼¼ 8’hE0) && (write))
+port_out_00 <¼ data_in;
+end
+//-- port_out_01 (address E1)
+always @ (posedge clock or negedge reset)
+begin
+if (!reset)
+port_out_01 <¼ 8’h00;
+else
+if ((address ¼¼ 8’hE1) && (write))
+port_out_01 <¼ data_in;
+end
+:
+“the rest of the output port models go here. . .”
+:
+11.3.3.4 Implementation of Input Ports in Verilog
+The input ports do not contain storage but do require a mechanism to selectively route their...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 6.1.3
+Can a test bench be simulated?
+6.1.4
+Can a test bench be synthesized?
+6.1.5
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should use a pro-
+cedural
+block
+and
+individual
+signal
+assignments for each pattern. Your test bench
+should change the input pattern every 10 ns.
+Fig. 6.1...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.3
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.3. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...
+
+- source_documents\Quick Start Guide to Verilog.pdf: ROM[12] ¼ BRA;
+ROM[13] ¼ 8’h00;
+end
+11.3.2
+Add the functionality to the computer model
+from 11.3.1 the ability to perform the LDA_DIR
+instruction. Simulate your computer system
+using the following program that will continually
+read from port_in_00 and write its contents to
+port_out_00:
+initial
+begin
+ROM[0] ¼ LDA_DIR;
+ROM[1] ¼ 8’hF0;
+ROM[2] ¼ STA_DIR;
+ROM[3] ¼ 8’hE0;
+ROM[4] ¼ BRA;
+ROM[5] ¼ 8’h00;
+end
+11.3.3
+Add the functionality to the computer model
+from
+11.3.2
+the
+ability
+to
+perform
+the...
+
+- source_documents\Quick Start Guide to Verilog.pdf: appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should read in a
+new input pattern every 10 ns. Your test bench
+should
+write
+the
+input
+pattern
+and
+the
+corresponding output of the DUT to an external
+ﬁle called “output.txt.”
+6.4.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench read in the input patterns from an
+external ﬁle called “input.txt.” This ﬁle should...

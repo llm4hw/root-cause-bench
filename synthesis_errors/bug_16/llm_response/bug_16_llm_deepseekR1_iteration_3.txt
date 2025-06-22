@@ -1,0 +1,32 @@
+The error occurs because the synthesis tool is unable to infer an asynchronous reset for the register `out1_reg` due to improper handling of the reset condition and blocking/non-blocking assignments. Here's why:
+
+1. **Missing Reset for Output Register**:  
+   The `out1` output is assigned inside the always block (`out1 = data`), making it a registered output. However, the reset condition only resets `data` to 0, **not `out1`**. Since `out1` is never explicitly reset, the synthesis tool cannot map it to a register with an asynchronous reset.
+
+2. **Blocking vs. Non-blocking Assignment Conflict**:  
+   - `data` uses a **non-blocking assignment** (`<=`) in the reset branch (correct for sequential logic), but switches to **blocking assignment** (`=`) in the clock-driven branch.  
+   - `out1` uses **blocking assignment** (`=`) unconditionally.  
+   This mixing of assignment types causes unpredictable behavior during synthesis. Blocking assignments in sequential always blocks prevent proper register inference.
+
+3. **Reset Behavior Mismatch**:  
+   During a reset event (`posedge rst`):  
+   - `data` is asynchronously reset to `0` (non-blocking).  
+   - `out1` is assigned the **current (pre-reset) value** of `data` via blocking assignment (`out1 = data`), **not the reset value**. This violates reset semantics.
+
+4. **Functional Hazard**:  
+   In the clock-driven branch (`else`), the blocking assignment `data = ~data` immediately updates `data`, then propagates it to `out1` (`out1 = data`) in the same timestep. This creates a **combinational path** within a sequential block, confusing the synthesis tool.
+
+### How to Fix:
+- **Option 1 (Combinational Output)**:  
+  Remove `out1 = data` from the always block and uncomment `assign out1 = data`. This makes `out1` a direct combinational copy of `data`, eliminating the need for reset handling on `out1`.
+
+- **Option 2 (Registered Output with Reset)**:  
+  If `out1` must be registered:  
+  1. Use **non-blocking assignments** (`<=`) for **all** register updates.  
+  2. **Reset both `data` and `out1`** in the reset branch.  
+  3. Ensure `out1` is assigned the **reset value** during reset and the correct **post-toggle value** of `data` in the clock branch.
+
+- **Critical Consistency Rule**:  
+  Never mix blocking and non-blocking assignments for registers in the same always block. Use non-blocking assignments exclusively for sequential logic.
+
+The root cause is the flawed reset implementation for `out1` and improper use of blocking assignments, preventing the synthesis tool from inferring a properly reset register.

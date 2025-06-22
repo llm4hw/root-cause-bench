@@ -1,0 +1,5 @@
+The error message "ERROR: [Synth 8-403] loop limit (65536) exceeded" is indicating that the while loop in the RTL code is causing an infinite loop. This error occurs because the condition `flag` within the while loop is not being updated inside the loop and remains always true. As a result, the loop keeps executing indefinitely, leading to a loop limit being exceeded during synthesis.
+
+To fix this issue, you need to update the value of the `flag` variable inside the while loop to eventually exit the loop. Without modifying the flag or adding a condition to break out of the loop, the loop will continue infinitely. You should review the purpose of the `flag` variable and its intended behavior to determine the appropriate logic for breaking out of the loop.
+
+In the given Verilog code snippet, the while loop may need to be restructured to ensure that the `flag` variable is updated within the loop, allowing the loop to terminate at some point based on the desired conditions.

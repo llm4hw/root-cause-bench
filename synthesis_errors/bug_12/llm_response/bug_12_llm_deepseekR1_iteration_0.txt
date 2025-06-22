@@ -1,0 +1,19 @@
+The error occurs because a `std_logic` signal is incorrectly initialized with a string literal `"0"` instead of a character literal `'0'`. Here's why:
+
+1. **Type Mismatch**: 
+   - `std_logic` is a single-bit type that requires a **character literal** (enclosed in single quotes, e.g., `'0'`).
+   - The code uses a **string literal** `"0"` (double quotes), which is interpreted as a 1-character string. This is incompatible with the `std_logic` type.
+
+2. **Location**:
+   - The error manifests at `signal a : std_logic := "0";` (line 31 in the provided code).
+   - The error message points to line 41 (`end entity;`) because the compiler's error recovery shifts the reported location after encountering the initial type mismatch.
+
+3. **Why This Breaks**:
+   - VHDL strictly enforces type rules. String literals (`"..."`) are for multi-bit types like `std_logic_vector`, while single-bit types (`std_logic`) require character literals (`'...'`).
+   - The synthesis tool fails to map the string `"0"` to a `std_logic` value, halting compilation.
+
+4. **Testbench Impact**:
+   - During simulation, the testbench would fail because signal `a` remains uninitialized (or in an invalid state) due to the incorrect literal.
+
+**Fix**:  
+Replace the string literal `"0"` with the character literal `'0'` for the `std_logic` signal initialization. The `std_logic_vector` signal `c` correctly uses `"0000"` (string literal) since it's a multi-bit type.

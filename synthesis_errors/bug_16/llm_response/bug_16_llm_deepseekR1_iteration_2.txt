@@ -1,0 +1,22 @@
+The bug arises due to incorrect handling of asynchronous reset and improper use of blocking/non-blocking assignments in the sequential logic block. Here's the breakdown:
+
+1. **Asynchronous Reset Issue**:
+   - The `out1` register lacks a dedicated reset assignment. During `rst=1`, only `data` is reset (to 0), but `out1` is assigned the **pre-reset value** of `data` via blocking assignment (`out1 = data`). 
+   - This prevents the synthesis tool from inferring a proper asynchronous reset for `out1`, causing the error. Registers with asynchronous resets must have their reset values assigned directly in the reset condition.
+
+2. **Blocking/Non-blocking Mix**:
+   - The `else` branch uses blocking assignment (`data = ~data`) for sequential logic, which causes immediate update. Combined with `out1 = data`, this creates:
+     - A **combinational feedback path** (since `data` depends on itself)
+     - Incorrect timing behavior (immediate updates prevent proper register inference)
+
+3. **Simulation vs Synthesis Mismatch**:
+   - During reset simulation: 
+     - Non-blocking `data <= 0` doesn't update immediately
+     - Blocking `out1 = data` uses the *old* value of `data` (not 0)
+   - Synthesis requires deterministic reset values, which this logic doesn't provide for `out1`.
+
+**Fix Approach**:
+- Use **non-blocking assignments** (`<=`) for all register updates
+- Assign **both `data` and `out1` in the reset branch** (e.g., `out1 <= 0` when `rst=1`)
+- Ensure the non-reset logic updates registers without combinational feedback
+- Alternatively, use a continuous assignment (`assign out1 = data`) if no independent register is needed for `out1`

@@ -1,0 +1,13 @@
+The error occurs because the state machine transitions from the `Ped` state back to `Red` instead of moving to `Green`, creating an incorrect loop between `Red` and `Ped`. Here's the breakdown:
+
+1. **State Transition Logic Issue**:
+   - The `Ped` state's next state is set to `Red` (due to `Ped: next = Red;`), which violates the intended sequence `Red → Ped → Green → Yellow → Red`.
+   - This traps the state machine in a loop: `Red ↔ Ped`, never reaching `Green` or subsequent states.
+
+2. **Testbench Timing Misalignment**:
+   - The testbench checks the state **10 time units after releasing `resetn`** (at the next clock edge). By this time, the state has already transitioned from `Red` to `Ped`, causing the first check to fail with `11` (Ped) instead of `00` (Red).
+
+3. **Root Cause**:
+   - The transition out of the `Ped` state is misconfigured. The design erroneously returns to `Red` immediately, bypassing `Green` and breaking the sequence.
+
+**Fix**: Modify the transition from `Ped` to `Green` (e.g., `Ped: next = Green;`) to align with the intended sequence. The testbench's timing may also need adjustment to check states at appropriate clock cycles.

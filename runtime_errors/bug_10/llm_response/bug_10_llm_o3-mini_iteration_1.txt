@@ -1,0 +1,10 @@
+The problem stems from using blocking assignments (i.e., the "=" operator) inside a clocked always block. In synchronous (clocked) logic, you want all the assignments to update concurrently at the same clock edge. However, with blocking assignments, each assignment is executed sequentially during the clock edge. This means that when you assign the first bit (data[0]) from serial_in, that new value is immediately available to the very next assignment (data[1] = data[0]), which then propagates that updated value throughout the entire register. As a result, rather than only setting the lowest bit, every bit receives the new value, which is why you see 1111 instead of the expected 0001 in your simulation.
+
+The test bench error message is generated because it expects that after a single clock cycle with serial_in = 1, the shift register should update to 0001. Instead, due to the sequential effect of blocking assignments, all bits are updated, leading to the comparison failure.
+
+In summary:
+• The bug arises because using blocking assignments in a sequential always block causes the data bits to update one after another rather than simultaneously.
+• The wrong evaluation order results in the entire register being loaded with the new bit, producing an output of 1111 instead of 0001.
+• The fix involves using nonblocking assignments so that all parts of the register are updated concurrently on the rising edge of the clock.
+
+Remember, in synchronous designs, nonblocking assignments are key to ensuring correct parallel behavior during state updates.

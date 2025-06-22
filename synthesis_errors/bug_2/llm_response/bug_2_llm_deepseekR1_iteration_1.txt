@@ -1,0 +1,35 @@
+### Issue Analysis
+1. **Error Message**: The synthesis tool reports that no definition of the `+` operator matches the operands `a` and `b` (both `std_logic_vector` types).  
+   - `ERROR: [Synth 8-944] 0 definitions of operator "+" match here`
+
+2. **Root Cause**:  
+   - The `+` operator is **not inherently defined** for `std_logic_vector` in the IEEE `numeric_std` package.  
+   - `numeric_std` only defines arithmetic operations for `unsigned` and `signed` types, not raw `std_logic_vector`.  
+   - The line `c <= a + b;` attempts to add two `std_logic_vector` signals directly, which has no legal implementation in the current context.
+
+3. **Why This Happens**:  
+   - `std_logic_vector` is a **non-numeric type** (merely a collection of bits). Arithmetic operations require numeric interpretation (e.g., unsigned/signed integers).  
+   - The compiler searches for a `+` operator overload that accepts two `std_logic_vector` operands and returns a `std_logic_vector` but finds none in `numeric_std`.
+
+4. **Simulation vs. Synthesis**:  
+   - This error occurs during **synthesis** because synthesis tools strictly enforce type compatibility. Some simulators might allow this with non-standard libraries (e.g., `std_logic_unsigned`), but synthesis requires IEEE-compliant code.
+
+### Fix
+- **Convert Operands to Numeric Types**:  
+  Explicitly cast `a` and `b` to `unsigned` (for unsigned arithmetic) or `signed` (for signed arithmetic) before addition.  
+  - Example:  
+    ```vhdl
+    c <= std_logic_vector(unsigned(a) + unsigned(b));
+    ```  
+    This uses `unsigned` from `numeric_std` to enable the `+` operation.
+
+- **Handle Bit-Width Mismatch**:  
+  The sum of two 4-bit values can produce a 5-bit result (e.g., `15 + 1 = 16`). Since `c` is 4 bits, the MSB (carry) is truncated. If this is acceptable, no further changes are needed. If not, resize the inputs or expand `c` to 5 bits.
+
+- **Avoid Non-Standard Libraries**:  
+  Do not use deprecated libraries like `std_logic_arith` or `std_logic_unsigned`. Stick to `numeric_std` for portability.
+
+### Why This Fix Works
+- `unsigned(a)` and `unsigned(b)` convert the `std_logic_vector` operands to numeric types, allowing the `+` operator (defined for `unsigned` in `numeric_std`) to function.  
+- The result is converted back to `std_logic_vector` for assignment to `c`.  
+- This approach is synthesis-safe and IEEE-compliant.

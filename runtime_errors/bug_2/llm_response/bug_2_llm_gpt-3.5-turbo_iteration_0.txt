@@ -1,0 +1,7 @@
+The bug in the code is in the assignment statement in the top_module module. The line `assign q = a&0;` is performing a bitwise AND operation between input 'a' and the constant '0'. This operation will always result in 'q' being 0, regardless of the input value of 'a'.
+
+When the test case where both controllers are on (a=1, b=1) is executed, 'q' is expected to be 1, but it remains 0 due to the assignment in the module.
+
+To fix this bug, you need to modify the assignment statement in the top_module module to correctly capture the intended functionality based on inputs 'a' and 'b'. Update the assignment statement to reflect the logic that determines the output 'q' based on the inputs.
+
+After fixing the assignment statement, rerun the simulation to verify that the output 'q' behaves as expected for all test cases.

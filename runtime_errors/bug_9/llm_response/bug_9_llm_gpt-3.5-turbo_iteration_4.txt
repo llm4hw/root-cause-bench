@@ -1,0 +1,7 @@
+The bug in the code is occurring in the part that handles the letter 'O' in the morse_code module. Specifically, the issue lies in the cases O_DASH1, O_DASH2, and O_DASH3. In these cases, the state transitions to the IDLE state after reaching the DASH duration. However, this logic is incorrect as it should be transitioning to the SPACE_STATE instead of directly going to IDLE after completing the DASH duration for the letter 'O'. 
+
+This bug leads to the error message "ERROR: Morse for O not correct" during the simulation of the test bench because the output morse_out is not expected to be high for the letter 'O' based on the expected morse code pattern of '---'.
+
+To fix this bug, the state transitions in the cases O_DASH1, O_DASH2, and O_DASH3 need to be updated to transition to the SPACE_STATE after completing the DASH duration instead of directly transitioning to IDLE.
+
+Once this modification is made, the simulation should proceed correctly, and the error message for the letter 'O' should no longer occur.

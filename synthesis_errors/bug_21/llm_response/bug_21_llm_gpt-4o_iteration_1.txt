@@ -1,0 +1,19 @@
+The error message you received indicates that there's an issue with your event control expression in the `always` block, specifically concerning the `reset` signal conditioning.
+
+### Explanation of the Bug:
+
+The line causing the issue is `if (!reset == 0) begin`. There are two primary concerns with this line:
+
+1. **Logical Operation Misuse:**
+   - The expression `!reset == 0` can be misleading. Within the precedence of operators in Verilog, `!` (logical NOT) is evaluated before `==` (equality operator). Hence, the expression is interpreted as `(!reset) == 0`. This essentially checks whether the logical NOT of `reset` is being compared to zero, which is functionally equivalent to `reset == 1`. Because of this order, the check might not behave as intended.
+
+2. **Misalignment with Event Control List:**
+   - In the sensitivity list of the `always` block, you have specified `negedge reset`, which implies that this block will trigger on the falling edge of the `reset` signal. When using an edge trigger like `negedge reset`, the internal logic typically involves directly checking the state of `reset` (such as when `reset` is low) rather than using logical operations or additional comparisons with 0 or 1.
+
+### Root Cause of the Issue:
+
+The root cause of the error is that the condition `!reset == 0` does not align semantically with the `negedge reset` specified in the sensitivity list. It should logically align with the event control, meaning, directly use the level of `reset` rather than manipulating its logic level.
+
+### Explanation on Fix:
+
+To resolve this error, you should modify the condition within the `always` block to straightforwardly use the level-sensitive check of `reset`, ensuring it aligns with the event control specified. By aligning your conditional checks directly with the signal's level or its active state, you eliminate the logical confusion and mismatch complained about by the synthesis tool.

@@ -1,0 +1,5 @@
+The error occurs because the case statement for the 2‐bit select signal does not cover all possible input values. In your code, you only handle the choices "00", "01", and "10". However, a 2‐bit vector can also be "11" (which is the binary representation of 3). The test bench is driving the select signal to this unhandled value, so the simulation (and synthesis tool) complains that the case statement is incomplete.
+
+Because VHDL requires a case statement to be either fully exhaustive or have an "others" clause to catch any values not explicitly listed, the missing "11" case causes the error. 
+
+To resolve the issue, you would need to account for the missing "11" case—either by explicitly handling that value or by including an "others" clause to cover any unspecified values.

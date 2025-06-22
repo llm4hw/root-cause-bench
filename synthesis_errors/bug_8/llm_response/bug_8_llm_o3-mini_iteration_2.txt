@@ -1,0 +1,3 @@
+The error occurs because the code assigns a value to "signal2" inside the process, but no such signal has been declared in the architecture. The simulation (or synthesis tool) complains that it does not recognize "signal2" since only "signal1" has been declared. This bug is essentially a naming error where the signal being driven ("signal2") is not defined anywhere in the design.
+
+The bug can be fixed by either declaring a "signal2" in the architecture's declarative region or by correcting the assignment if the intended signal was "signal1." The fix involves ensuring that all signals that are referenced in the code are actually declared with the proper type before they are used.

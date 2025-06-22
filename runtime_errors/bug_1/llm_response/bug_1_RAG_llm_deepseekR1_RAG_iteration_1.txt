@@ -1,0 +1,136 @@
+The error occurs because the DUT's logic for `p1y` is incorrectly implemented. The current code uses a bitwise AND between two 3-bit groups, but the intended functionality requires **OR-ing the results of two independent AND operations** (one for each group of inputs).
+
+### Root Cause:
+- **Incorrect Logic for `p1y`:**  
+  The original code for `p1y` is:
+  ```verilog
+  assign p1y = {p1a, p1b, p1c} & {p1d, p1e, p1f};
+  ```
+  This performs a **bitwise AND** between two 3-bit vectors (e.g., `3'b111 & 3'b000 = 3'b000`), then truncates the result to 1 bit (LSB = 0).  
+  However, the test cases expect `p1y` to be **1 if either group of inputs (p1a-p1c or p1d-p1f) is all 1s**. This requires **OR-ing** the reduction ANDs of each group.
+
+### Fix:
+Modify the DUT's code to compute the **OR of two AND operations**:
+```verilog
+assign p1y = (&{p1a, p1b, p1c}) | (&{p1d, p1e, p1f});
+```
+This ensures `p1y` is 1 if **either** `p1a, p1b, p1c` **all** are 1 **OR** `p1d, p1e, p1f` **all** are 1.
+
+### Why This Works:
+- **Test Case 1:** `{p1a, p1b, p1c} = 3'b111` (AND = 1), `{p1d, p1e, p1f} = 3'b000` (AND = 0).  
+  `1 | 0 = 1` → Matches the expected value.
+- **Test Case 2:** `{p1d, p1e, p1f} = 3'b111` (AND = 1) → `1 | 1 = 1`.
+- **Test Case 3:** Both groups have mixed values (ANDs = 0) → `0 | 0 = 0`.
+
+### Additional Issue in `p2y`:
+The code for `p2y` also has a similar bug. It should **AND the reduction ANDs** of both groups:
+```verilog
+assign p2y = (&{p2a, p2b}) & (&{p2c, p2d});
+```
+This ensures `p2y` is 1 **only if** all four inputs (`p2a-p2d`) are 1.
+
+### Updated DUT Code:
+```verilog
+module top_module(
+    input p1a, p1b, p1c, p1d, p1e, p1f,
+    output p1y,
+    input p2a, p2b, p2c, p2d,
+    output p2y
+);
+    assign p1y = (&{p1a, p1b, p1c}) | (&{p1d, p1e, p1f}); // OR of two ANDs
+    assign p2y = (&{p2a, p2b}) & (&{p2c, p2d});          // AND of two ANDs
+endmodule
+```
+
+### Explanation:
+- **`p1y` Fix:** Switched to `|` (OR) to match the test case's expectation that either group of 1s triggers `p1y = 1`.
+- **`p2y` Fix:** Ensures all four inputs must be 1 for `p2y = 1`, as intended for an AND-of-ANDs structure.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: generate all possible input patterns to drive the DUTand especially any transitions that may cause timing
+errors. Example 6.1 shows how to create a simple test bench to verify the operation of a DUT called
+SystemX. The test bench does not have any inputs or outputs; thus, there are no ports declared in the
+module. SystemX is then instantiated (DUT) in the test bench. Internal signals of type reg are declared to...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should read in a
+new input pattern every 10 ns. Your test bench
+should
+write
+the
+input
+pattern
+and
+the
+corresponding output of the DUT to an external
+ﬁle called “output.txt.”
+6.4.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench read in the input patterns from an
+external ﬁle called “input.txt.” This ﬁle should...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 6.1.3
+Can a test bench be simulated?
+6.1.4
+Can a test bench be synthesized?
+6.1.5
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should use a pro-
+cedural
+block
+and
+individual
+signal
+assignments for each pattern. Your test bench
+should change the input pattern every 10 ns.
+Fig. 6.1...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.4
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.4. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...

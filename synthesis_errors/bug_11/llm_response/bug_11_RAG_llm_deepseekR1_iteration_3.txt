@@ -1,0 +1,164 @@
+### Bug Explanation
+The error occurs because the `case` statement in the VHDL code does not cover all possible values of the input `sel`, which is a 2-bit `std_logic_vector`. The `case` statement only handles:
+- `"00"`
+- `"01"`
+- `"10"`
+
+The missing case is `"11"` (binary value `3`). Synthesis tools require **exhaustive coverage** of all possible input values in combinational logic (like this `case` statement) to avoid inferring unintended latches or registers. The error message explicitly states that the value `3` (represented as 32-bit `00000000000000000000000000000011`) is missing.
+
+### Why This Causes an Error
+1. **Incomplete Case Coverage**: 
+   - A 2-bit signal has 4 possible values (`0` to `3`), but the `case` statement only covers 3 cases.
+   - VHDL synthesis tools interpret incomplete `case` statements as implying "hold the previous value" for uncovered cases, which requires a latch (memory element). Latches are undesirable in most combinational logic.
+
+2. **Synthesis Guardrails**: 
+   - The tool (`[Synth 8-426]`) flags this as an error because:
+     - It risks creating unstable or unintended hardware.
+     - Modern synthesis tools enforce strict checks to prevent latch inference by default.
+
+### Fix
+Add a `when others` clause to cover all remaining cases (specifically `"11"`). This ensures:
+- All 4 possible input values are covered.
+- No latches are inferred.
+- Output behavior is explicitly defined for `"11"`.
+
+**Corrected Code:**
+```vhdl
+process(sel)
+begin
+    case sel is
+        when "00" =>
+            out1 <= '1';
+        when "01" =>
+            out1 <= '0';
+        when "10" =>
+            out1 <= '0';
+        -- Add this to cover "11" and any other std_logic values (e.g., 'U','X')
+        when others =>
+            out1 <= '0'; -- Explicitly handle "11"
+    end case;
+end process;
+```
+
+### Key Points
+- **`when others` is mandatory** for `std_logic`/`std_logic_vector` in combinational processes to cover all 9-value logic states (though synthesis focuses on `0`/`1`).
+- Without this clause, synthesis fails because the tool cannot guarantee safe hardware implementation.
+- The fix explicitly defines `out1 <= '0'` for `"11"`, matching the behavior of `"01"` and `"10"`.
+
+> 🔍 **Note**: The error message's `32'b...` notation is the tool's internal representation of the value `3` (due to 32-bit integers), but the actual signal is 2 bits. Focus on the missing binary value (`11`), not the bit-width in the message.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: case statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output.
+5.2.7
+Design a Verilog model to implement the
+behavior described by the 4-input truth table
+in Fig. 5.4. Use procedural assignment and an
+if-else statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output. Hint:
+Notice that there are far more input codes pro-...
+
+- source_documents\verilog_fsm.pdf: 48 always@( * ) begin
+49
+Status = 3’b000;
+50
+case (CurrentState)
+51
+STATE_2: begin
+52
+Status = 3’b010;
+53
+end
+54
+STATE_3: begin
+55
+Status = 3’b011;
+56
+end
+57
+endcase
+58 end
+59 //
+--------------------------------------------------------------------
+15...
+
+- source_documents\RTL error analysis.pdf: case(state)
+S0:             y_out = 0; 
+S1,S2,S3:   y_out = ~x_in;
+endcase
+endmodule
+HDL model for state diagram...
+
+- source_documents\Quick Start Guide to Verilog.pdf: always @ (A, B, ALU_Sel)
+begin
+case (ALU_Sel)
+3’b000
+: begin //-- Addition
+//-- Sum and Carry Flag
+{NZVC[0], Result} ¼ A + B;
+//-- Negative Flag
+NZVC[3] ¼ Result[7];
+//-- Zero Flag
+if (Result ¼¼ 0)
+NZVC[2] ¼ 1;
+else
+NZVC[2] ¼ 0;
+//-- Two’s Comp Overflow Flag
+if ( ((A[7]¼¼0) && (B[7]¼¼0) && (Result[7] ¼¼ 1)) ||
+((A[7]¼¼1) && (B[7]¼¼1) && (Result[7] ¼¼ 0)) )
+NZVC[1] ¼ 1;
+else
+NZVC[1] ¼ 0;
+end
+:
+//-- other ALU operations go here...
+:
+default
+: begin
+Result ¼ 8’hXX;
+NZVC
+¼ 4’hX;
+end
+endcase
+end...
+
+- source_documents\verilog_fsm.pdf: 20
+// Place -holder
+transitions
+21
+//
+---------------------------------------
+22
+STATE_5_PlaceHolder : begin
+23
+NextState = STATE_Initial ;
+24
+end
+25
+STATE_6_PlaceHolder : begin
+26
+NextState = STATE_Initial ;
+27
+end
+28
+STATE_7_PlaceHolder : begin
+29
+NextState = STATE_Initial ;
+30
+end
+31
+//
+---------------------------------------
+32
+endcase
+33 end
+Line 3 speciﬁes the beginning of a Verilog case statement. For all FSMs, this case statement is of...

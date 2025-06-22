@@ -1,0 +1,122 @@
+The problem is not that the design “is wrong” but that the test bench’s expected timing does not match what the design actually does when it comes out of reset. In your design the reset causes state to be set to Red (00) on the first clock edge while reset is low. However, once resetn is de‐asserted, the very next clock edge uses the current state (Red) in the combinational always block and sets next to Ped (11), so state is updated to Ped on that clock edge.
+
+Here’s what happens step‐by‐step:
+
+1. At time 0, you start with clk = 0 and resetn = 0. On the first posedge (at time 5 ns) the always block sees (~resetn) true, so it assigns state = Red (00).
+2. At time 10 ns your test bench releases reset (resetn = 1). The combinational always block (sensitive to state) sees that state is still Red, and so “next” is computed as Ped.
+3. At the next rising edge (at time 15 ns) the always block updates state to the value of “next” – which is Ped (11).
+
+Because your test bench then waits a further delay (10 ns after reset release) before checking the state value (expecting it to remain Red), it finds state = Ped instead. This is why you get the error message:
+  "ERROR: Expected Red (00), but got 11."
+
+To fix this mismatch you have two options:
+
+• Change the test bench’s expected sequence to match the actual behavior. If your FSM is meant to go immediately from Red to Ped after reset is released, then the test bench should check for Ped (11) on the cycle after reset and not expect Red (00) to “linger.”
+
+• If you want the FSM to remain in Red for one full clock cycle after reset is released, modify the design so that the state does not change immediately. For example, you could add an extra “hold” condition during the first cycle after reset de‐assertion or adjust the next state logic to only update when you are fully out of the reset phase.
+
+In summary, the “bug” is a mismatch between the test bench’s expectations (that Red remains for 10 ns after reset) and the design’s reality (the next state is computed on the first clock after reset and becomes Ped). The solution is to align the expected timings in the test bench with the design’s behavior—or adjust the design if the intended behavior was otherwise.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\verilog_fsm.pdf: 24
+end
+25
+STATE_3: begin
+26
+if (!A & B) NextState = STATE_Initial ;
+27
+else if (A & !B) NextState = STATE_4;
+28
+end
+29
+STATE_4: begin
+30
+end
+31
+STATE_5_PlaceHolder : begin
+32
+NextState = STATE_Initial ;
+33
+end
+34
+STATE_6_PlaceHolder : begin
+35
+NextState = STATE_Initial ;
+36
+end
+37
+STATE_7_PlaceHolder : begin
+38
+NextState = STATE_Initial ;
+39
+end
+40
+endcase
+41 end
+42 //
+--------------------------------------------------------------------
+43
+44 endmodule
+45 //...
+
+- source_documents\verilog_fsm.pdf: 48 always@( * ) begin
+49
+Status = 3’b000;
+50
+case (CurrentState)
+51
+STATE_2: begin
+52
+Status = 3’b010;
+53
+end
+54
+STATE_3: begin
+55
+Status = 3’b011;
+56
+end
+57
+endcase
+58 end
+59 //
+--------------------------------------------------------------------
+15...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...

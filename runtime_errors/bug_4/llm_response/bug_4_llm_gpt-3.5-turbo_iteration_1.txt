@@ -1,0 +1,3 @@
+The bug in the code is in the declaration of the signals in both the module and the testbench. In the `top_module`, the input `x` is defined as `[4:1]`, which should be `[4:0]` as the most significant bit of `x` should be 4 instead of 1. Similarly, in the testbench module `tb_top_module`, the declaration of `x` and the `expected_values` array should also be corrected to `[4:0]` instead of `[4:1]` and `[15:0]` respectively.
+
+This bug occurred because the signals were not properly defined, causing incorrect indexing and assignment of values. By correcting the signal declarations to `[4:0]`, the indexing of `x` and `expected_values` array will align correctly, preventing any mismatch in the values intended to be checked during the simulation.

@@ -1,0 +1,8 @@
+The bug occurs because the **comparison logic is incorrect** in the design. 
+
+**Root Cause Analysis:**
+- The module is intended to compare `a` and `b` and set `result = 1` when they are equal. However, the `if` condition checks `a == 5'b10101` (a 5-bit binary value, `21` in decimal), which is unrelated to `b`. 
+- Since `a` is a 4-bit input (max value `15`), the condition `a == 5'b10101` will **never be true**, causing `result` to always stay `0`. This explains why the test case `a = b = 9` fails.
+
+**Required Fix:**
+- Replace `a == 5'b10101` with a proper equality check between `a` and `b` (e.g., `a == b`). The current code does not use `b` at all, which violates the intended functionality.

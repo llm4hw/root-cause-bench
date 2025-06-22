@@ -1,0 +1,7 @@
+The error message indicates that there is a conflict in the VHDL process statement due to the use of both a sensitivity list and a `wait` statement within the same process. In VHDL, a process can either have a sensitivity list or use wait statements to control execution timing, but not both.
+
+In the provided code file, the process is defined with a sensitivity list containing `clk`. However, inside the process, there is also a `wait for 10 ns;` statement. This wait statement is causing the synthesis tool to raise an error because mixing a sensitivity list and a wait statement in the same process is illegal in VHDL.
+
+The reason this bug occurs is due to mismanagement of how process timing control is handled. When you have a sensitivity list, you're telling the simulator to only wake this process up when one of the signals in the list changes. Conversely, a wait statement explicitly manages when the process should pause and resume. Combining both can lead to ambiguous and unpredictable behavior during simulation, hence the error.
+
+To resolve this issue, you need to choose one method of timing control. If the design is clock-driven, you should remove the `wait for 10 ns;` statement and rely solely on the clock edge detection (i.e., the rising edge of `clk`) as the mechanism to control timing within this process. This aligns with typical synchronous design practices where changes in state occur in relation to clock edges. By doing so, you maintain a single method of control, well-defined behavior, and compatibility with synthesis tools.

@@ -1,0 +1,31 @@
+The bug occurs in Test Case 6 due to a combination of issues in the testbench expectations and a sensitivity list problem in the output logic of the Verilog module. Here's a breakdown:
+
+1. **Testbench Expectation Mismatch (Primary Issue)**:
+   - Test Case 6 expects `outResult > 3'b110` (i.e., >6 in decimal) when `longTimeHold=1` during a pedestrian request.
+   - However, the design's output logic for the `Ped` state (state=3) explicitly assigns:
+     - `outResult = 3'b101` (5) when `longTimeHold=1`
+     - `outResult = 3'b110` (6) when `longTimeHold=0`
+   - Since 5 is not greater than 6, the test fails. The testbench incorrectly expects a value above 6 when the design never produces outputs exceeding 6.
+
+2. **Incomplete Sensitivity List in Output Logic**:
+   - The output logic uses `always@(state, longTimeHold)` but misses `pedControl`.
+   - When `pedControl` changes, it affects the `next` state (in the combinational logic) but not the output directly. This doesn't cause the immediate failure but is a latent issue.
+
+3. **State Transition Logic Flaw**:
+   - From `Red` state: `if (pedControl) next = Ped` is correct, but the `else` branch unconditionally goes to `Green` without checking other conditions.
+   - The test sequence leaves `pedControl=1` from Test Case 2 onward, forcing the `Red`→`Ped` transition in Test Case 6. This is correct behavior but highlights how lingering signals affect tests.
+
+**Why Test Case 6 Fails**:
+- After Test Case 5 (state=`Red`), the test sets `longTimeHold=1` and advances one clock cycle.
+- With `pedControl` still high (from Test Case 2), the design transitions to `Ped` state and outputs `3'b101` (5).
+- The testbench erroneously checks for `>6` (via `outResult <= 3'b110`), failing because 5 ≤ 6.
+
+**Fix Approach**:
+1. **Correct Testbench Expectation**: 
+   - Test Case 6 should expect `3'b101` instead of checking for `>3'b110`.
+2. **Fix Sensitivity List**:
+   - Add `pedControl` to the output logic's sensitivity list to prevent simulation mismatches.
+3. **Review State Machine**:
+   - Ensure transitions account for all input conditions (e.g., should `longTimeHold` affect state transitions? Currently it only affects outputs).
+
+Note: The testbench also contains an error in Test Case 2 where it expects `3'b101` but checks for `3'b110` (inverted expectation), though this doesn't trigger failure due to the design's correct output of `3'b110` when `longTimeHold=0`. This should be fixed for consistency.

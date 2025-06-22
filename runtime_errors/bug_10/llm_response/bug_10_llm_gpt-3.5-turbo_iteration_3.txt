@@ -1,0 +1,7 @@
+The bug in this code is happening because the values written to the `data` output in the `shift_register` module are incorrect. In the always block of the `shift_register` module, the assignment for shifting the data is incorrect. Instead of shifting the data bits in the `data` register, the code is currently assigning the same value to each bit of the `data` register.
+
+To fix the bug, ensure that the correct shifting logic is implemented inside the `shift_register` module. Specifically, each bit in the `data` register should be shifted to the respective adjacent bit position when `shift_en` is high. This can be achieved by correctly assigning the `serial_in` value to `data[0]` and then shifting the bits from `data[0]` to `data[3]` in sequential order.
+
+With the correct shifting logic applied in the `always` block of the `shift_register` module, the testbench can be simulated again to confirm that the expected results match the actual outputs from the module.
+
+Make sure to verify and fix the shifting logic in the `always` block of the `shift_register` module to correctly reflect the expected behavior of a shifting register.

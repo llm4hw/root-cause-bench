@@ -1,0 +1,5 @@
+The error happens because the code is attempting to read the value of the output port (named b) in an expression ("a and b"). In VHDL, an output port is not readable from within the same entity unless it is declared with a type that permits reading (like as a buffer or inout). This is why the synthesis tool complains that it "cannot read from 'out' object b" and suggests using "buffer" or "inout" if you need to read the signal.
+
+The bug occurs because b is declared as an output port, meaning it is intended only to drive signals out of the entity. However, the architecture is trying to use b’s value as an input to compute temp_signal. The test bench error message indicates that the simulator is detecting an attempt to read from that output.
+
+To resolve the issue, you need to change the declaration of b so that it can be read in the architecture. This might be done by changing the mode to buffer or inout if that fits the design. Alternatively, if b was not intended to be read, you might reconsider your intended design and instead use another signal that correctly reflects the required input or output role.

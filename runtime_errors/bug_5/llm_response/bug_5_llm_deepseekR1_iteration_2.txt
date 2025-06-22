@@ -1,0 +1,47 @@
+### Analysis of the Bug
+
+The issue arises from the design's failure to meet the specified requirement: **assign the first value smaller than `a` to `min` in the order of `b`→`c`→`d` (else `min = a`)**. The current implementation does not prioritize the order of checking (`b`, then `c`, then `d`) and instead finds the **absolute minimum** among all inputs (`a`, `b`, `c`, `d`). This discrepancy causes Test Case 3 to fail.
+
+### Root Cause
+1. **Incorrect Condition Chaining**:  
+   The code uses independent `if` statements:
+   ```verilog
+   if (min > b) min = b; // Check b
+   if (min > c) min = c; // Always checks c
+   if (min > d) min = d; // Always checks d
+   ```
+   This allows **all conditions to be evaluated sequentially** without regard to whether a prior condition was met. After `min` is updated (e.g., to `c`), it continues checking subsequent values (e.g., `d`) and may update `min` again if a smaller value is found later in the sequence.
+
+2. **Violation of Requirements**:  
+   The requirement mandates that only the **first value in the order `b`→`c`→`d`** that is smaller than `a` should be assigned to `min`. For Test Case 3:
+   - `a=10`, `b=15` (not smaller than `a` → skip),
+   - `c=8` (smaller than `a` → **expected `min=c=8`**),
+   - `d=7` (should be ignored since `c` already satisfied the condition).
+   
+   Instead, the current logic:
+   - Sets `min=a=10`,
+   - Skips `b` (since `10 > 15` is false),
+   - Updates `min` to `c=8` (since `10 > 8` is true),
+   - Then updates `min` to `d=7` (since `8 > 7` is true), resulting in `min=7`.
+
+### Fix Required
+To adhere to the requirement, the logic must:
+1. **Terminate early** after the first value in the sequence (`b`, `c`, `d`) that is smaller than `a` is found.
+2. **Skip subsequent checks** once a qualifying value is assigned.
+
+This can be achieved by replacing the independent `if` statements with **`if-else if` chaining**:
+```verilog
+if (b < a) min = b;       // If b < a, assign min=b and skip c/d
+else if (c < a) min = c;  // Only check c if b wasn't smaller
+else if (d < a) min = d;  // Only check d if b/c weren't smaller
+else min = a;             // Default (none smaller)
+```
+The `else if` ensures that once a condition is met, subsequent values in the sequence are not evaluated.
+
+### Why This Fix Works
+- **Order Preservation**: Values are checked strictly in the sequence `b`→`c`→`d`.
+- **Early Termination**: The first value smaller than `a` (e.g., `c` in Test Case 3) is assigned to `min`, and later values (e.g., `d`) are ignored.
+- **Test Case 3 Behavior**:  
+  `b=15` (not `< a=10` → skip) → `c=8` (`< a` → assign `min=8`) → `d` is never checked. Result: `min=8` (pass).
+
+This aligns with the requirement while maintaining combinational logic. No other changes to the module or testbench are needed.

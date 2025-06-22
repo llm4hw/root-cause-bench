@@ -1,0 +1,7 @@
+The bug is caused by incorrect logical operations in the assignment to `p1y`. 
+
+**Root Cause:**  
+The expression `{p1a, p1b, p1c} & {p1d, p1e, p1f}` performs a bitwise AND between two 3-bit vectors, resulting in a 3-bit value. Since `p1y` is a single-bit output, only the least significant bit (LSB) of the result is used. This does not match the intended behavior, which requires `p1y` to be `1` if **either** `{p1a, p1b, p1c}` are all `1` **or** `{p1d, p1e, p1f}` are all `1` (an OR of two reduction-ANDs). The current code erroneously uses a bitwise AND instead of the required OR, leading to incorrect results when only one group is all `1`s.
+
+**Fix Required:**  
+Change the `p1y` assignment to use **reduction-AND operations** for each group and combine them with a **logical OR** instead of a bitwise AND. This ensures `p1y` is `1` if either group has all inputs as `1`.

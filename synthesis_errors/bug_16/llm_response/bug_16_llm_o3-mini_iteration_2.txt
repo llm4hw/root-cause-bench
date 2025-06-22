@@ -1,0 +1,8 @@
+The error is occurring because the output register (out1) is being updated with a blocking assignment (using "=") inside a clocked always block that also has an asynchronous reset. During synthesis, the tool is trying to extract an asynchronous reset from the code, but because out1 is not updated uniformly using a nonblocking assignment (using "<=") and isn’t fully encapsulated within the reset and clock branches, the extraction fails.
+
+When you mix blocking assignments (for example, for out1) with nonblocking assignments (for example, for data) in a clocked (sequential) block—even when the always block is sensitive to an asynchronous reset—the synthesis tool can become confused about which registers should have the reset behavior. In this case, because out1 is being assigned outside of the if–else reset block and using a different assignment type, the tool cannot reliably infer its asynchronous reset circuitry and signals.
+
+In short:
+• The bug is that out1 is assigned with a blocking assignment in an always block that also has asynchronous reset behavior.
+• It occurs because mixing assignment types in sequential logic prevents the synthesis tool from properly extracting the reset logic for that register.
+• The fix involves unifying the assignment style for all registers in the block (using nonblocking assignments) and making sure that every output register is updated in both the reset and the normal operation conditions so that the asynchronous reset can be cleanly extracted.

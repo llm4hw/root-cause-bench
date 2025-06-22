@@ -1,0 +1,29 @@
+The error message you're encountering relates to the condition used in the event control of an always block in your Verilog code. Let's analyze the issue carefully.
+
+### The Bug
+The error message points out an issue with the expression condition using the operand 'reset'. Specifically, the issue arises in the line within the always block: 
+
+```verilog
+if (!reset == 0) begin
+```
+
+There is a logical error in this condition check. The expression `!reset == 0` is always true when `reset` is low (0) because `!reset` inverts the signal, making it 1, and the comparison `1 == 0` is false. This creates confusion in the logical interpretation of your asynchronous reset condition.
+
+The main reason behind this confusion is the use of both `negedge reset` in the sensitivity list and the incorrect condition check. The always block is sensitive to the negative edge (`negedge reset`), meaning it should be triggered when `reset` transitions from high to low. However, the condition `if (!reset == 0)` does not correctly check if `reset` is low; instead, it inadvertently checks a logical condition inversely due to incorrect precedence in logical operation.
+
+### Why the Bug Occurs
+1. In Verilog, the operator precedence causes `!reset` to be evaluated separately before comparison, resulting in a logical operation that doesn't directly correspond to checking the active low state of `reset`.
+
+2. Using `if (!reset == 0)` is a complex and misleading condition that, due to operator precedence, can result in unexpected logical behavior when combined with how the sensitivity list should operate.
+
+3. Negating `reset` and comparing to zero is both unnecessary and leads to incorrect synthesis and simulation behavior. The synthesizer expects a straightforward check of a signal edge based on the listed event controls.
+
+### Explanation to Fix the Issue
+1. **Correct the Conditional Check**:
+   - You should directly check the state of the `reset` signal in a way that matches its purpose as an active-low reset.
+   - Instead of using `if (!reset == 0)`, directly use `if (!reset)` or `if (reset == 0)` to match your intention of checking for an active-low reset signal.
+
+2. **Simplify the Logic**:
+   - A clearer and syntactically correct structure would help the synthesis and simulation tools to operate correctly.
+
+By addressing the condition check within the always block, you align it with the sensitivity list's expectations, ensuring both simulation and synthesis correctly interpret the design intentions connected with the asynchronous reset.

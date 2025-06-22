@@ -1,0 +1,25 @@
+The error message you are encountering is due to an illegal construct in VHDL. In VHDL, a process can either use a sensitivity list or a `wait` statement, but not both. A sensitivity list describes events that trigger the process to execute, while a `wait` statement controls when and for how long the process suspends execution.
+
+In the code you provided, the process is declared with a sensitivity to the `clk` signal:
+
+```vhdl
+process (clk)
+begin
+    if rising_edge(clk) then
+        signal1 <= not signal1;
+    end if;
+    wait for 10 ns;
+end process;
+```
+
+Inside this process, there's also a `wait for 10 ns;` statement. The combination of these two constructs is not allowed, leading to the error message `process cannot have both a wait statement and a sensitivity list`. This restriction exists because they both serve as mechanisms to control the process's execution flow, but they do so in potentially conflicting ways.
+
+To resolve this error, you should choose one of the two mechanisms based on the desired functionality:
+
+1. **If you want the process to execute only in response to a clock edge (sequential logic):** Use the sensitivity list and remove the `wait` statement. This approach is typically used for synchronous logic driven by the clock.
+
+2. **If you want to use time-based delays within the process (purely combinatorial logic):** Remove the sensitivity list and rely on the `wait` statement.
+
+Given that your current code structure implies that you want to perform actions on the rising edge of `clk`, it seems like it should be a synchronous process responding to clock edges. Therefore, the appropriate action would be to remove the `wait for 10 ns;` statement. 
+
+This approach aligns with common design practices for synchronous circuits, where the transition of the signal is controlled by the clock without arbitrary delays.

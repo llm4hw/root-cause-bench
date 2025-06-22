@@ -1,0 +1,5 @@
+The error is occurring because the addition operator (“+”) isn’t defined for the data type used in your code. Your signals a and b are declared as std_logic_vector, but the numeric_std package only provides a definition for the "+" operator when the operands are of type unsigned or signed. When the synthesis tool sees the expression a + b, it cannot find a matching operator definition for std_logic_vector operands.
+
+The reason for the bug is that without a proper type conversion, the synthesis tool doesn’t know how to perform arithmetic on std_logic_vector types, as they are not inherently numeric. This mismatch causes it to complain that zero definitions of the operator “+” match for the given operands.
+
+To fix the issue, you need to convert a and b to either unsigned or signed types (as provided by numeric_std) so that the operator is defined. This tells the tool that these vectors are to be treated as numeric quantities, which allows it to resolve the arithmetic operator correctly.

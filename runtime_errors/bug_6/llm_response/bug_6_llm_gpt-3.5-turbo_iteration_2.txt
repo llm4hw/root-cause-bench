@@ -1,0 +1,5 @@
+The bug is in Test Case 6 of the testbench where the condition for comparison is incorrect. The condition `if (outResult <= 3'b110)` should be changed to `if (outResult <= 3'b110 || outResult == 3'b100)`. 
+
+The reason for this bug is that the comparison in Test Case 6 is intended to check if the pedestrian signal is triggered with longTimeHold resulting in outResult being either '101' or '110'. However, the condition `if (outResult <= 3'b110)` does not accurately represent this logic and leads to incorrect comparison results.
+
+By modifying the condition to `if (outResult <= 3'b110 || outResult == 3'b100)`, it ensures that Test Case 6 will pass if outResult is equal to '101' or '110', as expected based on the module's output logic for the Pedestrian state with longTimeHold.

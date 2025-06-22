@@ -1,0 +1,35 @@
+### Issue Explanation:
+
+The error occurs because the VHDL process contains **both a sensitivity list and a `wait` statement**, which violates fundamental VHDL rules. Here's why:
+
+1. **Mutually Exclusive Constructs**:
+   - A process can **either**:
+     - Use a **sensitivity list** (e.g., `process(clk)`) to trigger execution when listed signals change, **or**
+     - Use **`wait` statements** (e.g., `wait for 10 ns`) to control execution flow explicitly.
+   - Combining both in the same process creates ambiguity in execution control and is prohibited by the VHDL standard.
+
+2. **Synthesis Conflict**:
+   - Hardware synthesis tools cannot map a process with `wait for` statements to physical logic. `wait for` is a simulation-only construct for timing delays, which has no equivalent in digital hardware.
+
+3. **Behavioral Conflict**:
+   - The sensitivity list `(clk)` expects the process to trigger on clock edges, but the `wait for 10 ns` forces a fixed delay unrelated to clock behavior. This creates undefined timing behavior.
+
+### Root Cause:
+The process attempts to function as both:
+- An **edge-triggered sequential process** (via `rising_edge(clk)` and sensitivity to `clk`), and  
+- A **timed delay process** (via `wait for 10 ns`).
+
+These paradigms are fundamentally incompatible in a single process.
+
+---
+
+### Fix Approach:
+1. **Remove the `wait for 10 ns` statement** entirely.  
+   - The sensitivity list `(clk)` and `rising_edge(clk)` already provide correct clock-edge behavior.  
+   - The `wait` statement serves no functional purpose here and prevents synthesis.
+
+2. **Ensure the process contains only synthesizable constructs**:
+   - Keep the `if rising_edge(clk)` block for flip-flop behavior.  
+   - Remove all simulation-only timing controls (like `wait for`).
+
+After removal, the process will correctly model a clock-driven flip-flop without synthesis errors. The signal will toggle on every clock edge as intended.

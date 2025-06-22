@@ -1,0 +1,104 @@
+The bug in the provided code is likely due to using the not-equal-to operator "!==", which is incorrect for comparing arrays in Verilog. Instead, the correct equality operator "===" should be used for array comparisons. 
+
+To fix this issue, you need to replace "!== 4'b0001" with "=== 4'b0001" in the if statements that are checking the data values in the test bench. 
+
+Here is the corrected part of the test bench code:
+```verilog
+if (data === 4'b0001) $fatal("ERROR: Expected 0001, got %b", data);
+
+serial_in = 0; #10;
+if (data === 4'b0010) $fatal("ERROR: Expected 0010, got %b", data);
+
+serial_in = 1; #10;
+if (data === 4'b0101) $fatal("ERROR: Expected 0101, got %b", data);
+
+serial_in = 1; #10;
+if (data === 4'b1011) $fatal("ERROR: Expected 1011, got %b", data);
+```
+
+By making this adjustment, the test bench should now compare the data correctly and no longer generate the "ERROR: Expected XXXX, got YYYY" message.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: eﬀect on a circuit.
+1. Consider the shift register from Figure 2. If you place = assignments inside of an always@(posedge
+Clock) block to produce the shift register, you instead get the parallel registers shown in Figure 4
+and Program 15.
+You might also get one register, whose output is tied to B, C and D.
+Both
+possible outcomes are equivelent. These circuit make sense, but don’t create shift registers! (As...
+
+- source_documents\verilog_fsm.pdf: shift registers are common construct, we assume that you wanted to create a shift register)
+Figure 4 Parallel registers
+A
+Clock
+B
+C
+D
+Program 15 Parallel registers, using = assignments inside of an always@(posedge Clock) block
+1 always @(posedge
+Clock) begin
+2
+B = A;
+3
+C = B;
+4
+D = C;
+5 end
+2. The opposite example (shown in Program 16), where we place <= assignments inside of always@(
+* ) is less pronounced. In this case, just consider what type of circuit you want to create: do you...
+
+- source_documents\Quick Start Guide to Verilog.pdf: register is disabled (EN ¼ 0), the input clock is ignored. At all other times, the output holds its last value.
+Example 7.6
+RTL model of an 8-bit register in Verilog
+7.2.2 Shift Registers
+A shift register is a circuit which consists of multiple registers connected in series. Data is shifted
+from one register to another on the rising edge of the clock. This type of circuit is often used in serial-to-...
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\verilog_fsm.pdf: Figure 2 A shift register
+A
+Clock
+B
+C
+D
+Program 12 A shift register, using <= assignments inside of an always@(posedge Clock) block
+1 always @(posedge
+Clock) begin
+2
+B <= A;
+3
+C <= B;
+4
+D <= C;
+5 end
+4.3.6
+always@( * ) Blocks
+always@( * ) blocks are used to describe Combinational Logic, or Logic Gates. Only = (blocking)
+assignments should be used in an always@( * ) block.
+Never use <= (non-blocking) assignments in...
+
+- source_documents\Quick Start Guide to Verilog.pdf: appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should read in a
+new input pattern every 10 ns. Your test bench
+should
+write
+the
+input
+pattern
+and
+the
+corresponding output of the DUT to an external
+ﬁle called “output.txt.”
+6.4.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench read in the input patterns from an
+external ﬁle called “input.txt.” This ﬁle should...

@@ -1,0 +1,7 @@
+The bug arises because the **blocking assignments (=)** in the shift logic cause immediate updates, corrupting the shift sequence. 
+
+**Why it happens:**  
+When `shift_en` is active, the assignments `data[0] = serial_in`, `data[1] = data[0]`, etc., execute sequentially in one clock cycle. Blocking assignments update `data[0]` immediately, so `data[1]` uses the *new* value of `data[0]` (not its previous state). This propagates the *same* bit (e.g., `serial_in=1`) to all positions, resulting in `1111` instead of shifting correctly.
+
+**Fix direction:**  
+Replace blocking assignments with **non-blocking assignments (<=)**. This ensures all assignments use the original pre-clock-edge values of `data`, allowing proper sequential shifting. For example, use `data <= {data[2:0], serial_in};` or assign bits in reverse order with non-blocking assignments.

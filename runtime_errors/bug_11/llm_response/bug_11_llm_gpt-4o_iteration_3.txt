@@ -1,0 +1,17 @@
+The error you are encountering is due to the FSM (finite state machine) being set to a state that is not defined within the valid range of states (0 to 9) when `num_in` is outside the range of 0 to 9. The code does not handle invalid input cases (i.e., inputs greater than 9) and incorrectly sets the `valid` signal to 1 for any `num_in`, regardless of its validity.
+
+### Why the Bug Occurs:
+
+1. **State Assignment on Input:** In the code, the line `state <= num_in;` assigns `num_in` directly to the `state`. This does not account for the possibility of `num_in` being outside the valid range of 0 to 9. As a consequence, when `num_in` is 10 or 15 (like in your testbench), it assigns an undefined state to the `state`, which is not checked for validity.
+
+2. **Valid Signal Handling:** There is no logic to verify if `num_in` is within the valid range before setting `valid` to 1. Thus, when `num_in` is outside of that range, the `valid` signal is still set to 1, leading to incorrect behavior when the invalid inputs are tested in the testbench.
+
+### How to Identify and Fix the Bug:
+
+To fix the issue and ensure that `valid` is properly managed, you should add logic to verify if `num_in` is valid before adjusting the state and setting the `valid` signal. Consider introducing conditional checks:
+
+- Before assigning `state <= num_in;`, check if `num_in` is between 0 and 9.
+- Set `valid <= 1;` only if this condition is true.
+- If `num_in` is outside of this range, assign a default state or maintain the current state and set `valid <= 0;`.
+
+Such a check ensures that only valid inputs transition the FSM and changes the state and signal behavior appropriately when invalid inputs are encountered. This will prevent setting `state` to an invalid value and incorrectly enabling the `valid` signal for invalid numbers, thus aligning the behavior with the testbench expectations.

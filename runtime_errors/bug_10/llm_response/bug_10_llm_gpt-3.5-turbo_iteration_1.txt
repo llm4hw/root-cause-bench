@@ -1,0 +1,7 @@
+The bug in this code is due to incorrect shifting in the `shift_register` module. In the `always` block inside the `shift_register` module, the assignment statements `data[1] = data[0];`, `data[2] = data[1];`, and `data[3] = data[2];` are causing the issue. These assignments incorrectly shift the values in the wrong direction.
+
+Specifically, the incorrect behavior is causing the `data` output to be shifted left instead of right as intended. This is why the expected values in the testbench are not matching the actual outputs. The shifting logic needs to be corrected to achieve the desired right shift behavior.
+
+To fix this bug, you need to modify the assignment statements inside the `always` block in the `shift_register` module to correctly implement a right shift operation on the `data` register. Pay close attention to the correct shifting direction and bit-rotation behavior to achieve the desired output.
+
+By correcting the shifting logic in the `shift_register` module, you can ensure that the `data` output aligns with the expected values in the testbench, resolving the issue of the error message "ERROR: Expected 0001 got 1111."

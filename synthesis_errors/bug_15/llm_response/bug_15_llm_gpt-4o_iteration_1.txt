@@ -1,0 +1,11 @@
+The error message indicates that there is a procedural assignment to a non-register variable `data`, which is not allowed. In Verilog, the `wire` data type is meant for combinational logic and cannot store values across different procedural assignments (such as in an `always` block). Procedures, particularly those intended to trigger on clock edges like `always @(posedge clk or posedge rst)`, require the use of `reg` data types for variables being assigned within them.
+
+In your code, `data` is declared as a `wire` but is being used within an `always` block for sequential logic, where you are attempting to assign it a value using a non-blocking assignment (`<=`). This type of usage implies that `data` needs to store state (or remember a value across clock cycles), which is functionality only provided by the `reg` data type, or appropriate signals in SystemVerilog or VHDL.
+
+Here's why the bug occurs:
+- `wire` cannot store or retain values; it is used for connecting different points in a circuit together in a combinational logic manner.
+- A non-blocking assignment within a procedural block (`always`) to a `wire` is not allowed because a `wire` is not capable of remembering state between clock cycles.
+
+To fix this issue, you should change the declaration of `data` from a `wire` to a `reg`. This alteration matches its intended use, as `data` changes state based on a clock edge and therefore needs a storage mechanism provided by `reg`.
+
+In summary, the root cause of the error is the attempt to assign a value to a `wire` type within a procedural block designed for sequential logic. The fix requires changing the `data` declaration from a `wire` to a `reg`. This enables `data` to behave correctly by storing its state between each clock cycle as intended by the logic within the `always` block.

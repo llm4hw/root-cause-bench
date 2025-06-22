@@ -1,0 +1,7 @@
+The bug in the code is occurring because the half_adder module implementation is not handling the carry input properly when calculating the sum and carry values. 
+
+In the testbench task check function, the calculation of the expected value is incorrect. The expected value is calculated as the straight addition of a, b, and cin; however, this is not taking into account the carry from previous stages in the 4-bit adder.
+
+To fix this bug, you need to modify the expected calculation to take into account the carry from previous stages. You should consider updating the logic to handle carry propagation in a full adder structure with cascading carry bits from lower-order bits to higher-order bits.
+
+I recommend revising the expected calculation in the testbench code to include the carry-in and carry-out mechanisms in a 4-bit full adder. This adjustment will help ensure the correct handling of carry propagation throughout the adder.

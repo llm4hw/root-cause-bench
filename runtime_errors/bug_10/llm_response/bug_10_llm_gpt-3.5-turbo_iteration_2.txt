@@ -1,0 +1,7 @@
+The bug in this code is likely due to how the shifting of data is being implemented in the `shift_register` module. In the always block of the module, the shifting operation is intended to shift the data in `data` to the right by 1 bit on each clock cycle when `shift_en` is high. However, the current implementation is incorrect.
+
+The issue lies in the shifting logic within the always block. The assignments `data[0] = serial_in`, `data[1] = data[0]`, `data[2] = data[1]`, and `data[3] = data[2]` are supposed to shift the data but are not doing so correctly. Instead of a bitwise shift operation, each assignment is just copying the value from the previous bit position, causing the output to not shift as expected.
+
+To fix this bug, the shifting logic should be modified to correctly shift the data. You can implement a proper logical right shift operation using bitwise operations like concatenation and slicing in Verilog. By performing bitwise operations on the data to shift it to the right, you can correctly achieve the desired shifting behavior in the shift register.
+
+Once you implement the correct shifting logic in the `shift_register` module, the output in the testbench should match the expected values, and the error message "ERROR: Expected [expected_value], got [actual_value]" should be resolved.

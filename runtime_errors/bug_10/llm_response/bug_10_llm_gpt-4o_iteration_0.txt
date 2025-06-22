@@ -1,0 +1,29 @@
+The issue you're encountering stems from how the `shift_register` module updates the bits of the `data` register. Specifically, the problem is with the ordering of assignment operations within the `always` block of the shift register.
+
+### Explanation of the Bug:
+
+In your `always` block, the lines:
+
+```verilog
+data[0] = serial_in;
+data[1] = data[0];
+data[2] = data[1];
+data[3] = data[2];
+```
+
+are causing the issue. This is due to using blocking assignments (`=`) rather than non-blocking assignments (`<=`). Blocking assignments execute in the sequence they're written, meaning each subsequent assignment uses the value of `data` as it was immediately before the `always` block was entered, not considering the changes in the current execution of the block itself.
+
+As a result, when the test bench expects `4'b0001` after first shifting in `serial_in = 1`, the `data` register actually updates all bits simultaneously to the current `serial_in` input, causing all to become `1` eventually, which is why you get `4'b1111`.
+
+### Why the Bug is Occurring:
+
+- The use of blocking assignments (`=`) leads to all the bits of `data` updating based on the same conditions without considering the changes within that particular execution cycle of the `always` block.
+- Once the shift operation commences, rather than passing the value sequentially in a cascading manner, every line updates using its pre-shift value, invalidating the expected shift register behavior.
+
+### How the Approach Should Be Corrected:
+
+Without providing the corrected code, the fix involves using non-blocking assignments (`<=`) in the `always` block. This will ensure that all bits of `data` are updated simultaneously based on the values calculated in the present cycle of the `always` block.
+
+By switching to non-blocking assignments, each bit in the register is updated in a non-dependent manner, allowing them to capture the expected states of shift input propagation properly. This behavior aligns with how data is shifted through registers in concurrent hardware descriptions, reflecting actual hardware designs where all segments update based on the common clock.
+
+Overall, the primary issue here is stepping through assignments sequentially rather than concurrently, disrupting expected behavior in a shifted data paradigm.

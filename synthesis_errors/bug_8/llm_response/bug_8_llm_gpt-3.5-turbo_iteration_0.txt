@@ -1,0 +1,7 @@
+The bug in the provided code is that signal2 is not declared in the architecture section of the VHDL code, but it is being used in the process. This is leading to the error message "[Synth 8-1031] signal2 is not declared."
+
+This error occurred because the signal2 was not declared in the architecture part of the top8 module, and when the process tried to assign a value to signal2, it resulted in an undeclared signal error.
+
+To fix this issue, you need to declare signal2 in the architecture section before using it in the process. You can declare it as another signal or a variable based on the functionality you intend to implement. By declaring signal2 properly, the error should be resolved.
+
+Please ensure to properly declare all signals that are being used within a process to avoid such errors in the future.

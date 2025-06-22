@@ -1,0 +1,13 @@
+The issue lies in the faulty_comparator module's implementation, specifically within the conditional statement in the always block. 
+
+**Bug Explanation:**
+- In the faulty_comparator module, the condition checks if `a` is equal to the binary constant `5'b10101` (equivalent to decimal 21 in binary). However, `a` is defined as a 4-bit wide input, which means it can only represent values from 0 to 15. Any comparison with a number outside this range, like 21, does not make logical sense for a 4-bit input variable. 
+
+**Why the Bug Occurs:**
+- Since `a` will never equal `5'b10101` due to the constraint of its bit-width, the comparison `a == 5'b10101` will always evaluate to false. As a result, the `result` will always be set to 0 regardless of the values of `a` and `b`. This behavior contradicts what the testbench expects—that is, `result` should be 1 when `a` equals `b`.
+
+**Impact of the Bug:**
+- All the test cases that check for equality between `a` and `b` will fail, as they expect `result` to be 1 when `a` equals `b`, but because of the misplaced comparator logic, the `result` will incorrectly be 0.
+
+**Explanation for the Fix:**
+- The condition in the always block should directly compare `a` and `b` instead. By changing the condition to check if `a` is equal to `b`, the faulty_comparator module will produce the expected results during the test cases. This will align the module's logic with what the testbench asserts correctly.

@@ -1,0 +1,25 @@
+The error occurs because the instantiation of `ChildModule` in `top18` attempts to connect a signal to port `b`, which does not exist in the child module. Here's why:
+
+1. **Module Definition Mismatch**:  
+   `ChildModule` only declares two ports:  
+   - Input `a`  
+   - Output `c`  
+   There is no port `b` defined in `ChildModule`.
+
+2. **Erroneous Connection Attempt**:  
+   In `top18`, the instance `child_inst` tries to connect signal `in` to a port named `b`:  
+   ```verilog
+   .b(in),  // Illegal connection to non-existent port
+   ```  
+   This violates the module's interface definition.
+
+3. **Synthesis Tool Detection**:  
+   The synthesis tool (Synth 8-448) correctly flags this during elaboration because it verifies all port connections against the module's definition.
+
+**How to Fix**:  
+- **Option 1**: Remove the `.b(in)` connection entirely if `ChildModule` shouldn't receive this signal.  
+- **Option 2**: Modify `ChildModule` to include an input port `b` if the design requires this connection (would also require updating `ChildModule`'s functionality).  
+- **Option 3**: Connect `in` to an existing port in `ChildModule` (e.g., replace `.a(clk)` with `.a(in)` if `clk` isn't needed).  
+
+**Root Cause**:  
+The instantiation references a port not declared in the module, indicating either a typo in the port name or a mismatch between the intended functionality and the module's actual interface. The fix depends on whether the child module needs the `in` signal or if the connection was mistakenly added.

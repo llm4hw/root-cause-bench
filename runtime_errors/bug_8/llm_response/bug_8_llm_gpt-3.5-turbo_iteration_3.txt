@@ -1,0 +1,5 @@
+The bug is occurring because the value of `outResult` is being checked immediately after setting `pedControl` to 1, which causes the output to change immediately, rather than waiting for the next clock cycle for the state machine to transition to the `Ped` state. This is why the test fails with the error message: "pedControl 2 - ERROR: Expected Green (01), but got 11".
+
+To fix this issue, the testbench should wait for the next clock cycle after setting `pedControl` before checking the `outResult` value to ensure that the state machine has transitioned correctly to the `Ped` state. You can do this by adding a delay before checking the `outResult` value right after setting `pedControl`.
+
+By making this adjustment, the test will correctly verify the transition from `Red` to `Ped` to `Green`, and the test should pass without any errors.

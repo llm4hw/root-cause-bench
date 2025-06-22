@@ -1,0 +1,11 @@
+The error occurs in the sixth test case of your testbench, which expects the `outResult` to be greater than `3'b110` (i.e., greater than binary 110), when `longTimeHold` is set during the Pedestrian (Ped) state. Let's break down why this is happening:
+
+1. **Module Analysis**: When the system is in the `Ped` state, the lower block of combinational logic within the module checks the `longTimeHold` signal. If `longTimeHold` is true, the current design sets `outResult` to `3'b101`. If `longTimeHold` is false, `outResult` is set to `3'b110`. Thus, when `longTimeHold` is high, `outResult` becomes `3'b101`, which is less than `3'b110`.
+
+2. **Testbench Analysis**: The testbench expects `outResult` to be greater than `3'b110` when `Ped` state is active, and `longTimeHold` is set. This implies it expects the `outResult` to be a value like `3'b111` or higher in numerical value, during this condition.
+
+3. **Cause of the Bug**: The conditional logic in the state machine is not assigning a correct value greater than `3'b110` when transitioning out of the `Ped` state with `longTimeHold`. The current implementation assigns `outResult` as `3'b101`, which is less than what's expected for this test case.
+
+4. **Explanation of Error Messages**: Specifically, the message `ERROR: Test Case 6 failed. outResult = 101 (Expected > 110)` indicates that with `longTimeHold` set, the `outResult` is `3'b101`, whereas the testbench expects a binary value larger than `3'b110`. The logic determining `outResult` doesn't match the expectations of the testbench under these conditions. 
+
+The root of the problem lies in the mismatch between what the testbench expects and how the RTL logic assigns values to `outResult`. An examination and alignment of expectations and assignments will be necessary to reconcile the test case with the functional objectives of the module.

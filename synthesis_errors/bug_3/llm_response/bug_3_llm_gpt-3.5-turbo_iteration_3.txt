@@ -1,0 +1,7 @@
+The bug in the provided code is related to the usage of the signal `input1` within the architecture of the entity `top3`. In VHDL, an `in` mode port is meant for inputs to the entity, and these ports cannot be driven inside the architecture where the entity is instantiated. 
+
+In this case, the line `input1 <= '0';` inside the architecture of `top3` is trying to assign a value to the input port `input1`, which is not allowed. You cannot assign a value to an input port within the architecture; inputs should be driven by some external source. 
+
+To fix this bug, you should remove the line `input1 <= '0';` from the architecture of the entity `top3`. If you need to assign an initial value to `input1`, you can do this in the test bench or at the place where the entity is instantiated in the test bench. 
+
+Make sure the changes made reflect the intended design functionality.

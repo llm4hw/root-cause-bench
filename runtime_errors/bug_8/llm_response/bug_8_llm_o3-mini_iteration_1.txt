@@ -1,0 +1,3 @@
+The error occurs because once the state machine enters the Ped state, it remains there instead of transitioning to the expected state (Green). In the combinational block that computes the next state, when the current state is Ped the code unconditionally sets next to Ped. This causes the output to remain at 2'b11 (the Ped output), so when the test bench expects a transition to the Green state (2'b01) in the next cycle, it still sees the Ped state.
+
+In short, the bug is that the state transition logic for the Ped state is not allowing a transition out of Ped, which is why the test bench reports, "Expected Green (01), but got 11." The root cause is that the next state for the Ped state is incorrectly assigned to be Ped itself rather than transitioning to another state.

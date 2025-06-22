@@ -1,0 +1,11 @@
+The bug causing the "Morse for O not correct" error is due to improper state transitions in the 'O' sequence logic. The state machine for 'O' does not generate the three required dashes (---) with intra-character spaces between them. 
+
+**Root Cause:**
+- When generating 'O', the code transitions to `O_DASH1` but immediately returns to `IDLE` after completing one dash (DASH duration). It does not progress through `O_DASH2` and `O_DASH3`, nor does it insert the required intra-character spaces (SPACE duration) between dashes. 
+- The grouped handling of `O_DASH1`, `O_DASH2`, and `O_DASH3` states lacks transitions to advance between them. Each state unconditionally returns to `IDLE` after a dash, resulting in only one dash being transmitted instead of three.
+
+**Why This Fails:**
+- Morse code for 'O' requires three sequential dashes separated by intra-character spaces (one DOT duration). The current implementation sends a single dash and terminates, causing the testbench to detect an incomplete output (morse_out remains high during the test's wait period).
+
+**Fix Needed:**
+- Modify the state transitions for 'O' to iterate through `O_DASH1` → `SPACE_STATE` → `O_DASH2` → `SPACE_STATE` → `O_DASH3`, ensuring each dash is followed by a space and the next dash. After the third dash, transition to `IDLE`. This mirrors how 'A' handles dot-dash spacing and how 'S' sequences through three dots.

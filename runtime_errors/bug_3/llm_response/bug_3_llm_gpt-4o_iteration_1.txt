@@ -1,0 +1,17 @@
+The issue arises from the way `o_carry` is calculated in the `full_half_add_1bit` module. In a full adder, `o_carry` should be calculated as the logical OR of the individual carries from the two half-adder stages:
+
+1. **Explanation of the Problem:**
+   - The first half-adder (`h1`) takes `i_a` and `i_b` as inputs, producing a sum (`w_sum1`) and a carry (`w_carry1`).
+   - The second half-adder (`h2`) takes `w_sum1` and `i_cin` as inputs, producing the final sum (`o_sum`) and a carry (`w_carry2`).
+   - The `o_carry` output of a full adder should be computed as `w_carry1 | w_carry2`, because a carry can be generated in either half-adder stage, not both as the current code suggests with the statement `assign o_carry = w_carry1 & w_carry2;`.
+
+2. **Why the Bug Occurs:**
+   - The use of `&` (logical AND) for `o_carry` means that `o_carry` is set only when both `w_carry1` and `w_carry2` are 1. This is incorrect for a full adder, which should account for a carry from either stage.
+   - In Test Case 3 (`{i_a, i_b, i_cin} = 3'b110`), the expected result is `o_sum = 0` and `o_carry = 1`. Here, `i_a = 1` and `i_b = 1` should produce a carry (`w_carry1 = 1`), while `w_sum1` and `i_cin` result in no carry (`w_carry2 = 0`). The correct `o_carry` should be `1` because `w_carry1 = 1`.
+
+3. **How the Bug Can Be Fixed:**
+   - Modify the calculation of `o_carry` to handle the logical OR operation between individual carry outputs:
+     - Change the line `assign o_carry = w_carry1 & w_carry2;` to `assign o_carry = w_carry1 | w_carry2;`.
+   - This change ensures that `o_carry` will correctly reflect a carry from either of the two half-adders, which aligns with the expected behavior of a full adder.
+
+By making this change, Test Case 3 will pass, as `o_carry` will be correctly set to 1 when there is a carry from `i_a` and `i_b`. This correctly matches the logic of a complete full-adder circuit.

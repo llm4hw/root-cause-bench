@@ -1,0 +1,20 @@
+The bug arises due to an **incomplete case statement** in the VHDL code. Here's why:
+
+1. **Missing Case Coverage**:  
+   The `sel` input is a 2-bit `std_logic_vector`, which has **4 possible binary values**: `"00"`, `"01"`, `"10"`, and `"11"`. The case statement only handles three cases (`"00"`, `"01"`, `"10"`), omitting `"11"`.
+
+2. **Synthesis Requirement**:  
+   VHDL synthesis requires case statements to cover **all possible values** of the selector expression. The error `missing choice(s) 32'b...00000011` explicitly indicates the missing `"11"` case (where `...00000011` is the 32-bit representation of `3`, equivalent to `"11"` in 2 bits).
+
+3. **Simulation/Synthesis Mismatch**:  
+   During simulation, the testbench likely drove `sel` to `"11"`, exposing the incomplete case. Synthesis tools preemptively flag this as it creates undefined hardware behavior for the missing case.
+
+---
+
+**Fix Approach**:  
+Add coverage for the missing `"11"` case using one of these methods:  
+- Explicitly add a `when "11" => ...` branch  
+- Use an `when others => ...` clause to handle all unlisted cases (including `"11"` and non-binary values like `'X'`/`'U'`).  
+
+**Key Note**:  
+The `others` clause is generally safer for `std_logic` types as they can have non-binary values (`'U'`, `'X'`, etc.), though synthesis typically treats these as don't-cares.

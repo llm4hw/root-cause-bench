@@ -1,0 +1,5 @@
+The error message is caused by an infinite loop that the synthesis tool tries to unroll. In your combinational always block, you have a while loop that continues as long as the signal "flag" is true. Since "flag" is initialized to true and never gets updated inside the loop, the loop has no termination condition during simulation. The synthesizer or simulation test bench tries to iterate through the loop until it reaches its built‐in iteration limit (65536 in this case) and then throws the error.
+
+This situation not only creates an infinite loop in simulation but also represents combinational logic that would never resolve to a stable state in hardware. The error arises because the design, as written, never reaches a point where the condition in the while loop is false, leading to an infinite combinational loop.
+
+The fix involves restructuring the process, typically by using a clocked (synchronous) always block and removing or rethinking the while loop, so that iteration occurs over successive clock cycles rather than in an always‐active combinational block.

@@ -1,0 +1,5 @@
+The core issue is that a signal of type std_logic is being initialized with what is interpreted as a string literal. In VHDL, std_logic expects a single character literal (using single quotes), whereas double quotes are used for string literals (which are meant for arrays like std_logic_vector). By initializing the std_logic signal with a double-quoted "0", the simulator sees a type mismatch—it's receiving a string literal where a single character is expected. This mismatch is what prompts the error message.
+
+The fix involves making the initialization consistent with the type. Instead of using a string literal for a scalar std_logic, the proper literal should use single quotes.
+
+Note: There’s also a slight naming inconsistency between the entity name and the comments, but the error message specifically refers to the type mismatch issue.

@@ -1,0 +1,149 @@
+The error you're experiencing is due to how the FSM handles invalid inputs (numbers outside the range '0' to '9'), specifically in the portion of the code responsible for setting the `valid` signal and `output_data`.
+
+### Root Cause:
+The issue lies in the FSM sequential logic section of your `always` block, where `state <= num_in;` unconditionally assigns whatever `num_in` is to the `state` without checking if `num_in` is within the valid range (0-9). Additionally, `valid <= 1;` is set regardless of whether the input is valid or not.
+
+### Why It Is Occurring:
+As coded, if `num_in` is any value, the state is set to that value, even if it is beyond '9' (such as '10' or '15'). Since there is no logic to handle invalid states, they are all treated as valid, triggering the error checks in your testbench.
+
+### How to Fix It:
+You need to modify the FSM logic to include a check for valid numbers. Only set the `state` and `valid` when `num_in` is within the valid range. Set `valid` to 0 and `output_data` to a designated invalid indicator when the input is invalid. Here's one way to implement this:
+
+```verilog
+// Modify the FSM sequential logic
+always @(posedge clk or posedge reset) begin
+    if (reset) begin
+        state <= S0; // Default state on reset
+        output_data <= 8'd0; // Default output
+        valid <= 0; // Default invalid
+    end else begin
+        if (num_in <= 9) begin
+            state <= num_in;
+            valid <= 1;
+        end else begin
+            state <= 4'd0;   // or some default state
+            output_data <= 8'd0; // Indicate invalid by setting output_data to zero
+            valid <= 0;
+        end
+    end
+end
+```
+
+### Explanation:
+- **Validity Check**: By checking if `num_in <= 9`, the logic restricts the valid states to the defined range. Only then is the state and validity set accordingly.
+- **Invalid Handling**: If outside the valid range, the `state` and `valid` are managed so that `output_data` is set to zero and `valid` is set to zero, reflecting the invalid nature of the input, which will satisfy your testbench checks.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: 6
+7 always@( * ) begin
+8
+Status = 3’b000;
+9
+case (CurrentState)
+10
+STATE_2: begin
+11
+Status = 3’b010;
+12
+end
+13
+STATE_3: begin
+14
+Status = 3’b011;
+15
+end
+16
+endcase
+17 end
+Alternatively, the output assignment for Status can be combined into the always@( * ) block that
+chooses what the next state should be (see Program 21). It is seperated here for clarity.
+4.5
+A Complete FSM
+In this tutorial we hasve discussed why the Moore machine FSM is useful in digital design and how...
+
+- source_documents\verilog_fsm.pdf: Program 23 The complete FSM (part 1) from Figure 1
+1 module
+BasicFsm(
+2
+//
+------------------------------------------------------------
+3
+// Inputs
+4
+//
+------------------------------------------------------------
+5
+input
+wire
+Clock ,
+6
+input
+wire
+Reset ,
+7
+input
+wire
+A,
+8
+input
+wire
+B,
+9
+//
+------------------------------------------------------------
+10
+11
+//
+------------------------------------------------------------
+12
+// Outputs
+13
+//...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 116
+8.1.5 Changing the State Encoding Approach ....................................................
+118
+8.2 FSM DESIGN EXAMPLES ........................................................................................
+119
+8.2.1 Serial Bit Sequence Detector in Verilog ......................................................
+119
+8.2.2 Vending Machine Controller in Verilog ........................................................
+121...
+
+- source_documents\verilog_fsm.pdf: 2
+STATE_1 = 3’b001 ,
+3
+STATE_2 = 3’b010 ,
+4
+STATE_3 = 3’b011 ,
+5
+STATE_4 = 3’b100;
+As 3 bits can specify a total of 8 states (0-7), our encoding speciﬁes 3 potential states not speciﬁed
+as being actual states. There are several ways of dealing with this problem:
+1. Ignore it, and always press Reset as a way of initializing the FSM.
+2. Specify these states, and make non-conditional transitions from them to the STATE_Initial....
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should read in a
+new input pattern every 10 ns. Your test bench
+should
+write
+the
+input
+pattern
+and
+the
+corresponding output of the DUT to an external
+ﬁle called “output.txt.”
+6.4.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench read in the input patterns from an
+external ﬁle called “input.txt.” This ﬁle should...

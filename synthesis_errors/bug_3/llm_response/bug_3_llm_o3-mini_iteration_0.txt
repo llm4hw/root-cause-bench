@@ -1,0 +1,12 @@
+The problem is that the design is trying to drive an input port. In VHDL, ports declared with mode "in" are read‐only; they are meant to receive values from outside the design, not be assigned within the architecture. Here, the line that assigns a value to the "in" port (input1) is causing the error.
+
+Why it's happening:
+• The port "input1" is declared as an input, so it is not allowed to be updated by signals within the design.
+• The assignment “input1 <= '0';” in the architecture mistakenly attempts to drive a value onto an input, which violates VHDL’s rules.
+• This results in the error during simulation because the simulator detects that an "in" mode signal is being updated, which is not permitted.
+
+How to fix the issue:
+• Instead of trying to update an input port, you should either remove the assignment if it wasn’t intended, or use an internal signal that can be driven. Alternatively, if the design requirement is that "input1" should be driven by something within the architecture, its mode should be reconsidered (for example, changing its mode to "buffer" or "inout" if it suits the design).
+• By ensuring that only signals that are allowed to be driven (such as outputs or properly declared internal signals) are assigned a value, the error will be resolved.
+
+This explains the root cause of the error and guides you on how to address it without providing a direct code fix.

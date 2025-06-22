@@ -1,0 +1,30 @@
+### Bug Explanation:
+The error occurs because `signal2` is referenced in the assignment `signal2 <= '0';` but has **not been declared** in the architecture. In VHDL, all signals must be explicitly declared before they can be used. 
+
+### Root Cause:
+1. **Missing Declaration**:  
+   The architecture declares only `signal1`:
+   ```vhdl
+   signal signal1 : STD_LOGIC := '0';
+   ```
+   There is no corresponding declaration for `signal2`. The VHDL compiler fails because it cannot resolve `signal2` to any known object.
+
+2. **Synthesis Error Context**:  
+   The assignment `signal2 <= '0';` appears in the reset clause of the synchronous process. Since `signal2` doesn't exist, the synthesizer throws error `[Synth 8-1031]`.
+
+### Why This Happened:
+- The design likely intended to reset `signal1` (the only declared signal) but accidentally used `signal2` due to a typo or oversight.
+- VHDL requires strict declaration of all identifiers. Unlike some languages, it does not implicitly create signals on first use.
+
+### Fix Approach:
+1. **Correct the Signal Name**:  
+   Replace `signal2` with `signal1` in the reset assignment to align with the declared signal. This matches the design's intent since `signal1` is toggled in the clocked section and drives `out1`.
+
+2. **Alternative (If Needed)**:  
+   If a second signal was genuinely intended, declare `signal2` in the architecture's declaration section before the `begin` keyword, e.g.:
+   ```vhdl
+   signal signal2 : STD_LOGIC;
+   ```
+
+### Key Takeaway:
+**All VHDL signals must be explicitly declared in the architecture's declarative region**. Unidentified signals will always cause synthesis errors. Verify signal names against declarations, especially when copying/modifying code.

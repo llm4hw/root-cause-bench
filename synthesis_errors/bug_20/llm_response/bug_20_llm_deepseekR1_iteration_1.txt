@@ -1,0 +1,37 @@
+### Bug Explanation:
+The error occurs because the `while (flag)` loop in the combinational `always @*` block creates an **infinite loop** during synthesis. Here's why:
+
+1. **Static Condition**:  
+   `flag` is initialized to `1'b1` (true) and never modified within the module. This makes the loop condition `while (flag)` perpetually true.
+
+2. **Combinational Loop**:  
+   The `always @*` block implies combinational logic. Since the loop has:
+   - No exit condition (as `flag` never changes)
+   - No timing controls (e.g., `@(posedge clk)`)
+   - No event-based break (e.g., `#delay`),
+   the synthesis tool attempts to unroll the loop indefinitely, hitting its iteration limit (65,536 cycles).
+
+3. **Non-Blocking Assignment Issue**:  
+   `out <= ~out` creates a **feedback loop**:
+   - `out` is both an input (to `~out`) and output
+   - No new values are introduced to break the loop.
+
+### Why This Fails Synthesis/Simulation:
+- **Synthesis**: Hardware cannot resolve an infinite combinational loop. The tool exhausts its loop-unrolling capacity.
+- **Simulation**: Even if synthesized, this would cause a zero-delay oscillation (hanging simulation) as `out` toggles infinitely fast in the same timestep.
+
+### Fix Approach:
+1. **Replace `always @*` with sequential logic**:  
+   Use `always @(posedge clk)` to synchronize toggling with clock edges.
+
+2. **Eliminate the infinite loop**:  
+   Remove the `while` loop entirely. Toggling can be done with a simple assignment per clock cycle.
+
+3. **Initialize `out` (optional)**:  
+   Add a reset mechanism to set `out` to a known initial state if needed.
+
+### Key Insight:
+Hardware loops **must** have:
+- A bounded exit condition, or
+- Synchronization (clock edges) to break combinational continuity.  
+Combinational blocks (`always @*`) should never contain unbounded loops or internal state dependencies like `out <= ~out`.

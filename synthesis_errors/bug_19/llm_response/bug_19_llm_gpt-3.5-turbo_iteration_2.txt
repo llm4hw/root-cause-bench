@@ -1,0 +1,5 @@
+The bug in the code is that an illegal character '2' is being used within a binary number declaration '2'b2'. In Verilog, binary numbers are represented as '0' and '1', so using '2' in the binary number declaration is incorrect and resulting in the error.
+
+To fix this issue, the binary number declaration should only contain '0' or '1' in each digit. Use '2'b10' instead of '2'b2' to represent binary '10'. 
+
+Once you correct the binary number declaration within the assignment, the error should be resolved, and the code should simulate successfully.

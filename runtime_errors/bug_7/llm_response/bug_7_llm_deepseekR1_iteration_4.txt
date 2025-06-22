@@ -1,0 +1,10 @@
+The bug occurs because the state machine transitions back to `Red` from the `Ped` state instead of moving to `Green`. 
+
+**Root Cause**: 
+In the `case` statement for the next state logic, the transition from `Ped` is incorrectly assigned to `Red` (parameter value 0). According to the testbench's expected sequence (`Red → Ped → Green → ...`), after `Ped`, the next state should be `Green` (parameter value 1). However, the code sets `next = Red` when in the `Ped` state. This causes the state machine to oscillate between `Red` and `Ped` instead of progressing to `Green`. 
+
+**Why the Error Occurs**:
+After reset is deasserted, the first transition moves to `Ped` (11). The testbench checks after one clock cycle expecting `Red` (00), but since the design transitions to `Ped` immediately, the error "Expected Red (00), but got 11" is triggered. Subsequent transitions also fail because the state machine never reaches `Green` or `Yellow` due to this incorrect transition. 
+
+**Fix**:
+Modify the `Ped` state's next state assignment to transition to `Green` instead of `Red`. This ensures the state sequence follows `Red → Ped → Green → Yellow → Red` as intended.

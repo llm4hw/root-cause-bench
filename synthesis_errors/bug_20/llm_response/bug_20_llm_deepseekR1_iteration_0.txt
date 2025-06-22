@@ -1,0 +1,31 @@
+### Issue Explanation:
+1. **Infinite Combinational Loop**:  
+   The `always @*` block is sensitive to any changes in its inputs (which include `flag` and `out`). However, the `while (flag)` loop runs indefinitely because:
+   - `flag` is initialized to `1'b1` and **never modified** within the block.
+   - The loop contains no timing control (e.g., `# delays`, clock edges) or exit condition.
+
+2. **Synthesis Failure**:  
+   During synthesis, tools attempt to "unroll" loops into hardware. Since the loop has no exit condition, the tool tries to unroll it infinitely, hitting the 65,536-iteration limit (a safeguard against hangs).
+
+3. **Simulation Hang**:  
+   In simulation, the loop would cause a hang because:
+   - `out <= ~out` schedules a non-blocking assignment but **doesn't advance simulation time**.
+   - The combinational block triggers repeatedly without pause, preventing time progression.
+
+### Root Cause:
+- **Combinational Logic Misuse**:  
+  Combinational blocks (`always @*`) must resolve within **zero time** and describe purely combinational circuits. An infinite loop violates this by requiring infinite zero-time iterations.
+- **No Clock or Timing Control**:  
+  Continuous toggling of `out` requires sequential logic (clock-driven) to break the loop into discrete time steps.
+
+### Fix Approach:
+1. **Replace `while` with Sequential Logic**:  
+   Use a clocked process (`always @(posedge clk)`) instead of combinational logic. This allows toggling `out` once per clock cycle.
+
+2. **Add Loop Exit Condition**:  
+   If toggling should stop, add logic to set `flag = 0` after a condition (e.g., after a counter limit).
+
+3. **Avoid Combinational Loops**:  
+   Ensure combinational blocks contain no unbounded loops or feedback paths without explicit exit conditions.
+
+**Key Insight**: Hardware cannot instantiate infinite loops—all behavior must resolve in finite time or synchronize with a clock.

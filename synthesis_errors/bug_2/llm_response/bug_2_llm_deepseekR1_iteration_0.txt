@@ -1,0 +1,24 @@
+The error occurs because the `+` operator is not defined for `std_logic_vector` types in the used libraries. Here's why:
+
+1. **Missing Type Conversion**:  
+   The code attempts to directly add `a` and `b` (both `std_logic_vector`). However, the `numeric_std` package only defines arithmetic operations for `unsigned`/`signed` types, not raw `std_logic_vector`.
+
+2. **Operator Overload Issue**:  
+   The compiler searches for a `+` operator matching `(std_logic_vector, std_logic_vector)` but finds no implementation in `IEEE.STD_LOGIC_1164` or `numeric_std`.
+
+3. **Truncation Risk**:  
+   Even if converted, adding two 4-bit values may produce a 5-bit result. Assigning this to a 4-bit `c` will truncate the carry bit without warning.
+
+**Fix Approach**:  
+Convert inputs to `unsigned`/`signed` before addition, then convert the result back to `std_logic_vector`. For example:  
+```vhdl
+c <= std_logic_vector(unsigned(a) + unsigned(b));
+```  
+This explicitly handles:  
+- Type conversion for arithmetic  
+- Potential truncation by design choice  
+- Compatibility with `numeric_std` rules  
+
+**Key Decisions**:  
+- Choose `unsigned` or `signed` based on data interpretation  
+- If overflow matters, extend `c` to 5 bits to preserve the carry

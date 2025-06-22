@@ -1,0 +1,38 @@
+### Bug Explanation
+The error occurs because the code attempts to **read the value of an output port (`b`)** in the expression `a and b`. In VHDL, ports declared as `out` are **write-only** within their own entity. Reading from an `out` port is syntactically illegal because:
+1. `out` ports are designed to **drive signals external to the entity**, not to provide feedback internally.
+2. The value of an `out` port is undefined internally until it is explicitly assigned within the architecture.
+
+### Why This Causes an Error
+- The line `temp_signal <= a and b;` tries to read `b`'s value (which is `out`) as if it were an input or internal signal.
+- Synthesis tools flag this as a violation of VHDL port mode rules (`out` ports cannot be read).
+- The error suggests using `buffer` or `inout` mode to resolve this, but these modes have specific use cases and implications.
+
+### Root Cause
+The fundamental issue is a **misuse of port directions**:  
+- `b` is declared as `out`, but the logic treats it as an input/internal signal for the AND operation.
+- The code implies a **feedback path** (using `b`'s output as an input), which requires explicit handling in VHDL.
+
+### How to Fix
+1. **Change port mode** (if feedback is intentional):  
+   - Replace `out` with `buffer` for `b`. This allows reading the port's value internally.  
+   - *Caveat*: `buffer` ports can complicate hierarchy integration and are less common in industry practice.
+
+2. **Use an internal signal** (recommended):  
+   - Create a new internal signal (e.g., `b_internal`).  
+   - Drive `b` from this signal (e.g., `b <= b_internal;`).  
+   - Use `b_internal` instead of `b` in logic (e.g., `temp_signal <= a and b_internal;`).  
+   - Ensures separation between internal logic and output ports.
+
+3. **Redesign logic** (if feedback is unintended):  
+   - If `b` isn’t meant to be read, assign `temp_signal` using only inputs/internal signals (e.g., `temp_signal <= a;`).  
+   - Drive `b` separately from another expression.
+
+### Additional Issue
+The output port `b` is **never assigned a value** in the architecture. This will result in `b` being undefined (high-impedance `'Z'`). After fixing the read error, you must assign `b` to avoid this secondary issue.
+
+### Key Takeaway
+**Output ports (`out`) are write-only**. To use their value internally, you must either:  
+- Use `buffer`/`inout` (with caution), or  
+- Mirror the output via an internal signal.  
+Always ensure outputs are explicitly driven in the architecture.

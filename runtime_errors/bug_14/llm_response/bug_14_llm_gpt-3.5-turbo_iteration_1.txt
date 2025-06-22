@@ -1,0 +1,5 @@
+The bug in the code is that the `output_data` is not being updated correctly in the `always @(state)` block when `enableAscii` is set to 0. This is causing the test to fail when trying to check for the expected output data in the testbench.
+
+The issue occurs because in the `always @(state)` block, when `enableAscii` is 0, `output_data` should be updated based on the current state irrespective of ASCII values. However, the code is setting `output_data` to ASCII values even when `enableAscii` is 0. This mismatch causes the test to fail.
+
+To fix this bug, you need to make sure that when `enableAscii` is set to 0, the `output_data` is updated correctly based on the current state itself, without taking ASCII values into account. You can do this by ensuring that the correct values are assigned to `output_data` for each state when `enableAscii` is 0 in the `always @(state)` block.

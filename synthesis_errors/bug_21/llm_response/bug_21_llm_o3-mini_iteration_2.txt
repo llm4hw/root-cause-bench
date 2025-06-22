@@ -1,0 +1,7 @@
+The error is triggered because the reset signal is used in the condition in a way that conflicts with the edge specified in the always block’s sensitivity list. In your design the always block is declared to react on the negative edge of reset (an active-low reset), but the condition within the block is written as “if (!reset == 0)”. 
+
+When the synthesis tool examines the condition, it sees that you are inverting reset (using the logical NOT operator) and then comparing it to 0. With operator precedence, this is equivalent to checking if the inverted value of reset is equal to 0, which actually reverses the intended logic. In an active-low reset scenario you expect that when reset goes low (i.e., equals 0) the block triggers the reset action. However, the expression “!reset == 0” evaluates the opposite way: when reset is low, the inverted value is high, causing the comparison to fail.
+
+Because of this mismatch, the operand “reset” within your conditional does not match with the negative edge event control, and the tool flags it as an error. The root problem is an inconsistent use of the reset signal’s polarity between the event control and the conditional check.
+
+To fix the issue, you need to rewrite the condition so that it directly tests for the active state of reset (i.e., when reset is low). This way, the condition inside the always block will correctly match the intended asynchronous reset edge.

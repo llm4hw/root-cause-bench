@@ -1,0 +1,38 @@
+The issue at hand is related to how the state transitions are defined in the Verilog module and how this interacts with the behavior expected by the testbench. Let's analyze the error context and the relevant code sections to understand the root cause.
+
+### Issue Summary
+
+The error message from the testbench is: 
+
+```
+pedControl 2 - ERROR: Expected Green (01), but got 11
+```
+
+This message indicates that during a test case where the testbench anticipated the state to transition to 'Green' (represented in the testbench by `2'b01`), the module's output was actually 'Ped', represented by `2'b11`. 
+
+### Analyzing the Code
+
+1. **Initial State Setting**:
+   - Upon reset (`resetn = 0`), the state is set to `Red`. This is correct and matches the expectation of the testbench.
+
+2. **State Transitions**:
+   - From the `Red` state, if `pedControl` is active (i.e., `pedControl == 1`), the module should transition to the `Ped` state; otherwise, it transitions to `Green`.
+   - From `Ped`, the state does not automatically transition to `Green`, as it just remains in `Ped`.
+
+3. **Issue Identification**:
+   - The testbench seems to expect that when `pedControl` is set to `1` from a `Red` state, the transition would go `Red` -> `Ped` -> `Green`.
+   - However, the `Ped` state in the module as currently coded simply stays in `Ped` and does not transition back to `Green`. Thus, the module remains in the `Ped` state instead of moving to `Green`.
+
+### Why the Bug Occurs
+
+The Verilog code has a flaw in the state transition logic from `Ped` back to `Green`. Specifically, the logic currently implemented in:
+
+```verilog
+Ped: next = Ped;
+```
+
+Means that once the state is `Ped`, it will perpetually stay in the `Ped` state without transitioning to `Green` or any other state regardless of the `pedControl` signal, which does not match the testbench's expectations.
+
+### Explanation of the Fix
+
+To rectify this, the state transition logic must be updated. Specifically, the transition out of the `Ped` state should be defined in such a way that it moves to the `Green` state after a certain condition (e.g., deactivation of `pedControl`) or timing, matching the tests' expectations. However, I won't provide specific code to fix it, as requested. Instead, the design logic should be revisited in terms of desired behavior and then adjusted to ensure that after addressing a pedestrian control request, the state machine naturally progresses to `Green`.

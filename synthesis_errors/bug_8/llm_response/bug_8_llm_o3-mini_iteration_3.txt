@@ -1,0 +1,10 @@
+The error message indicates that within the code there is an attempt to assign a value to a signal ("signal2") that has not been declared anywhere in the design. The architecture only declares "signal1," so when the process tries to use "signal2" (for example, on the reset condition), the synthesizer and simulator cannot find any declaration for it.
+
+This bug occurs because of a mismatch between the signal names: the process refers to "signal2", which is likely a typographical error or an oversight where the developer intended to use the declared "signal1" or meant to declare "signal2" initially.
+
+To fix the issue, one would need to ensure that every signal referenced in the code has been formally declared in the architecture. This can be done either by using the correctly declared signal name in the assignment (if "signal1" was intended) or by adding an appropriate declaration for "signal2" if it is a separate element required by the design.
+
+In summary:
+• The bug is that a signal ("signal2") is used in the code without any prior declaration.
+• It occurs because the code mistakenly refers to an undeclared signal.
+• The remedy is to adjust the code so that it only uses declared signals or declare "signal2" if it is actually needed.

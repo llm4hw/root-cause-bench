@@ -1,0 +1,8 @@
+The bug stems from an incorrect sensitivity list in the sequential (state update) block. Instead of triggering on the clock edges (and including the reset), the always block is triggered only by the positive edge of reset. This means that after the reset is de-asserted, the block never executes again, so changes to num_in and the enable flag never update the state, output_data, and valid signals. The test bench expected that, after reset goes low, applying num_in = 3 would update state to 3 (and output_data and valid accordingly), but since the always block is not clocked, no update occurs beyond the initial reset.
+
+In summary:
+• The sequential process is sensitive only to posedge reset, not the clock.
+• As a result, state is never updated to reflect the new num_in after reset is released, leading to the outputs staying at their reset values.
+• The fix would involve updating the sensitivity list to include the clock (and ideally an asynchronous reset) so that the state changes on each clock cycle when reset is inactive.
+
+This is why the test bench observed 0 0 0 for state, output_data, and valid, instead of the expected values.

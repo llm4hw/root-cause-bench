@@ -1,0 +1,24 @@
+The bug occurs because you are attempting to assign a value to an input port (`input1`), which violates fundamental HDL port direction rules. Here's why:
+
+1. **Port Direction Violation**:  
+   `input1` is declared as `in STD_LOGIC` in the entity port list. Input ports are **read-only** inside the module - they can only receive values from external sources (e.g., testbenches or higher-level modules). Assigning a value to an input port (`input1 <= '0';`) is illegal because it would override the external driver.
+
+2. **Synthesis Error**:  
+   The synthesis tool correctly flags this as an error (`[Synth 8-1789]`) because hardware cannot drive a signal in two directions simultaneously. Input ports physically correspond to pins/wires that must only be driven from outside the module.
+
+3. **Unassigned Output**:  
+   The `output` port has no assigned value in your architecture, resulting in undefined behavior. This is a separate issue that would cause problems after fixing the input assignment.
+
+---
+
+**Fix Strategy**:  
+- Remove the illegal assignment to `input1`  
+- Decide the intended functionality:  
+  - If you want to ignore the input and force a constant output, assign to `output` instead:  
+    `output <= '0';`  
+  - If you want to propagate the input to the output:  
+    `output <= input1;`  
+  - If you need to modify the input internally, declare an internal signal (e.g., `signal internal_sig : STD_LOGIC;`) and use that for calculations, then assign it to `output`.
+
+**Key Principle**:  
+Input ports can only appear on the **right-hand side** of assignments or in expressions. Output ports must be driven from inside the module.

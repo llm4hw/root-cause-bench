@@ -1,0 +1,26 @@
+The bug occurs due to an incorrect port connection during module instantiation in the `top18` module. Here's a breakdown:
+
+1. **Module Definition Mismatch**:
+   - `ChildModule` is defined with only two ports: input `a` and output `c`
+   - The port `b` does **not exist** in `ChildModule`
+
+2. **Erroneous Instantiation**:
+   - In `top18`, the instance `child_inst` attempts to connect signal `in` to a port named `.b`
+   - This connection (` .b(in) `) references a non-existent port in the child module
+
+3. **Synthesis Failure**:
+   - The Verilog synthesizer detects this invalid port name during elaboration
+   - It throws error `[Synth 8-448]` because port `b` isn't declared in `ChildModule`
+
+4. **Root Cause**:
+   - The designer likely intended to pass signal `in` to `ChildModule`, but mistakenly used `b` instead of the correct input port `a`
+   - The existing connection `.a(clk)` already uses `ChildModule`'s only input port, making it impossible to connect both `clk` and `in` simultaneously
+
+**Required Fixes**:
+- Remove the invalid port connection `.b(in)` entirely
+- Decide correct functionality:
+  - If `ChildModule` should process `in`, change `.a(clk)` to `.a(in)`
+  - If `ChildModule` requires both signals, modify `ChildModule` to include a new input port (but this requires changing the child module itself) 
+- Ensure all port connections match the target module's interface exactly
+
+The error originates from a fundamental mismatch between the child module's interface and the parent module's instantiation attempt. No actual simulation occurs because the design fails during synthesis.

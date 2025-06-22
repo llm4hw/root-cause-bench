@@ -1,0 +1,9 @@
+The error is due to the usage of the `+` operator between two `std_logic_vector`s in line 16 of the code. In VHDL, the `+` operator is not natively defined for `std_logic_vector` types. The error message indicates that there is no definition of the `+` operator for `std_logic_vector` in this context.
+
+One way to address this issue is by using the `numeric_std` library, which provides overloaded operators for numeric operations involving `std_logic_vector`. You can use the `unsigned` or `signed` types from `numeric_std` to perform arithmetic operations on `std_logic_vector` signals.
+
+To fix this bug, you can convert both `a` and `b` to either `unsigned` or `signed` types before performing addition, and then assign the result to `c` after conversion back to `std_logic_vector`.
+
+Ensure that you have `use ieee.numeric_std.all;` at the beginning of your code to import the necessary numeric types and overloaded operators.
+
+Remember to modify your test bench accordingly to reflect the changes made in the main code.

@@ -1,0 +1,5 @@
+The bug in the code lies in the testbench verification of the scenario where the `pedControl` signal is activated. Specifically, the error message "pedControl 2 - ERROR: Expected Green (01), but got 11" is being triggered because the testbench is checking for the `outResult` immediately after transitioning to `Ped`, where it should be verifying the output after the subsequent state transition to `Green`.
+
+This error is happening because the `pedControl` signal transitions to `1` and puts the state to `Ped` within the same time frame as the assertion check for `Green` in the testbench. Hence, the output verification is not aligned with the actual behavior of the state machine in the DUT.
+
+To fix this bug, you would need to adjust the timing in the testbench code such that when setting `pedControl` to `1`, you wait for the subsequent clock cycle to verify the output when the state transitions to `Green`. This would ensure that the output verification matches the expected behavior of the state machine in the design.

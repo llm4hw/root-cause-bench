@@ -1,0 +1,5 @@
+The error indicates that the case statement in your VHDL design does not cover all possible values of the input signal. In your design, sel is a 2-bit vector and can represent four different patterns ("00", "01", "10", and "11"). However, only three of these value choices are explicitly handled inside the case statement.
+
+The synthesizer (or the test bench simulation environment) correctly infers that the combination "11" is not covered, which causes an error. Because the simulation provided an input of "11" (which represents the binary value 3), the missing branch leads to undefined behavior, and the tool flags it as a bug.
+
+To fix the issue, you must add a branch in your case statement that handles the missing input value ("11") or include a generic branch (such as "when others") to cover all unspecified combinations.

@@ -1,0 +1,14 @@
+The issue arises due to the handling of the "Ped" state in the Verilog module. Let's analyze the problem.
+
+During the test bench simulation, when the `pedControl` signal is asserted (logic high), the state machine should transition from `Red` to `Ped`, and then to `Green`. However, if we step through the code, we see that:
+
+1. The state machine is initially in the `Red` state.
+2. When `pedControl` is high and the state is `Red`, the state transitions to `Ped`. This is correctly handled by the condition `if (pedControl) next = Ped;` in the `Red` case of the `always@(state or pedControl)` block.
+3. Once in the `Ped` state, the transition is set by `Ped: next = Ped;`. This line causes the state machine to remain indefinitely in the `Ped` state, since there's no condition triggering the transition out of `Ped`.
+
+The issue is that there is no transition from `Ped` back to any other state, which causes the system to remain in the `Ped` state indefinitely. The test bench expects a transition from `Ped` back to `Green`, but this does not occur due to the state machine design.
+
+To summarize the root cause:
+- The state machine lacks a condition to transition away from the `Ped` state, meaning it will remain in `Ped` until reset.
+
+To fix this issue, you must modify the state machine logic to define a transition from the `Ped` state to `Green` (or any appropriate state after `Ped` based on your traffic control requirements). Consider adding a transition condition in the `Ped` case that moves the state to `Green` after certain time/event triggers. This way, the state machine can exit the `Ped` state and continue the expected sequence.

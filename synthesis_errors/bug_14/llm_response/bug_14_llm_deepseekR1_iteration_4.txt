@@ -1,0 +1,30 @@
+The error occurs because the signal `data` is used in the assignment `out1 <= data;` but has not been declared anywhere in the module. Here's why:
+
+1. **Missing Declaration**: The module `top14` only declares:
+   - Input port `clk`
+   - Output register `out1`
+   There is no declaration for `data` (as a port, wire, or reg).
+
+2. **Synthesis Error**: During synthesis (indicated by `[Synth 8-1031]`), the tool checks all signal references. Since `data` has no declaration, it fails with "data is not declared".
+
+3. **Possible Causes**:
+   - `data` was intended to be an **input port** but was omitted from the port list
+   - `data` was meant to be an **internal register/wire** but was never declared
+   - A typo in the signal name (e.g., another existing signal was misnamed as `data`)
+
+**How to Fix**:
+- **Option 1**: Add `data` as an input port in the module declaration:
+  ```verilog
+  module top14(
+      input wire clk,
+      input wire data,  // Add this
+      output reg out1
+  );
+  ```
+- **Option 2**: Declare `data` internally if it should be a local signal:
+  ```verilog
+  reg data;  // Add this before the always block
+  ```
+- **Option 3**: Replace `data` with a valid signal that exists in the current scope (e.g., if another signal was intended)
+
+**Verification Step**: Check whether `data` should originate from outside the module (requires a port) or be generated internally (requires a local declaration). The fix depends on the intended functionality.

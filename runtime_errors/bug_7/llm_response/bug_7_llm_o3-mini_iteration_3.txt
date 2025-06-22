@@ -1,0 +1,7 @@
+The problem comes from a mismatch between what the test bench expects and the transitions defined in your state machine. The test bench is written with the assumption that after an initial reset the state will remain Red (00) for the first check. However, the state machine (in its combinational block) immediately computes the next state to be Ped (11) when the current state is Red. This means that on the very first clock edge (after the reset‐deassertion) the state updates from Red to Ped. Consequently, when the test bench checks the output (expecting Red), it instead sees Ped.
+
+The error “Expected Red (00), but got 11” is a direct consequence of the state machine’s transition. In other words, the bug is that your design’s state transition from Red goes directly to Ped, whereas the test bench expects a different sequence (in particular, expecting Red to be held longer before switching or expecting a transition into Green after Ped).
+
+This situation arises because the intended sequence (“Red -> Ped -> Green -> Yellow -> Red”) isn’t correctly implemented in your state machine. The branch for the Ped state leads back to Red instead of going to Green as the test bench expects.
+
+To resolve the issue you must reconcile the state machine’s transitions with those expected by the test bench.

@@ -1,0 +1,5 @@
+The error occurs because a variable is being declared at the architecture level rather than within a process or subprogram. In VHDL, variables are allowed only inside processes, procedures, or functions—unless they are declared as shared. The synthesizer (or simulation environment) is complaining that the variable is outside a subprogram or process and thus must have a 'shared' attribute, but typically shared variables are not synthesizable and are discouraged in RTL designs.
+
+This bug happens because the variable declaration "variable variable1 : STD_LOGIC := '0';" is placed in the architecture’s declarative region rather than inside the process that uses it. Variables declared in the architecture level require special handling (i.e., they must be marked as shared) to be accessible across processes, and that is not supported in this context.
+
+The fix is to ensure that the variable's scope is limited to the process where it is needed. This can be done by moving the declaration inside the process block. That way, the variable follows the VHDL rules for sequential variables, and the error is resolved.

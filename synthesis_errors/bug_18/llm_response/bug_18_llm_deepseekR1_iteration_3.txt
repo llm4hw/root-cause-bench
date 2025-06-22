@@ -1,0 +1,24 @@
+The error occurs because the instance `child_inst` of `ChildModule` in `top18` attempts to connect a signal to a port named `b`, but `ChildModule` has no such port. Here's why:
+
+1. **Module Definition Mismatch**:  
+   `ChildModule` declares only two ports:  
+   - `input wire a`  
+   - `output wire c`  
+   There is no port `b` defined in `ChildModule`.
+
+2. **Invalid Port Connection**:  
+   In `top18`, the instantiation tries to connect `in` to a port `b` (line: `.b(in)`). Since `b` doesn't exist in `ChildModule`, the synthesis tool rejects this connection.
+
+3. **Root Cause**:  
+   The instantiation references a port that isn't part of the module's interface. This is likely a typo or misunderstanding of `ChildModule`'s ports.
+
+**How to Fix**:  
+- **Remove the invalid connection**: Delete the line `.b(in)`.  
+- **Reassign the signals**:  
+  Since `ChildModule` has only one input (`a`), decide which signal (`clk` or `in`) should drive it. For example:  
+  - To use `in`, change `.a(clk)` to `.a(in)`  
+  - To use `clk`, keep `.a(clk)` and remove `.b(in)` (leaving `in` unused)  
+- **Alternate Solution**:  
+  If two inputs were intended, modify `ChildModule` to add a port `b` (requires editing `ChildModule`).
+
+**Key Issue**: The instantiation must exactly match the module's port list. No extra/unrecognized ports can be connected.

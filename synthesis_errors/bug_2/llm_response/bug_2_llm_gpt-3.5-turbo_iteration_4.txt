@@ -1,0 +1,11 @@
+The error occurs because the `+` operator is not directly supported on `std_logic_vector` data types in VHDL. You need to use the `numeric_std` package for arithmetic operations on vector types. To fix this issue, you should include the `numeric_std` package in your code and use the appropriate functions provided by this package for adding two vectors.
+
+Make sure to include the following line at the top of your code after `use IEEE.STD_LOGIC_1164.ALL;`:
+
+```vhdl
+use ieee.numeric_std.all;
+```
+
+Then, replace the line `c <= a + b;` with the correct operation using the `numeric_std` functions, like `c <= std_logic_vector(unsigned(a) + unsigned(b));`.
+
+By doing this, you will be able to perform the arithmetic operation on the `std_logic_vector` variables `a` and `b` and assign the result to `c` without encountering the error.

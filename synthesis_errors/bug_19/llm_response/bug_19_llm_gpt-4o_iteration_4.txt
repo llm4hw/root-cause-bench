@@ -1,0 +1,10 @@
+The error message you are encountering is due to an incorrect assignment in binary notation within your Verilog code. Specifically, the line `y = 2'b2;` is invalid because the binary notation `2'b` expects binary digits (0 or 1), and '2' is not a valid binary digit.
+
+In Verilog, when you represent values using binary notation, you prefix the number with the base (in this case, '2' means binary and the 'b' signifies the following digits are binary). So, `2'b2` is incorrect because the only allowable digits for a binary number are '0' and '1'.
+
+The expression is attempting to assign a binary representation of the decimal number '2' directly using an invalid digit, which causes the synthesizer to throw an error on encountering the illegal character.
+
+To resolve this issue, you need to represent the numbers with valid binary digits. When you're assigning values for 2-bit wide data, keep in mind: 
+- The binary representation for the decimal number 2 using 2 bits is `2'b10`.
+
+Therefore, you should replace `y = 2'b2;` with `y = 2'b10;`, which is the correct 2-bit binary representation of the decimal number 2. This will ensure that there are no illegal characters used in your binary number assignments.

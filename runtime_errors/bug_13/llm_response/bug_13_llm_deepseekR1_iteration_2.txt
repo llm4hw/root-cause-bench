@@ -1,0 +1,17 @@
+The error arises due to two main issues in the 4-bit adder's carry chain:
+
+1. **Incorrect Carry Connections Between Adders**: 
+   - The carry signals between the 1-bit full adders are improperly connected, creating a non-sequential chain. For example:
+     - `fa2`'s input carry (`i_cin`) incorrectly uses `w_carry3` (from `fa4`), creating a backward loop.
+     - `fa3`'s input carry uses `w_carry1` (from `fa1`), skipping the intermediate adder (`fa2`).
+   - This breaks the ripple-carry mechanism, causing incorrect propagation of intermediate carries.
+
+2. **Final Carry Output Taken from Wrong Stage**:
+   - The module's output carry (`o_carry`) is connected to `fa3`'s carry-out instead of the last adder (`fa4`). This means the final carry reflects the third bit's result, not the fourth (MSB).
+
+**Why This Causes the Error**:
+- In the test case `3 + 5 + 0`, the broken carry chain leads to incorrect sum bits and an invalid carry-out. For example, the first adder's carry isn't passed to the second adder, and the loop between `fa2` and `fa4` creates unresolved dependencies, resulting in erroneous values.
+
+**Fix**:
+- Reconnect the carry signals to form a proper ripple chain: `fa1 → fa2 → fa3 → fa4`, where each stage's carry-out feeds the next stage's carry-in.
+- Connect the final `o_carry` to the carry-out of `fa4` (the last stage), ensuring it reflects the MSB addition's result.

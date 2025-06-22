@@ -1,0 +1,21 @@
+The error occurs because the signal `signal2` is referenced in the assignment `signal2 <= '0';` but has not been declared anywhere in the architecture. Here's why:
+
+1. **Declaration Issue**: The architecture only declares one signal:  
+   `signal signal1 : STD_LOGIC := '0';`  
+   There is no declaration for `signal2` anywhere in the code.
+
+2. **Synthesis Failure**: During synthesis, the tool encounters `signal2` at line 46 but cannot resolve it because:
+   - It isn't declared in the architecture's declarative region (before `begin`)
+   - It isn't a port of the entity
+   - It isn't a globally visible object
+
+3. **Probable Cause**: This is likely a typo where the designer intended to reset `signal1` instead of `signal2`, as `signal1` is:
+   - The only declared signal
+   - Used in the clocked process (`signal1 <= not signal1`)
+   - Connected to the output (`out1 <= signal1`)
+
+**Fix Approach**:  
+- **Option 1 (Recommended)**: Replace `signal2` with `signal1` in the reset assignment since `signal1` is the only signal being used elsewhere.  
+- **Option 2**: Declare `signal2` properly in the architecture if a second signal was intentionally needed (though inconsistent with current usage).
+
+The reset logic should operate on the same signal (`signal1`) that the process modifies during normal operation to maintain design consistency.

@@ -1,0 +1,9 @@
+The error message indicates that there is a problem with the addition operation in your code. In this case, the issue is that you are trying to use the "+" operator directly on std_logic_vector types a and b in the line `c <= a + b;`. 
+
+In VHDL, `+` operator is not directly applicable to `std_logic_vector` types. You need to perform addition using the signed or unsigned types provided by the `numeric_std` library. The error occurs because the compiler cannot find a suitable definition for the operator `+` that operates on `std_logic_vector`.
+
+To fix this bug, you need to convert `std_logic_vector` types a and b to either `signed` or `unsigned` types before performing addition. You can achieve this by using conversion functions like `unsigned()` or `signed()` provided by the `numeric_std` package.
+
+Once you have converted a and b to the appropriate type, you can use the `+` operator to perform addition and assign the result back to c.
+
+By making these changes, you can fix the bug and allow the addition operation to work correctly in your VHDL code.

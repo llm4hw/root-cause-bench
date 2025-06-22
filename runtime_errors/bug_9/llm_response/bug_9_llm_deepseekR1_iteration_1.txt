@@ -1,0 +1,12 @@
+The bug causing the "Morse for O not correct" error is due to improper state transitions in the Morse code generator for the 'O' character. 
+
+**Root Cause:**
+The state machine for 'O' is supposed to generate three consecutive dashes (---). However, after each dash (in states `O_DASH1`, `O_DASH2`, `O_DASH3`), the design transitions back to `IDLE` instead of progressing to the next dash state. This results in only one dash being generated (stuck in `O_DASH1`), followed by an immediate return to `IDLE` when `select` is still set to 'O', restarting the first dash again. The code does not sequence through all three required dash states. 
+
+**Why It Fails:**
+- After the first dash (`O_DASH1`), the state transitions to `IDLE`, not `O_DASH2`. 
+- Since `select` remains set to 'O', it re-enters `O_DASH1` repeatedly, never advancing to `O_DASH2` or `O_DASH3`.
+- The testbench waits for insufficient time (150 units) to complete even one full dash (which requires 30 clock cycles × 10 units/cycle = 300 units), leaving `morse_out` high and failing the check.
+
+**Required Fix:**
+Modify the state transitions for 'O' to sequence through `O_DASH1` → `O_DASH2` → `O_DASH3` with proper inter-dash spacing (using `SPACE_STATE` between dashes). Ensure the final transition back to `IDLE` occurs only after the third dash. The testbench also needs adjustment to wait for the correct duration (3 dashes + 2 spaces).

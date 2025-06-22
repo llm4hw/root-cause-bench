@@ -1,0 +1,3 @@
+The error is occurring because the signal `input1` is declared as an input port in the entity declaration of the `top3` module, and you are trying to assign a value to it in the architecture body. Inputs in VHDL are supposed to be driven by external sources and cannot be assigned a value within the module. 
+
+To fix this issue, you should remove the assignment `input1 <= '0';` from the architecture body of `top3`. Inputs should only be assigned in the test bench or at the top-level entity where the module is instantiated, not within the module itself.

@@ -1,0 +1,27 @@
+The error in Test Case 6 arises due to both a misunderstanding in the test expectation and a logical issue in the design.
+
+### Issue Explanation
+
+1. **Testbench Expectation Misalignment**:
+   - The testbench expects `outResult` to be greater than `3'b110`, i.e., more than 110 in binary (greater than 6 in decimal form), when the pedestrian signal `pedControl` is triggered with `longTimeHold = 1`.
+   - However, in the design logic provided, there is no defined condition where `outResult` can exceed `3'b110` (or binary 110). The possible values dictated in the design for the `outResult` are `3'b100`, `3'b101`, `3'b110`, `3'b011`, `3'b010`, and `3'b001`. None of these values exceed `3'b110`.
+
+2. **Logical Implementation in the Design**:
+   - When the system is in the `Ped` state, and `longTimeHold` is asserted (i.e., set to `1`), the current implementation outputs `3'b101` for `outResult`. This matches the correctly intended logic for handling `longTimeHold`.
+   - The next state logic moves from `Ped` back to `Green` unconditionally, rather than reflecting any changes based on `longTimeHold`.
+
+### Root Cause of the Error
+
+The testbench claim that the `outResult` should be greater than `3'b110` during `longTimeHold` seems to require an output value that the design is not set to provide, indicating a possible misunderstanding in the test specification itself. However, considering the existing test expectation, this could also suggest that the design does not have an adequate representation of states or outputs to account for a "greater than 3'b110" condition with `longTimeHold` being involved.
+
+### Explanation of Fix
+
+There are two possible approaches depending on what is actually needed:
+
+1. **Correct the Test Expectation**:
+   - If the expectation of an `outResult` greater than `3'b110` is indeed incorrect, modify the testbench to expect correct values in alignment with the state outputs as defined in the module (i.e., `outResult = 3'b101` when `longTimeHold` is `1`).
+
+2. **Adjust the Design**:
+   - If there is indeed a need for a new, higher value of `outResult` when `longTimeHold` is asserted and the system is in the `Ped` state, then adjust the design logic to incorporate a new valid state or output value that matches this condition (e.g., add a condition that assigns `outResult` a new value greater than `3'b110` specifically when in the `Ped` state with `longTimeHold = 1`).
+
+However, considering typical designs and conventions, it's more likely the testbench expectation might need reevaluation unless specified extra functionality was part of the requirement.

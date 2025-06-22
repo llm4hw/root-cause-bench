@@ -1,0 +1,23 @@
+The error message you are encountering with your VHDL code relates to the misuse of a variable declaration within the scope of the architecture. The specific issue highlighted is the use of a "variable" declaration that is not inside a subprogram (such as a procedure or function) or a process. Here's a deeper look at what went wrong and why:
+
+### Explanation of the Bug:
+
+1. **Variable Declaration Location**: The variable `variable1` is declared directly within the architecture, outside any process or subprogram. VHDL allows variables to be declared at this level only if they are marked as `shared`. This is because variables at this scope are global for the architecture and require a mechanism to ensure consistency if accessed by multiple processes or entities, which is what the `shared` keyword provides.
+
+2. **VHDL Scoping Rules**: In VHDL, variables are typically used within processes or subprograms. When you declare a variable within a process, it maintains its state between process activations (acting similarly to static storage) and is internal to that process. By default, variables are local to the scope they are declared in, and without `shared`, they cannot be used in this manner outside of subprograms or processes.
+
+### Why the Bug Occurs:
+
+- **Synthesis Tools**: The error arises because synthesis tools expect variables outside of processes to be shared and therefore capable of concurrent access by different parts of the design. Without the `shared` keyword, such a declaration is treated as invalid.
+
+- **Variable Usage**: You are trying to use `variable1` within a process which is correct, however, it should have been declared inside the process itself to align with VHDL standards.
+
+### How to Understand the Issue:
+
+- The error indicates that if you need persistent data outside of processes, it should be declared as a signal (which is naturally shared across the whole architecture) or if you indeed need a shared variable, it must be declared with the `shared` keyword.
+
+### Explanation of Fix (Don't implement, just understand):
+
+The recommended practice is to declare variables within the process block where they are used. You should move the declaration of `variable1` inside the process block. This way, `variable1` is local to the process and retains its functionality across clock cycles.
+
+By understanding these VHDL rules and error messages, you can ensure your design is correctly simulated and synthesized without structural issues related to variable scope and usage.

@@ -1,0 +1,24 @@
+The error message reported by the testbench indicates that the ring oscillator's output (`OUT`) never toggled. This is due to a likely issue in the feedback wiring within the ring oscillator module. Let's analyze why this could be happening:
+
+1. **Feedback Configuration:**
+   - The `lut_outs` is expected to provide feedback to `lut_ins`, forming a loop that allows the signal to propagate and eventually trigger oscillation. The assignment `assign lut_ins = {lut_outs[10], lut_outs[9:0]};` aims to achieve this, where the output of the last inverter (`lut_outs[10]`) is fed back into the first input (`lut_ins[0]`).
+
+2. **Initial Conditions and Oscillation:**
+   - In ring oscillators, proper initial conditions and delays are crucial for generating oscillations. The testbench initially forces `lut_ins[0]` to `1'b1` temporarily, which seems correct to artificially start the oscillation. The release happens before oscillation begins, allowing the feedback loop to take over.
+
+3. **Analyzing the `not_with_delay`:**
+   - The `not_with_delay` module introduces a delay of 1 time unit on inverting the input. This mimics the delay typically needed for logical transitions in hardware. However, the total number of inverters in the loop should be odd to ensure that the signal inverts in a correct manner to sustain oscillation.
+
+4. **Possible Issues:**
+   - One potential issue is that a stable state is being reached where the feedback doesn't cause any further toggling, possibly due to the even number of stages (which is 11, as expected with a single-ended feedback used here).
+
+5. **Reset and Initialization:**
+   - There is no clear reset or explicit initialization of the `lut_outs` within the simulation. This can result in a condition where internal signals stabilize to non-oscillating states, given they are just driven from register reset values or enduring metastability.
+
+**Root Cause and Potential Fixes:**
+- **Improper Initial Feedback Signal:** The feedback initialization may not be sufficient. Despite forcing `lut_ins[0]` initially to `1`, if the design instantaneously reaches an induced metastability or stable non-oscillating state soon after, the ring never starts oscillating. Extending or timing this force better can help.
+- **Ensure Odd Total Inversions:** Consider revisiting or validating the odd number stage requirement; make sure the ring indeed provides an odd number of inversions and actual propagation with needed delays.
+- **Checking Reset Conditions:** Ensure there are no zeroing conditions that force the inverter chain into a stable state before oscillation can begin. Confirm all stages have been accounted preventively for a stable turning on.
+- **Simulation Time Constraints:** The testbench needs enough simulation time to observe potential oscillations – confirm that the test conditions and constraints allow for actual toggling to be observed or ruled out.
+
+Ultimately, refining the initialization and thoroughly validating effective feedback with the right combination of stage delays and force interactions would likely resolve the toggling issue.

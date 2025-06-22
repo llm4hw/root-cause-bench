@@ -1,0 +1,5 @@
+The problem is that the assignment is trying to place a three‐bit signal (input1) into a four‐bit target (output). In VHDL, the width of the source must match the width of the destination exactly during a signal assignment. Since input1 is defined as a 3-bit vector (from index 2 downto 0) and output is defined as a 4-bit vector (from index 3 downto 0), the synthesis tool raises an error indicating that there is a width mismatch.
+
+This bug occurs because the designer intended to assign one vector to the other without considering the difference in how many bits each contains. The test bench, in its simulation and synthesis checking, catches this mismatch because one bit is essentially missing (or extra) in the assignment operation.
+
+To address this issue, you need to make sure that both signals are defined with matching widths. This can be done by modifying the port declaration so that the widths are consistent or by altering the assignment such that the shorter signal is extended (for example, by padding it with an extra bit) to match the width of the target.

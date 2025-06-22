@@ -1,0 +1,28 @@
+The error message you're encountering is related to improper handling of asynchronous set/reset behavior for a register. Let's break down the issue:
+
+### Understanding the Error:
+
+1. **Synchronous vs. Asynchronous Control**: The synthesis tool is unable to extract an asynchronous set/reset logic for the `out1_reg` due to the way the register is being implemented.
+
+2. **Blocking vs. Non-blocking Assignments**: 
+   - In the given always block, the `data` and `out1` signals are updated using blocking assignments (`=`). 
+   - `data = ~data;` and `out1 = data;` are both using the blocking assignment. This means that changes to `data` are applied immediately, affecting `out1` directly in this execution cycle of the always block.
+
+3. **Potential Inconsistency**:
+   - Since `out1` is supposed to represent a flip-flop with asynchronous reset behavior, using blocking assignments can lead to race conditions or incorrect modeling of synchronous logic, as blocking assignments perform operations in sequence within the same always block, which might not accurately model real flip-flop behavior especially during resets or specifically in edge-sensitive designs.
+
+### Why the Bug Occurs:
+
+- The error stems from using inappropriate assignment types (`=`) and the inconsistent combination of asynchronous reset logic within the always block. Blocking assignments can prevent the clear definition of synchronous (and asynchronous) behaviors required for registers in hardware descriptive languages like Verilog, especially if complex logic or sequential logic sensitivity lists are used.
+
+### Explanation for the Solution:
+
+- To address this, you should use non-blocking assignments (`<=`) within synchronous processes. Non-blocking assignments help accurately model hardware behavior by ensuring operations modeled in the same clock cycle are executed in parallel, allowing for proper inference of asynchronous and synchronous elements in HDL design.
+
+### Key Points for Fix:
+
+Instead of providing code, it's crucial to understand:
+- Use non-blocking assignments (`<=`) for all signals within `always` blocks used for sequential logic (i.e., sensitive to `posedge clk or posedge rst`). This allows the tool to correctly infer the necessary flip-flop behavior with asynchronous or synchronous reset and reduces risk of race conditions.
+- Ensure clear separation between combinational and sequential logic in your design process, as this impacts how your hardware will synthesize and simulate.
+
+Through onboarding these concepts, you would address the root of the error and enable proper synthesis of the flip-flop design required for your logic.

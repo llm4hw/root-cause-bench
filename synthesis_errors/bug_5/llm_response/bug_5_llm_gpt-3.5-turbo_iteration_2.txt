@@ -1,0 +1,10 @@
+The error is occurring because the part `(7)` in the line `out1 <= std_logic_vector(to_unsigned(counter, 8))(7);` is trying to index the result of a type conversion, which is not allowed in VHDL.
+
+To fix this issue, you can use the `resize` function provided by the `numeric_std` package to reduce the size of the vector and then assign it to `out1`.
+
+Replace the problematic line with:
+```vhdl
+out1 <= resize(std_logic_vector(to_unsigned(counter, 8)), 1);
+```
+
+This change will resize the 8-bit vector obtained from the `to_unsigned` conversion to just 1 bit, as required by the `out1` signal.

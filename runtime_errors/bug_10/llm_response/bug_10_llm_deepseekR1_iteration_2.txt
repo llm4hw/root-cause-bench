@@ -1,0 +1,5 @@
+The bug arises due to incorrect assignment types in the shift register's always block. The code uses **blocking assignments** (=) for shifting, causing each bit to immediately update and propagate the new value to the next higher bit in the same clock cycle. This results in all bits being overwritten with `serial_in` in one cycle instead of a sequential shift. 
+
+For example, when `serial_in` is 1, `data[0]` becomes 1, then `data[1]` takes the **new** `data[0]` (1), and so on, filling all bits with 1. The testbench expects only the LSB to update (0001) but gets 1111. 
+
+The fix is to use **non-blocking assignments** (<=) for sequential logic. This ensures all bits shift using their pre-update values in the same clock cycle, preserving the correct shift behavior.

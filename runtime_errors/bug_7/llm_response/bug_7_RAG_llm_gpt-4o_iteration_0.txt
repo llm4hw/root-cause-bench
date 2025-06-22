@@ -1,0 +1,134 @@
+The error message "ERROR: Expected Red (00), but got 11" indicates that the testbench is expecting the state to be `Red` (encoded as `00`) after the reset and initial state progression, but it is getting `11`, which corresponds to the state `Ped`.
+
+Upon examining the main module's code, we notice that the state transitions are not aligning with what the testbench expects. Let's breakdown the state transitions in the module:
+
+1. Initial State: If `resetn` is not asserted, the state is set to `Red`.
+2. State transitions from:
+   - `Red` to `Ped`
+   - `Ped` to `Red`
+   - `Green` to `Yellow`
+   - `Yellow` to `Red`
+
+Now, let's see what the testbench expects:
+- State sequence: `Red` -> `Ped` -> `Green` -> `Yellow` -> `Red`
+
+The main source of the error is in the state transition logic of the main module. The desired sequence expects a transition from `Ped` to `Green`, but the given code transitions from `Ped` to `Red`, which causes the testbench to fail when checking for `Green`.
+
+To fix this, you need to modify the `always@(state)` block in the main module to correctly follow the expected state sequence:
+```verilog
+    always@(state) begin
+        case (state)
+            Red: next = Ped;
+            Ped: next = Green; // Change from Red to Green
+            Green: next = Yellow;
+            Yellow: next = Red;
+            default: next = 2'bxx;
+        endcase
+    end
+```
+
+With this change, the state machine will now correctly transition from `Ped` to `Green`, which aligns with the testbench's expected sequence, resolving the error.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\verilog_fsm.pdf: 24
+end
+25
+STATE_3: begin
+26
+if (!A & B) NextState = STATE_Initial ;
+27
+else if (A & !B) NextState = STATE_4;
+28
+end
+29
+STATE_4: begin
+30
+end
+31
+STATE_5_PlaceHolder : begin
+32
+NextState = STATE_Initial ;
+33
+end
+34
+STATE_6_PlaceHolder : begin
+35
+NextState = STATE_Initial ;
+36
+end
+37
+STATE_7_PlaceHolder : begin
+38
+NextState = STATE_Initial ;
+39
+end
+40
+endcase
+41 end
+42 //
+--------------------------------------------------------------------
+43
+44 endmodule
+45 //...
+
+- source_documents\verilog_fsm.pdf: 48 always@( * ) begin
+49
+Status = 3’b000;
+50
+case (CurrentState)
+51
+STATE_2: begin
+52
+Status = 3’b010;
+53
+end
+54
+STATE_3: begin
+55
+Status = 3’b011;
+56
+end
+57
+endcase
+58 end
+59 //
+--------------------------------------------------------------------
+15...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...

@@ -1,0 +1,3 @@
+The problem is with the literal written as 2'b2. In Verilog, when you specify a binary number using the format (width)'(base)(digits), the digits must only be 0 or 1. Here, '2' is not an allowed binary digit. This causes the error because the synthesizer/parser detects an illegal character in the binary number.
+
+The error occurs because, in binary notation, you cannot represent a value with a digit "2". The intended value must be expressed using a binary number with only 0s and 1s. To resolve the issue, you would need to rewrite this literal using valid binary digits, ensuring that it accurately represents the desired two-bit number.

@@ -1,0 +1,9 @@
+The error message you're encountering, "ERROR: [Synth 8-2576] procedural assignment to a non-register data is not permitted," occurs because of a misunderstanding of how assignments work within procedural blocks in Verilog.
+
+The underlying issue in your code is that you are trying to assign a value to a `wire` type variable (`data`) inside an `always` block. In Verilog, `wire` types are intended for continuous assignments, which are used outside of procedural blocks. They are read-only in the context of procedural assignments, meaning that you cannot use blocking (`=`) or non-blocking (`<=`) assignments within `always` blocks to modify wire variables.
+
+In the snippet you provided, `data` is declared as a `wire`, but you are attempting to assign a value to it using procedural (non-blocking) assignments within the `always` block. This approach conflicts with the nature of `wire` signals, leading to the synthesis error.
+
+To correct this, you need to ensure that any signal being assigned a value in a procedural block (an `always` block in this context) is declared as a `reg` type instead of a `wire`. The `reg` type allows for procedural assignments within an `always` block, which will resolve the synthesis error you're seeing.
+
+Therefore, the primary step to address this issue is to change the declaration of `data` from a `wire` to a `reg`. This adjustment aligns with the requirement that variables within an `always` block that are intended to store state or be assigned to need to be of type `reg`.

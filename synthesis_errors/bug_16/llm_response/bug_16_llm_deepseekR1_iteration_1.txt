@@ -1,0 +1,47 @@
+### Analysis of the Error and Bug
+
+The synthesis error `Cannot extract Asynchronous Set/Reset for register 'out1_reg'` occurs due to **improper handling of reset and clock-edge behavior** in the `always` block. Here's why:
+
+1. **Mixed Blocking/Non-Blocking Assignments**:  
+   - `data` uses non-blocking assignment (`<=`) in the reset path but blocking assignment (`=`) in the clocked path.  
+   - `out1` uses blocking assignment (`=`) unconditionally.  
+   This creates ambiguity for the synthesis tool when inferring flip-flop behavior.
+
+2. **Incomplete Reset Control for `out1`**:  
+   The reset condition (`rst`) only initializes `data`, but `out1` is assigned *immediately afterward* using a blocking assignment. During reset:  
+   - `data` gets reset to `1'b0` via non-blocking assignment (which doesn't update immediately).  
+   - `out1 = data` uses the *pre-reset value* of `data` (not `1'b0`) due to blocking assignment.  
+   This prevents the tool from inferring a consistent reset value for `out1`.
+
+3. **Conflicting Edge-Sensitive Behavior**:  
+   The `always` block triggers on both `posedge clk` and `posedge rst`, but:  
+   - `out1` is updated on *every edge* (reset or clock) without a clear reset condition.  
+   - Blocking assignments cause immediate updates, making `out1` behave like combinational logic in parts of the block.
+
+4. **Asynchronous Reset Extraction Failure**:  
+   Synthesis tools expect registers in edge-sensitive `always` blocks with asynchronous reset to:  
+   - Use non-blocking assignments (`<=`) exclusively.  
+   - Have the reset value defined *directly* for all registers in the reset branch.  
+   Here, `out1` violates both rules, so the tool cannot guarantee its reset state.
+
+---
+
+### How to Fix
+1. **Use Non-Blocking Assignments Everywhere**:  
+   Replace all `=` with `<=` in the `always` block to ensure correct sequential behavior.
+
+2. **Include `out1` in the Reset Branch**:  
+   Explicitly define `out1`'s value during reset (e.g., `out1 <= 1'b0`).
+
+3. **Restructure the `always` Block**:  
+   Separate reset and clocked logic cleanly:  
+   - Reset branch: Set both `data` and `out1` to their initial values.  
+   - Clocked branch: Update `data` and `out1` using non-blocking assignments.
+
+4. **Alternative Option**:  
+   If `out1` should directly mirror `data`, remove `out1` from the `always` block and use a continuous assignment (`assign out1 = data`). This requires changing `output reg out1` to `output wire out1`.
+
+---
+
+### Root Cause Summary
+The bug stems from **inconsistent reset handling and blocking/non-blocking assignment misuse** for `out1`, preventing the synthesis tool from inferring a well-defined asynchronous reset. Fix by ensuring all registers are cleanly reset and using non-blocking assignments for sequential logic.

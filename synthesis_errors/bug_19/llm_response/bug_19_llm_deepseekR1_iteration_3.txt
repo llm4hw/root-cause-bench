@@ -1,0 +1,45 @@
+### Issue Analysis
+The error occurs due to an **invalid binary literal** in the assignment `y = 2'b2;`. Here's why:
+
+1. **Illegal Character in Binary Literal**:  
+   In Verilog, binary literals must only contain digits `0` or `1` after the `'b` prefix. The character `2` in `2'b2` is invalid because `2` is not a valid binary digit. Binary digits represent logical states (0 = LOW, 1 = HIGH), and no other digits are permitted.
+
+2. **Context of the Error**:  
+   The code attempts to assign a value to `y` in the `else` branch when `a` is neither `2'b00` nor `2'b01`. The invalid literal `2'b2` violates Verilog syntax rules, causing the synthesis tool to fail.
+
+3. **Synthesis Tool Limitation**:  
+   The error `[Synth 8-2108]` explicitly flags this as a syntax error during synthesis. Synthesis tools require strict adherence to HDL syntax and cannot interpret non-binary digits in binary literals.
+
+---
+
+### Root Cause
+- **Invalid Digit**: The digit `2` in `2'b2` is not a valid binary digit.  
+- **Literal Format**: Binary literals in Verilog must follow the format `<size>'b<binary_digits>`, where `<binary_digits>` can only be `0` or `1`.  
+- **Consequence**: The tool rejects the design because it cannot parse `2` as part of a binary number.
+
+---
+
+### How to Fix
+1. **Replace the Invalid Literal**:  
+   Change `2'b2` to a valid 2-bit binary value (e.g., `2'b10`, `2'b11`, or another value matching the intended behavior). For example:  
+   ```verilog
+   y = 2'b10; // Assigns binary '10' (decimal 2)
+   ```
+
+2. **Verify Design Intent**:  
+   Determine what value `y` should take in the `else` branch:
+   - If the goal is to output a decimal `2`, use `2'b10` (since `10` binary = `2` decimal).  
+   - If the goal is to set both bits to `1`, use `2'b11`.  
+   - Avoid non-binary digits entirely.
+
+3. **Prevent Future Errors**:  
+   Always use valid binary digits (`0`, `1`) in binary literals. For other bases (e.g., hexadecimal), use `'h` instead of `'b`.
+
+---
+
+### Why This Wasn't Caught Earlier
+- **Simulation vs. Synthesis**: Simulators might overlook this error if the code is never executed in testbenches, but synthesis tools rigorously check all branches.  
+- **Incomplete Testing**: Testbenches might not cover the `else` branch where `a` is `2'b10` or `2'b11`, allowing the bug to evade simulation.  
+- **Syntax vs. Logic**: This is a syntax error (caught during synthesis), not a logical error (which might only surface during simulation).
+
+Fix the literal to resolve the error.

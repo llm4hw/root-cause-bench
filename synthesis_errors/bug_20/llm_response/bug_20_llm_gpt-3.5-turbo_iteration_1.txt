@@ -1,0 +1,5 @@
+The error message indicates that the loop limit of 65536 has been exceeded, which is causing the error. The issue lies within the while loop in the `AlwaysError` module. The `while (flag)` loop is essentially creating an infinite loop since `flag` is not being toggled within the loop. This leads to the loop running indefinitely, hitting the loop limit and causing the error.
+
+To fix this bug, the while loop should be modified to ensure that it can exit by toggling or updating the condition that controls the loop. One way to fix this issue is to add a condition within the loop that will eventually cause the loop to exit, such as changing the value of `flag` based on certain conditions within the loop or adding a counter that will eventually lead to an exit condition.
+
+In the Verilog code provided, updating the value of `flag` inside the while loop based on some condition would be a potential solution to avoid an infinite loop. It's essential to ensure that the loop has a clear exit condition to avoid hitting the loop limit and causing errors during simulation.

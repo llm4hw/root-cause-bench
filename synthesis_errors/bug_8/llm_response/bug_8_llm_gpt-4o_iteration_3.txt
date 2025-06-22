@@ -1,0 +1,18 @@
+The error message "signal2 is not declared" indicates that the code is trying to reference a signal named `signal2`, but this signal has not been defined anywhere in the provided VHDL code. This is a compilation error because the VHDL compiler needs to know about all signals being used, and they must be declared before usage. Here's a breakdown of the issue:
+
+### Reason for the Error:
+1. **Undeclared Signal:** The error points to line 46, where `signal2 <= '0';` is written inside the process. However, there's no declaration for `signal2` in the architecture section of the code. This means the code attempts to assign a value to a signal that the compiler does not recognize, resulting in the error.
+
+2. **Scope and Declarations:** In VHDL, all signals must be declared within the correct scope before they are used. Typically, this happens in the architecture declaration part. Signals used inside a process must be declared at the architecture level (or inside the process itself if intended to be local to the process).
+
+### How to Address and Understand the Bug:
+- **Check for Missing Declarations:** The current code only declares `signal1` within the architecture section. For `signal2` to be used, it should also be declared there, or alternatively, the intention behind `signal2` should be clarified.
+
+- **Identify Intentions:** If `signal2` was supposed to be another signal used within the design, it needs to be properly declared. However, if it's a typographical error (e.g., you intended to use `signal1` instead), you should revise the code to use the correct, already-declared signal.
+
+### Resolution:
+- **Declare signal2:** If `signal2` is intended to be an independent signal, declare it in the architecture section similarly to `signal1`. Determine initial conditions and data type (likely `STD_LOGIC` if similar to existing signals).
+  
+- **Correct Usage:** Alternatively, if `signal2` was mistakenly written and should have been `signal1`, change the erroneous line to `signal1 <= '0';` in the reset condition.
+
+In both scenarios, the code will be aligned with VHDL's expectations for signal declaration and usage, resolving the compilation issue presented by the error message.

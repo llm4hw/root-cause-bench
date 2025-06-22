@@ -1,0 +1,7 @@
+The issue is raised by the way the full adder’s carry output is generated. In your design, you use two half adders: the first generates an intermediate sum and carry, and the second uses the intermediate sum and the input carry to produce the final sum and another carry. However, the final carry is derived by performing a bitwise AND on the two half adder carry outputs.
+
+For a proper full adder, the final carry should be set when either of the half adders produces a carry (or if both do). In mathematical terms, the final carry should be the logical OR of the two half adder carry outputs. By using the AND operator instead, the design only produces a carry when both half adders output a carry, which is not the intended behavior.
+
+This discrepancy causes Test Case 3 (which adds 1 + 1 + 0) to fail. In that case, the first half adder correctly produces a carry (since 1 plus 1 yields a carry of 1), but the second half adder produces no carry (because adding its inputs results in 0 with no carry). Since the AND operation requires both inputs to be 1, the final o_carry ends up being 0 instead of the expected 1.
+
+In summary, the bug is that an AND is used where an OR should be used to combine the intermediate carry outputs. To resolve the issue, the operator for combining w_carry1 and w_carry2 should be changed to an OR so that the final carry correctly reflects the conditions of a full adder.

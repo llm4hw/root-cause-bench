@@ -1,0 +1,5 @@
+The bug in the code is in the way the output `q` is being assigned in the `top_module`. The assignment statement `assign q = a&0;` is performing a bitwise AND operation between input `a` and the constant `0`, which will always result in `q` being `0` regardless of the value of `a`.
+
+As a result, when both `a` and `b` are set to `1` in the testbench, the output `q` is calculated as `0`, leading to test case 4 failing with the error message `ERROR: Test Case 4 failed. q = 0 (Expected: 1)`.
+
+To fix this bug, the assignment statement in `top_module` should be modified to correctly capture the logic related to the inputs `a` and `b` that determine the output `q`. This will ensure that the output `q` reflects the expected behavior based on the inputs `a` and `b.

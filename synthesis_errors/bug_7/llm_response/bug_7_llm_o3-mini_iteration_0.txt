@@ -1,0 +1,9 @@
+The error occurs because the process is mixing two mutually exclusive types of event control. In VHDL, a process that has a sensitivity list (in this case, the signal "clk") should not include a wait statement. When a process includes a sensitivity list, it is automatically triggered by events on the listed signals, and adding an explicit wait statement (like "wait for 10 ns;") creates a conflict in how the process is supposed to be controlled.
+
+This bug is occurring because the VHDL simulator detects that you have both an automatic trigger mechanism (the sensitivity list) and a manual delay (the wait statement) within the same process. The simulator cannot resolve this mixed control flow, so it flags an error during synthesis or simulation.
+
+To fix this issue, you must choose one style of process control:
+• Either remove the wait statement and rely entirely on the sensitivity list (or use clock-based control as usual) 
+• Or remove the sensitivity list, using only wait statements to manage process timing.
+
+By using only one method, you'll provide a clear control structure to the simulator and resolve the error.

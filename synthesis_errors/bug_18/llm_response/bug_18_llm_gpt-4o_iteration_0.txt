@@ -1,0 +1,13 @@
+The error message you are encountering indicates that there is an issue with the instantiation of the module `ChildModule` within the `top18` module. Specifically, the error `[Synth 8-448] named port connection 'b' does not exist for instance 'child_inst' of module 'ChildModule'` points out that there is an attempt to connect a signal to a non-existent port named `b` in the `ChildModule`.
+
+Here's the breakdown of what has gone wrong and why:
+
+1. **Module Definition Mismatch**: In your `ChildModule` definition, only two ports are declared: an input port `a` and an output port `c`. There is no port `b` defined in this module.
+
+2. **Instantiation Error**: In the instantiation of `ChildModule` inside `top18`, you are trying to connect a signal to a port named `b`, which does not exist as per the `ChildModule` definition. This results in the synthesis error you are encountering.
+
+3. **Why It Occurs**: Verilog requires that all ports specified during module instantiation match the ports defined in the module's declaration. If there is an attempt to connect to a port that is not defined in the module, a synthesis error will occur, as the synthesis tool will not be able to find the port to make the connection.
+
+To fix the issue, the instantiation of `ChildModule` should align with the actual port list defined in `ChildModule`. Since `ChildModule` does not have a port `b`, you need to revise the instantiation to match the correct port names.
+
+In summary, this issue occurs because of a mismatch between the port names used during module instantiation and the names defined in the module's declaration. The fix involves ensuring that these names are consistent and that all intended connections are made to existing ports.

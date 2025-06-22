@@ -1,0 +1,23 @@
+The error message from the testbench indicates that there is an expectation mismatch between the intended state transitions and the actual state transitions in the `top_module`. It expects a sequence of states: Red -> Ped -> Green -> Yellow -> Red, aligned with binary codes: 00 -> 11 -> 01 -> 10 -> 00. However, during simulation, the first sequence expected was not matched: Instead of transitioning to 11 (Ped), it seems to have transitioned to something other than the expected Red 00.
+
+### Root Cause:
+1. **State Representation Misalignment**: In the main module `top_module`, the state transitions are based on symbolic names `Red`, `Green`, `Yellow`, and `Ped`, represented by numerical constants. From the parameter list in `top_module`:
+
+   - `Red` is mapped to `0` (00 in binary),
+   - `Green` is mapped to `1` (01 in binary),
+   - `Yellow` is mapped to `2` (10 in binary),
+   - `Ped` is mapped to `3` (11 in binary).
+
+2. **Incorrect State Transition Programming**: The state transition is managed by a synchronous and combinational logic. In the always block managing the state transitions, `next` is incorrectly set to `Ped` when `state` is `Red`, though logically correct according to parameter assignments. 
+
+3. **Testbench State Expectation Misalignment**: The testbench expects the state to be `Green` (01 in binary) after `Ped` (11 in binary), while the `top_module` logic never transitions into state 01 (Green) based on the provided case conditions. After `Ped`, the transition should go to `Green` but currently it doesn't.
+
+### Explanation of Error:
+The discrepancy arises because the transitions are not aligning with the expected sequence mentioned in the testbench. Specifically, the `top_module` logic does not account for a direct transition from `Ped` to `Green`. Instead, it loops between `Red` and `Ped` directly.
+
+### Fix Explanation:
+The issue can be solved by correcting the state transition logic in the `always @(state)` block to ensure that transitions align with the expected sequence: Red -> Green -> Yellow -> Ped. Instead of looping between `Red` and `Ped`, there needs to be a defined pathway for transitioning through Green and Yellow.
+
+- You need to redefine the next state for each case properly such that the transitions follow the order `Red -> Green -> Yellow -> Ped` and back to `Red`, matching the testbench expectations. For example, if the state is `Ped`, the next state should logically be modelled to transition to `Green`, not back to `Red`. 
+
+By ensuring that the transition logic accounts for the expected state pathway, the testbench will find the expected states accordingly during simulation.

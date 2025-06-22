@@ -1,0 +1,31 @@
+### Bug Explanation
+The error occurs because you are attempting to **read the value of an `out` port** (`b`) in the expression `a and b`. In VHDL, ports declared as `out` have strict limitations:
+1. `out` ports can only be **written to** (assigned values).
+2. They **cannot be read** within the architecture (except under specific conditions in VHDL-2008, which aren't applied here).
+
+Your code violates rule #2 by using `b` as an operand in the expression `a and b`. The synthesizer detects this illegal read operation and throws the error.
+
+### Why This Causes an Issue
+- `b` is an output port, meaning its value is driven **from inside the module to the outside world**.
+- At the point where you try to read `b` (`a and b`), `b` has **no defined value** inside the module because:
+  1. Output ports don't have a "readable" internal state by default.
+  2. You never assigned a value to `b` elsewhere in the code (it's uninitialized).
+
+### Fix Required
+1. **Change the port mode** of `b` to allow reading:
+   - Use `buffer` if `b` is purely an output but needs internal feedback (e.g., `b` is assigned and later read in the same module).
+   - Use `inout` if `b` is bidirectional (driven externally and internally).
+   
+   Example fix for the entity declaration:
+   ```vhdl
+   port (
+     a : in std_logic;
+     b : buffer std_logic  -- Change from 'out' to 'buffer'
+   );
+   ```
+
+2. **Ensure `b` is assigned a value** before being read (if using `buffer`). Currently, `b` is never assigned, so reading it would use an undefined value even after changing the port mode.
+
+### Additional Notes
+- If `b` is meant to be an **input** (not an output), change its mode to `in` instead of `out`.
+- The signal `temp_signal` is unused after the assignment. If it drives an output or internal logic, this might indicate incomplete/misplaced functionality.

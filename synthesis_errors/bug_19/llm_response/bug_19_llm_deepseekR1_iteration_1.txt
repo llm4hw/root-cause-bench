@@ -1,0 +1,18 @@
+The bug occurs due to an **invalid binary literal** in the assignment `y = 2'b2;`. Here's why:
+
+1. **Illegal Character**:  
+   In Verilog, binary literals must use **only digits 0 or 1** after the `'b` prefix. The digit `2` in `2'b2` is invalid because binary digits can only be `0` or `1`.
+
+2. **Syntax Violation**:  
+   The correct format for a binary literal is `<size>'b<binary_digits>`. Here, `2'b2` violates this because `2` is not a valid binary digit. The synthesis tool flags this as an illegal character.
+
+3. **Context**:  
+   The assignment appears in the `else` branch of the conditional logic. While the other branches correctly use valid binary literals (`2'b00`, `2'b01`), this line uses an invalid character.
+
+**How to Fix**:  
+Replace `2'b2` with a valid **2-bit binary literal** using only `0` and `1` digits. For example:  
+- `2'b10` (decimal 2)  
+- `2'b11` (decimal 3)  
+- Or another value fitting your design intent.  
+
+The fix requires correcting the literal to comply with Verilog's binary number syntax rules.

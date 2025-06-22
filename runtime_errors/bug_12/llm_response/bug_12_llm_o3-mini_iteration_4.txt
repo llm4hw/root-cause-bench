@@ -1,0 +1,5 @@
+The bug is that the module isn’t actually performing a comparison between the two inputs. Instead of comparing input a with input b, the module compares input a against a hard-coded constant (5'b10101). Because of this, when your test bench sets a equal to b, the design doesn’t check whether a equals b at all—it only checks whether a equals the value represented by 5'b10101. Since none of your test cases set a to that constant (and note that a is only 4 bits wide, so the constant’s width is also mismatched), the condition always evaluates to false. 
+
+As a result, even when a and b match (which by the test bench is supposed to yield a result of 1), your module always sets the output to 0, triggering the fatal error in the test bench.
+
+In summary: The error occurs because the design mistakenly compares the wrong value (a compared to a constant) rather than comparing a with b. The fix is to update the logic so that it correctly compares a with b rather than against the constant.

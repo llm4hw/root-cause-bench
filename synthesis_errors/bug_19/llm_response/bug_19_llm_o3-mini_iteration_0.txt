@@ -1,0 +1,5 @@
+The error comes from the assignment "y = 2'b2;" where the literal is defined using a binary notation that mistakenly includes the digit "2". In Verilog, binary literals (indicated by 2'b... where “2” is the width) can only contain the digits 0 and 1. The digit "2" is not permitted in a binary constant, which is why the synthesis tool flags it as an illegal character.
+
+This bug occurs because the literal was likely intended to represent the decimal value 2, but in binary form this should instead be written using allowed binary digits (for example, representing 2 in 2 bits should use the digits "1" and "0" rather than "2"). The mistake results from confusing the numeral system; in a binary literal, only 0s and 1s are acceptable.
+
+To resolve the issue, you need to change the binary literal to correctly represent the intended value using only binary digits.

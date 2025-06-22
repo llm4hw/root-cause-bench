@@ -1,0 +1,7 @@
+The bug in the code is related to Test Case 6 failing during simulation. The expected result for Test Case 6 is 3'b110, but the actual result is 3'b101. 
+
+The reason the bug is occurring is because the condition `if (outResult <= 3'b110)` is used for comparison in Test Case 6 instead of `if (outResult !== 3'b110)` as in the other test cases. The less than or equal to operator (`<=`) is not suitable for comparing equality between two 3-bit binary values.
+
+To fix this bug, the condition for Test Case 6 should be modified to `if (outResult !== 3'b110)` to correctly check for equality.
+
+Ensuring the correct equality comparison will address the error and allow Test Case 6 to pass successfully during simulation.

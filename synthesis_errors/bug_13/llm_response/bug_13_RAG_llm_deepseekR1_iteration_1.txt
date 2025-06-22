@@ -1,0 +1,111 @@
+The bug in your Verilog code is a missing semicolon (`;`) at the end of the `assign` statement. Here's the breakdown:
+
+**Bug Location:**
+```verilog
+assign c = a & b   // ← Missing semicolon here
+endmodule
+```
+
+**Why the Error Occurs:**
+1. Verilog requires every statement to end with a semicolon (`;`).
+2. The parser reaches `endmodule` while still processing the incomplete `assign` statement.
+3. The error `syntax error near endmodule` occurs because the compiler encounters `endmodule` where it expects either a semicolon or another part of the assignment expression.
+
+**Fixed Code:**
+```verilog
+`timescale 1ns / 1ps
+
+module top13(
+    input wire a,
+    input wire b,
+    output wire c
+);
+    assign c = a & b;  // Added semicolon here
+endmodule
+```
+
+**Why This Fix Works:**
+- The semicolon properly terminates the continuous assignment statement
+- The compiler can now correctly recognize `endmodule` as the end of the module declaration
+- This is a fundamental syntax requirement in Verilog (similar to C/C++)
+
+**Additional Notes:**
+- The error message points to `endmodule` because that's where the parser realizes the previous statement is incomplete
+- Always check for missing semicolons when you see syntax errors near closing keywords (`endmodule`, `endcase`, etc.)
+- Most Verilog linters/IDEs would flag this error immediately with a message like "expected semicolon"
+
+This is a common syntax mistake that's easily fixed by adding the required semicolon at the end of the assignment statement.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: 43
+44 endmodule
+45 //
+--------------------------------------------------------------------
+16...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\verilog_2001_ref_guide.pdf: `ifdef RTL 
+    wire  y = a & b; 
+`else 
+    and #1 (y,a,b); 
+`endif 
+`include “file_name” 
+File inclusion. The contents of another Verilog HDL source file is inserted
+where the `include directive appears.
+`celldefine 
+`endcelldefine 
+Flags the Verilog source code between the two directives as a cell.  Some
+tools, such as a delay calculator for an ASIC, need to distinguish between a
+module that represents an ASIC cell and other modules in the design.
+`default_nettype net_data_type...
+
+- source_documents\Quick Start Guide to Verilog.pdf: #10
+A_TB¼0; B_TB¼0; C_TB¼1;
+#10
+A_TB¼0; B_TB¼1; C_TB¼0;
+#10
+A_TB¼0; B_TB¼1; C_TB¼1;
+#10
+A_TB¼1; B_TB¼0; C_TB¼0;
+#10
+A_TB¼1; B_TB¼0; C_TB¼1;
+#10
+A_TB¼1; B_TB¼1; C_TB¼0;
+#10
+A_TB¼1; B_TB¼1; C_TB¼1;
+$display("Simulation stopping at time: %t", $time);
+end
+This example will result in the following statements printed to the simulator transcript:
+Stimulus starting at time:
+0.00ns
+Simulation stopping at time: 80.00ns
+CONCEPT CHECK
+CC5.3...
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...

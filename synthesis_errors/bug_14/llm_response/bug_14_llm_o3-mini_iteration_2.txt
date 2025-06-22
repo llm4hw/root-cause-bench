@@ -1,0 +1,5 @@
+The error occurs because the code is referencing a signal named “data” that is never declared anywhere within the module. In other words, the assignment to out1 is attempting to use an identifier that the synthesis tool does not recognize.
+
+The synthesis error comes from the fact that every signal used in a Verilog module must be declared (as an input, output, or a reg/wire, etc.) before it can be used. In this case, "data" is being used in the always block but isn’t declared, so the tool flags it as an undeclared identifier.
+
+To address the issue, you need to ensure that the signal “data” is declared properly within the module's scope, or if it is not needed, remove or replace it with an appropriate declared signal.

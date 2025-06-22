@@ -1,0 +1,9 @@
+The error message is indicating a syntax error near 'endmodule' in the code. The issue in the provided Verilog code is that there is a missing semicolon (;) at the end of the line where the assign statement is defined. Verilog requires each statement to end with a semicolon to separate them, and this is why the syntax error is occurring.
+
+To fix the bug, simply add a semicolon at the end of the line where the assign statement is written. 
+
+So, the line:
+```assign c = a & b```
+
+should be modified to:
+```assign c = a & b;```

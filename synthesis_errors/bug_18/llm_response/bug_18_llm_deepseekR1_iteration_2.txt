@@ -1,0 +1,18 @@
+The bug occurs because the instance `child_inst` of `ChildModule` attempts to connect a signal to a port named `b`, which does not exist in the `ChildModule` definition. Here's why:
+
+1. **Module Definition Mismatch**:  
+   `ChildModule` declares only two ports: `a` (input) and `c` (output). There is no port `b` defined in this module.
+
+2. **Erroneous Connection in Instantiation**:  
+   In `top18`, the instance `child_inst` incorrectly tries to connect the top-level input `in` to a non-existent port `b` via `.b(in)`. Synthesis tools strictly validate port names during instantiation and will fail if a connection references an undefined port.
+
+3. **Root Cause**:  
+   The error arises because the designer likely intended to pass `in` to `ChildModule` but mistakenly used the wrong port name (`b` instead of `a`). Alternatively, the design may require `ChildModule` to have an additional port `b`, but it was not implemented.
+
+**How to Fix**:  
+- **Option 1**: Remove the illegal connection `.b(in)` since `b` doesn’t exist. This leaves `in` unused (may cause functional issues).  
+- **Option 2**: Replace `.a(clk)` with `.a(in)` to route the intended signal `in` to the correct port `a` (leaves `clk` unused).  
+- **Option 3**: Modify `ChildModule` to add a port `b` if dual inputs were intended (requires changing the module's I/O and internal logic).  
+
+**Functional Note**:  
+The current setup connects `clk` to `ChildModule`'s input `a`, while `in` is unused. The designer must decide whether `clk` or `in` should drive the module, as `ChildModule` only has one input port (`a`).

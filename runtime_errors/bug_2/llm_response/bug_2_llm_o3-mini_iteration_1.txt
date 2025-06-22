@@ -1,0 +1,5 @@
+The problem lies in the assignment statement within the module. Instead of combining the two inputs to produce the correct output, the code is performing a bitwise AND between one of the inputs (a) and constant 0. Since any bitwise AND with 0 yields 0, the output signal (q) is forced to be 0 at all times.
+
+During the simulation, test case 4 sets both inputs high (a = 1 and b = 1) but still receives q = 0, which is why the error message "q = 0 (Expected: 1)" is generated. The bug occurs because the logic in the module is not using both inputs to determine the output. Essentially, the module's operation does not match the intended design behavior expected by the test bench.
+
+The fix, though not provided here, would involve changing the logic in the module to correctly combine both input signals so that when both are on, the output signal becomes high.

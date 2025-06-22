@@ -1,0 +1,5 @@
+The bug in the provided Verilog code is the missing semicolon at the end of the line that assigns the output `c`. Specifically, the line should be `assign c = a & b;` instead of `assign c = a & b`. 
+
+The error message indicates a syntax error near the `endmodule` keyword, which suggests that the issue lies within the module definition. In Verilog, it is required to end statements with a semicolon to signify the end of a line, unless it is the end of a block such as an `endmodule`, `endfunction`, etc.
+
+To fix this bug, simply add a semicolon at the end of the line `assign c = a & b`. After making this change, the code should compile and simulate without any syntax errors.

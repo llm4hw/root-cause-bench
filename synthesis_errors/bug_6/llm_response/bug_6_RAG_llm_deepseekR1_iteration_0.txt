@@ -1,0 +1,113 @@
+### Bug Analysis:
+The error occurs because the variable `variable1` is declared at the **architecture level** (outside a process/subprogram) in VHDL. According to VHDL rules:
+1. Variables can **only be declared inside processes, functions, or procedures**.
+2. Variables declared at the architecture level must be explicitly declared as `shared variable` (which is rarely recommended due to potential race conditions).
+
+### Why This Error Occurs:
+- Line 42 (`variable variable1 : STD_LOGIC := '0';`) declares a variable in the architecture declarative region, violating VHDL scoping rules.
+- Synthesis tools (like Vivado) enforce this rule because architecture-level variables imply global shared state, which isn't synthesizable without explicit `shared` handling.
+
+### Fix:
+Move the variable declaration **inside the process** where it's used:
+
+```vhdl
+architecture Behavioral of top6 is
+    signal signal1 : STD_LOGIC := '0';
+begin
+    process (clk, rst)
+        variable variable1 : STD_LOGIC := '0';  -- Moved inside process
+    begin
+        if rst = '1' then
+            signal1 <= '0';
+            variable1 := '0'; 
+        elsif rising_edge(clk) then
+            variable1 := signal1;
+        end if;
+    end process;
+    
+    out1 <= signal1;
+end Behavioral;
+```
+
+### Key Points:
+1. **Scope Correction**: Variables in VHDL must be local to processes/subprograms.
+2. **Synthesis Compliance**: Tools require strict adherence to synthesizable VHDL conventions.
+3. **Avoid Shared Variables**: Using `shared variable` (as the error suggests) is **not recommended** for RTL design due to non-deterministic behavior in synthesis.
+
+### Additional Note:
+The original code also has a logical flaw:  
+- `variable1` is assigned (`variable1 := signal1`), but its value is never used.  
+- This unused variable can be removed entirely unless required for future functionality.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: © Sutherland HDL, Inc.
+13
+6.2
+Variable Data Types  
+  
+Variable data types are used for programming storage in procedural blocks.
+• Variables store logic values only, they do not store logic strength.
+• A variable data type must be used when the signal is on the left-hand side
+of a procedural assignment.
+• Variables were called “registers” in older versions of the Verilog standard. 
+• variable_type is one of the following:...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 18
+2.2.3 Signal Declarations .....................................................................................
+19
+2.2.4 Parameter Declarations ..............................................................................
+20
+2.2.5 Compiler Directives .....................................................................................
+20
+3: MODELING CONCURRENT FUNCTIONALITY IN VERILOG .............................
+23...
+
+- source_documents\Quick Start Guide to Verilog.pdf: ¼ 8’h42;
+//-- A <¼ A + B
+parameter BRA
+¼ 8’h20;
+//-- Branch Always
+parameter BEQ
+¼ 8’h23;
+//-- Branch if Z¼1
+Now the program memory can be declared as an array type with initial values to deﬁne the program.
+The following Verilog shows how to declare the program memory and an example program to perform a
+load, store, and a branch always. This program will continually write x“AA” to port_out_00.
+160
+•
+Chapter 11: Computer System Design...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 6.1.3
+Can a test bench be simulated?
+6.1.4
+Can a test bench be synthesized?
+6.1.5
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should use a pro-
+cedural
+block
+and
+individual
+signal
+assignments for each pattern. Your test bench
+should change the input pattern every 10 ns.
+Fig. 6.1...
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...

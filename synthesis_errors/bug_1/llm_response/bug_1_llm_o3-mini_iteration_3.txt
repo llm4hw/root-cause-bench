@@ -1,0 +1,5 @@
+The error is due to a missing semicolon at the end of the assignment in the reset branch. In VHDL, each sequential statement within a process must be terminated with a semicolon, including the assignment that sets data_out to all zeros when rst = '1'. Without the semicolon, the compiler doesn’t recognize the end of the statement and interprets the following "elsif rising_edge(clk) then" as part of the previous statement, which leads to a syntax error.
+
+This issue occurs during simulation because the test bench sees the improperly delimited statement and its parser cannot correctly separate out the different parts of the conditional expression.
+
+To fix the issue, the semicolon should be added at the end of the assignment statement within the if branch, so that the syntax is correct and the statement boundary is clear.

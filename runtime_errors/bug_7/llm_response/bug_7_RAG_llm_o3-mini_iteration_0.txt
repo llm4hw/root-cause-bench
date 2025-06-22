@@ -1,0 +1,140 @@
+The error is not coming from a syntax problem in either file but from a timing (clock edge) mismatch between what the design does and what the test bench expects.
+
+Below is an explanation of the issue and how to fix it:
+
+• What the design does:
+ – The state is set to Red when resetn is low.
+ – When resetn goes high, on the next posedge of clk the design updates state to next.
+ – According to your state‑transition case, if the current state is Red then next is set to Ped.
+ – So after the reset is released, the first clock edge (when clk rises) causes the state to change from Red (00) to Ped (11).
+
+• What the test bench expects:
+ – The comments show the intended sequence is “Red → Ped → Green → Yellow → Red.”
+ – However, the test bench begins by de‐asserting resetn and then waiting 10 ns before checking the state.
+ – With your clock period of 10 ns (always #5 clk = ~clk), the first clock rising edge after resetn is released has already occurred before the 10‑ns delay expires.
+ – Thus, by the time the test bench checks the first expected state (Red, i.e., 00), the device has already transitioned to Ped (11).
+
+• Why the error message says “Expected Red (00), but got 11”:
+ – The test bench is reading Ped (11) on the first check because the design’s state transition (Red → Ped) occurred on the posedge of clk that happened after reset de‑assertion.
+
+• How to fix it:
+You have two main options:
+
+1. Change the Test Bench Timing:
+ • Delay the first check until you know the design is still in Red if that is what you intend.
+ • For example, if you want to see Red immediately after reset, check it before the clock’s rising edge that triggers a state transition. One way is to check immediately after de‑asserting reset (or at time zero if you sample the synchronous reset condition correctly).
+ • Alternatively, if you intend the first transition to be Ped (because of the synchronous update), then update your expected value in the test bench. For instance, change the first check to expect Ped (11) and then follow the sequence accordingly.
+
+2. Modify the Design (if the intention was for the state to remain Red for one extra clock cycle):
+ • For example, you might introduce a one‑cycle delay or rearrange the state machine so that on the first clock edge after reset the state remains Red instead of immediately jumping to Ped.
+ • This could be done by adding a separate “reset done” flag or by modifying the state transition logic so that the side effect of reset release happens in the cycle after the clock edge.
+
+In most cases the simplest fix is to adjust the test bench to match the design. For instance, if you keep the design as is, modify the test bench’s checks so that:
+ – The first check (after reset is released) expects Ped (11) on the first clock edge, then the next check expects Green, etc.
+ – Or, insert an extra delay so that the first check happens before the first posedge of clk after de‑asserting reset.
+
+Thus, the bug is a misalignment between when the test bench is checking for a particular state and when the module updates its state at the clock edge. The fix is to align the test bench timing (or alter the intended sequence) to reflect that when reset is taken away, the very next clock edge changes the state from Red (00) to Ped (11).
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\verilog_fsm.pdf: 24
+end
+25
+STATE_3: begin
+26
+if (!A & B) NextState = STATE_Initial ;
+27
+else if (A & !B) NextState = STATE_4;
+28
+end
+29
+STATE_4: begin
+30
+end
+31
+STATE_5_PlaceHolder : begin
+32
+NextState = STATE_Initial ;
+33
+end
+34
+STATE_6_PlaceHolder : begin
+35
+NextState = STATE_Initial ;
+36
+end
+37
+STATE_7_PlaceHolder : begin
+38
+NextState = STATE_Initial ;
+39
+end
+40
+endcase
+41 end
+42 //
+--------------------------------------------------------------------
+43
+44 endmodule
+45 //...
+
+- source_documents\verilog_fsm.pdf: 48 always@( * ) begin
+49
+Status = 3’b000;
+50
+case (CurrentState)
+51
+STATE_2: begin
+52
+Status = 3’b010;
+53
+end
+54
+STATE_3: begin
+55
+Status = 3’b011;
+56
+end
+57
+endcase
+58 end
+59 //
+--------------------------------------------------------------------
+15...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...

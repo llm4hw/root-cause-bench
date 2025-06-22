@@ -1,0 +1,110 @@
+### Bug Analysis:
+The error occurs because the signal `data` is referenced in the assignment `out1 <= data;` but has not been declared anywhere in the module. In Verilog, all signals must be explicitly declared before use. Since `data` is not defined as an input, output, register, or wire, the synthesis tool throws an undeclared identifier error.
+
+### Why This Happens:
+1. **Undeclared Signal**: The module `top14` only declares `clk` (input) and `out1` (output). The signal `data` is missing from the port list and internal declarations.
+2. **Synthesis Requirement**: Synthesis tools strictly require explicit signal declarations. Unlike simulation tools (which might tolerate implicit nets in some cases), synthesis fails on undeclared identifiers.
+
+### Fix:
+Declare `data` appropriately based on its intended role:
+1. **If `data` is an input** (e.g., from another module or testbench):  
+   Add it to the module's input port list.
+2. **If `data` is an internal register**:  
+   Declare it as a `reg` within the module.
+
+#### Fixed Code (assuming `data` is an input):
+```verilog
+module top14(
+    input wire clk,
+    input wire data,   // Declare 'data' as an input
+    output reg out1
+);
+    always @(posedge clk) begin
+        out1 <= data;
+    end
+endmodule
+```
+
+#### Fixed Code (if `data` is an internal register):
+```verilog
+module top14(
+    input wire clk,
+    output reg out1
+);
+    reg data;  // Declare 'data' as an internal register
+    
+    always @(posedge clk) begin
+        out1 <= data;
+    end
+endmodule
+```
+
+### Key Takeaways:
+- **Always declare signals**: Every identifier in Verilog must be explicitly declared (as `input`, `output`, `reg`, `wire`, etc.).
+- **Port list completeness**: Ensure all signals used in the module are included in the port list or declared internally.
+- **Synthesis vs. Simulation**: Synthesis tools are stricter about declarations than simulators. Always resolve undeclared identifiers before synthesis.
+
+This resolves the `data is not declared` error by providing the missing declaration. Choose the fix based on whether `data` is an external input or an internal signal.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: data_out ¼ rom_data_out;
+else if ( (address >¼ 128) && (address <¼ 223) )
+data_out ¼ rw_data_out;
+else if (address ¼¼ 8’hF0) data_out ¼ port_in_00;
+else if (address ¼¼ 8’hF1) data_out ¼ port_in_01;
+else if (address ¼¼ 8’hF2) data_out ¼ port_in_02;
+else if (address ¼¼ 8’hF3) data_out ¼ port_in_03;
+else if (address ¼¼ 8’hF4) data_out ¼ port_in_04;
+else if (address ¼¼ 8’hF5) data_out ¼ port_in_05;
+else if (address ¼¼ 8’hF6) data_out ¼ port_in_06;
+else if (address ¼¼ 8’hF7) data_out ¼ port_in_07;...
+
+- source_documents\Quick Start Guide to Verilog.pdf: assignments will be attempted for addresses outside of the deﬁned range of the ROM array. This enable
+line can now be used in the behavioral model for the ROM as follows:
+always @ (posedge clock)
+begin
+if (EN)
+data_out ¼ ROM[address];
+end
+11.3.3.2 Data Memory Implementation in Verilog
+The data memory is created using a similar strategy as the program memory. An array signal is
+declared with an address range corresponding to the memory map for the computer system (i.e., 128 to...
+
+- source_documents\Quick Start Guide to Verilog.pdf: ROM to data_out when a valid address is entered. Consider the following Verilog to create an internal
+enable (EN) that will only be asserted when the address falls within the valid program memory range of
+0 to 127.
+always @ (address)
+begin
+if ( (address >¼ 0) && (address <¼ 127) )
+EN ¼ 1’b1;
+else
+EN ¼ 1’b0;
+end
+If this enable signal is not created, the simulation and synthesis will fail because data_out...
+
+- source_documents\Quick Start Guide to Verilog.pdf: else if (address ¼¼ 8’hF7) data_out ¼ port_in_07;
+else if (address ¼¼ 8’hF8) data_out ¼ port_in_08;
+else if (address ¼¼ 8’hF9) data_out ¼ port_in_09;
+else if (address ¼¼ 8’hFA) data_out ¼ port_in_10;
+else if (address ¼¼ 8’hFB) data_out ¼ port_in_11;
+else if (address ¼¼ 8’hFC) data_out ¼ port_in_12;
+else if (address ¼¼ 8’hFD) data_out ¼ port_in_13;
+else if (address ¼¼ 8’hFE) data_out ¼ port_in_14;
+else if (address ¼¼ 8’hFF) data_out ¼ port_in_15;
+end
+11.3.4 CPU Implementation...

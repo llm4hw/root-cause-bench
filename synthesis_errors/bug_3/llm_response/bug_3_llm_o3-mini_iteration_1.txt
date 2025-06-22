@@ -1,0 +1,5 @@
+The issue is that the code is trying to drive a value onto an input port. In VHDL, ports declared with mode "in" are meant to be driven externally (for example, by a test bench or another module) and cannot be updated from within the design's architecture. Here, the assignment "input1 <= '0';" is attempting to modify an input, which causes the synthesizer and simulator to reject the design.
+
+This bug occurs because the design mistakenly treats the input as if it were an internal signal that can be driven, rather than an externally driven port.
+
+To resolve the issue, you would need to remove or modify the assignment within the architecture so that only signals declared with output or inout modes are driven. Alternatively, if the intention is to drive a signal inside the design, you could declare an internal signal and assign it that value.

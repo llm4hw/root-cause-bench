@@ -1,0 +1,5 @@
+The error message "named port connection 'b' does not exist for instance 'child_inst' of module 'ChildModule'" occurs because in the instantiation of `ChildModule` inside the `top18` module, the port connection `.b(in)` is specified, but there is no corresponding port `b` in the `ChildModule` module. The actual ports in the `ChildModule` are `a` and `c`.
+
+To fix this issue, the port connection `.b(in)` in the instantiation of `ChildModule` should be removed since there is no `b` port in the `ChildModule`. Only connect the existing ports `a` and `c` in the instantiation of `ChildModule`.
+
+After correcting the instantiation, the error message should be resolved.

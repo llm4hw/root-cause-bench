@@ -1,0 +1,27 @@
+The error occurs because the variable `variable1` is declared in the architecture's declarative region (outside any process or subprogram), which violates VHDL rules. Here's why:
+
+1. **VHDL Variable Scope Rules**:
+   - Variables in VHDL can only be declared:
+     - Inside processes (local to that process)
+     - Inside subprograms (functions/procedures)
+     - As **shared variables** (using `shared variable`) in architecture declarations
+   - Standard variables (non-shared) cannot be declared at the architecture level.
+
+2. **The Specific Error**:
+   - Line 42 declares `variable variable1 : STD_LOGIC := '0';` directly in the architecture body
+   - This is only permitted if declared as a shared variable (e.g., `shared variable variable1 : STD_LOGIC := '0';`)
+   - Shared variables require special handling and are generally discouraged for synthesis
+
+3. **Why This Causes Synthesis Failure**:
+   - Synthesis tools expect architecture-level storage elements to be signals (not regular variables)
+   - Variables at this level imply multi-process access ambiguity
+   - The tool flags it because non-shared variables aren't allowed here per VHDL standard
+
+**How to Fix**:
+- **If the variable is only used in one process**: Move the declaration inside the process (between `process` and `begin`). This makes it local to the process.
+- **If sharing between processes is required**: 
+  1. Convert it to a signal (recommended for synthesis)
+  2. Or declare it as a `shared variable` (not recommended due to non-determinism risks)
+- **In this specific code**: Since `variable1` is only accessed in the single process, moving its declaration inside that process would resolve the error.
+
+**Note on Initialization**: The `:= '0'` initialization might not be synthesizable even after moving it into the process. For hardware registers, initialize via reset logic instead.

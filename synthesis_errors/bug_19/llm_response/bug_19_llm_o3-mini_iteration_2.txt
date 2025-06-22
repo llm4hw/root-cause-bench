@@ -1,0 +1,5 @@
+The error occurs because the code attempts to assign a binary literal with an illegal digit. In Verilog, binary numbers are specified using only the digits 0 and 1. The literal "2'b2" includes the digit 2, which is not valid in a binary constant. This misuse of the binary literal syntax is what causes the synthesis error.
+
+The bug is happening because the literal "2'b2" does not properly represent a 2-bit binary number. Likely, the intention was to represent the binary representation of the decimal number 2 (which is "10" in binary). However, by writing 2'b2, the tool interprets it as a binary literal containing an illegal character.
+
+To fix the bug, the binary literal must be expressed using only valid binary digits (0 or 1).

@@ -1,0 +1,9 @@
+The bug in the provided code is a logical error causing an infinite loop in the `Always @*` block due to the while loop not being properly controlled. The error message indicates that the loop limit of 65536 was exceeded, which usually occurs when the loop runs indefinitely.
+
+In this case, the issue stems from the `while (flag)` loop inside the `always @*` block. Since `flag` is not being toggled within the loop, it remains constantly true (1), leading to an infinite loop that continuously flips the `out` signal. As a result, this loop never exits and the tool imposes a limit on the execution.
+
+To fix this bug, the while loop should have a way to terminate or some condition that can make `flag` false to break out of the loop. It is crucial to have a mechanism to change the value of `flag` inside the loop so that it can eventually become false, allowing the loop to exit.
+
+Additionally, it's important to note that using blocking assignments (`<=`) inside a combinational block (`always @*`) is not a good coding practice in synthesizable RTL code. It's recommended to use non-blocking assignments (`<=`) in sequential blocks like `always @(posedge clk)`.
+
+In summary, the fix involves incorporating a mechanism within the `always @*` block to update the `flag` variable, thereby ensuring that the while loop can eventually exit.

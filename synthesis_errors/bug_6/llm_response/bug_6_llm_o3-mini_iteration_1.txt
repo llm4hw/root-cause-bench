@@ -1,0 +1,8 @@
+The error is caused because a variable is being declared in the architecture’s declarative region rather than inside a process, subprogram, or function. In VHDL, variables declared outside of these scopes must be labeled as shared. The synthesis tool is complaining that, since the variable is declared in the concurrent region (outside a process), it must have the 'shared' qualifier. However, shared variables have different semantics and are rarely synthesizable, so using one there is usually unintended.
+
+Basically:
+• The tool expected any variable declared outside a process to be defined as shared.
+• The bug occurs because the variable declaration is placed in an invalid location, causing a conflict with the VHDL language rules and synthesis expectations.
+• The fix involves moving the variable declaration inside the process (or within a subprogram) where variables can be used normally, or converting it into a signal if the intent is to retain concurrent behavior.
+
+This explains the root of the issue and why the error occurs without showing any direct fix.

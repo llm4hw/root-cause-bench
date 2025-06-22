@@ -1,0 +1,83 @@
+The bug is occurring because the comparison in the testbench for pedControl 2 is checking for `2'b01` instead of `2'b11`. The expected output for the scenario when pedControl is activated should be `2'b11` (Ped), not `2'b01` (Green), as indicated by the error message "ERROR: Expected Green (01), but got 11". 
+
+To fix this issue, you should update the comparison in the testbench after setting pedControl to 1:
+
+Change:
+```verilog
+if (outResult !== 2'b01) begin
+    $display("pedControl 2 - ERROR: Expected Green (01), but got %b", outResult);
+    $fatal;
+end
+```
+
+To:
+```verilog
+if (outResult !== 2'b11) begin
+    $display("pedControl 2 - ERROR: Expected Ped (11), but got %b", outResult);
+    $fatal;
+end
+```
+
+By making this change, you will correctly check for the expected output value `2'b11` (Ped) when pedControl is activated, resolving the error message discrepancy.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\Quick Start Guide to Verilog.pdf: case statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output.
+5.2.7
+Design a Verilog model to implement the
+behavior described by the 4-input truth table
+in Fig. 5.4. Use procedural assignment and an
+if-else statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output. Hint:
+Notice that there are far more input codes pro-...
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\verilog_2001_ref_guide.pdf: 34
+   Verilog HDL Quick Reference Guide
+   
+15.2 Path Pulse (Glitch) Detection
+A pulse is a glitch on the inputs of a module path that is less than the delay of the
+path.  A special specparam constant can be used to control whether the pulse
+will propagate to the output (transport delay), not propagate to the output
+(inertial delay), or result in a logic X on the output.
+specparam PATHPULSE$input$output = (reject_limit, error_limit); 
+specparam PATHPULSE$ = (reject_limit, error_limit);...

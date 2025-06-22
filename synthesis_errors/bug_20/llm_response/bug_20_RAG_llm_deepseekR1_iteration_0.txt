@@ -1,0 +1,118 @@
+The error occurs because the `while (flag)` loop inside the `always @*` block creates an **infinite zero-delay loop** that prevents simulation time from advancing, causing the simulator to hang. Here's why:
+
+### Root Cause:
+1. **Combinatorial Infinite Loop**:
+   - `always @*` triggers whenever `flag` or `out` changes
+   - Inside the loop: `out <= ~out` immediately changes `out`
+   - This change retriggers `always @*` (since `out` is in the implicit sensitivity list)
+   - The loop runs continuously at time=0 with no time progression
+
+2. **No Time Advancement**:
+   - Hardware simulations require time steps (e.g., `#delay` or clock edges) to advance
+   - The loop contains no timing controls (`#`, `@posedge`, etc.), so simulation time never progresses
+
+3. **Simulator Protection**:
+   - The simulator detects >65,536 iterations without time advancement and throws the error as a safety measure
+
+### Fix:
+Replace the combinatorial loop with **clock-driven sequential logic**:
+
+```verilog
+always @(posedge clk) begin  // Use clock edge for time progression
+    if (flag) begin          // Conditional toggle
+        out <= ~out;
+    end
+end
+```
+
+### Key Changes:
+1. **Added Clock Sensitivity**:
+   - `always @(posedge clk)` ensures time advances with each clock cycle
+   - Eliminates zero-delay looping
+
+2. **Removed Combinatorial Loop**:
+   - Replaced `while` with single conditional assignment per clock cycle
+   - Prevents immediate retriggering
+
+3. **Preserved Functionality**:
+   - Still toggles `out` when `flag=1`, but at controlled clock intervals
+
+### Why This Works:
+- Each toggle now happens **synchronously** at clock edges
+- Simulation time advances between operations
+- No risk of infinite zero-time loops
+- Synthesizable to actual hardware (flip-flop behavior)
+
+> **Note**: Initial `out` value should be defined (e.g., `initial out = 0;`) to avoid undefined ('x') starting state.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: provide a time step event or delay within a forever loop or it will cause a simulation to hang. The following
+is the syntax for a forever loop in Verilog.
+forever
+begin
+statement_1
+statement_2
+:
+statement_n
+end
+Consider the following example of a forever loop that generates a clock signal (CLK) with a period of
+10 time units. In this example, the forever loop is embedded within an initial block. This allows the initial...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 16 times total. For loops allow the loop variable to be used in signal assignments within the block.
+Example:
+initial
+begin
+for (i¼0; i<15; i¼i+1)
+#10 Count ¼ i;
+end
+5.2.8 disable
+Verilog provides the ability to stop a loop using the keyword disable. The disable function only works
+on named statement groups. The disable function is typically used after a certain ﬁxed amount of time or
+within a conditional construct such as an if-else or case statement that is triggered by a control signal....
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Consider the following forever loop example that will generate a clock signal (CLK), but only when an
+enable (EN) is asserted. When EN ¼ 0, the loop will disable and the simulation will end.
+Example:
+initial
+begin
+CLK ¼ 0;
+forever
+begin: loop_ex
+if (EN ¼¼ 1)
+#10 CLK ¼ ~CLK;
+else
+disable loop_ex; // The group name to be disabled comes after the keyword
+end
+end
+CONCEPT CHECK
+CC5.2
+When using an if-else statement to model a combinational logic circuit, is using the else...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...

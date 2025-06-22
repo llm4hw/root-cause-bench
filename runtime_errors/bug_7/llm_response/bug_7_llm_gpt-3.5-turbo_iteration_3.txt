@@ -1,0 +1,7 @@
+The bug in the code is due to a misunderstanding in the testbench logic. The issue lies in the way the test cases are being checked. The testbench is using non-blocking assignment operators '!==', which will compare the states in parallel, rather than sequentially as intended.
+
+As a result, when checking the states, all the 'if' conditions are evaluated simultaneously, causing the error messages to trigger at the wrong time. This is why the testbench is outputting unexpected values.
+
+To fix this issue, the testbench should use blocking assignment '==' inside each 'if' condition to ensure that the checks are done sequentially. By modifying the testbench to compare the 'states' values one by one using blocking assignment, the correct comparison and error messages should be outputted.
+
+Once this modification is made, the testbench should be able to correctly verify the state transitions.

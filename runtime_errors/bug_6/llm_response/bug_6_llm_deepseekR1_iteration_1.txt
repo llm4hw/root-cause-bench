@@ -1,0 +1,31 @@
+The bug occurs because the test bench's Test Case 6 incorrectly expects the output (`outResult`) to be greater than `3'b110` (6 in decimal) when the design produces `3'b101` (5 in decimal) for the Pedestrian (Ped) state with `longTimeHold` asserted. Here's why:
+
+1. **Design Behavior**:  
+   In the Ped state, the output logic is:  
+   ```verilog
+   Ped: if(longTimeHold) outResult = 3'b101;
+        else outResult = 3'b110;
+   ```  
+   When `longTimeHold = 1` (as set in Test Case 6), the design correctly outputs `3'b101`.
+
+2. **Test Case 6 Sequence**:  
+   - At the start of Test Case 6, the state is **Red** (from Test Case 5).  
+   - `pedControl` is still `1` (set in Test Case 2 and never cleared).  
+   - On the next clock edge (after `#10`), the state transitions:  
+     **Red → Ped** (since `pedControl = 1`).  
+   - The output becomes `3'b101` because `longTimeHold = 1`.
+
+3. **Test Bench Error**:  
+   The test checks:  
+   ```verilog
+   if (outResult <= 3'b110) // Fails if ≤6
+   ```  
+   with the expectation:  
+   `Expected > 110` (i.e., >6).  
+   However, `3'b101` (5) is less than 6, triggering the error. The test bench mistakenly expects a value >6, but the design only produces outputs between 1 and 6.
+
+**Root Cause**:  
+The test bench's condition for Test Case 6 is flawed—it expects an impossible value. The design works correctly per its specification, but the test bench's validation logic does not match the design's actual output for the Ped state with `longTimeHold` asserted.
+
+**Fix Direction**:  
+Modify the test bench to expect `3'b101` (not >6) in Test Case 6. Additionally, ensure `pedControl` remains asserted appropriately throughout the test sequence.

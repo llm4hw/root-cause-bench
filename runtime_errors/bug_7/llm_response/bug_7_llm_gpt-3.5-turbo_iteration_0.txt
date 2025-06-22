@@ -1,0 +1,5 @@
+The bug in this code is that the test bench is checking the value of `states` using the inequality operator `!==` instead of the equality operator `===`. This is causing the error messages to be generated even when the expected states are correct. 
+
+Additionally, the reason why this bug is occurring is due to the incorrect usage of the inequality operator, which is checking for a value other than the expected one for each state instead of checking for the exact expected value.
+
+To fix this bug, the test bench code should be updated to use the equality operator `===` when comparing the value of `states` with the expected state values. This change will correctly compare the binary representation of `states` with the expected values and avoid generating false error messages during simulation.

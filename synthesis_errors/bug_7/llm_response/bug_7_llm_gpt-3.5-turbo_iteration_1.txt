@@ -1,0 +1,7 @@
+The bug in the code is caused by having both a `wait for` statement and a sensitivity list in the same process. In VHDL, a process can either have a sensitivity list or use wait statements, but not both simultaneously. 
+
+In this case, the process sensitivity list is defined as `(clk)` indicating sensitivity to the `clk` signal. Inside the process, there is a `wait for 10 ns;` statement which is not allowed since the process already has a sensitivity list. 
+
+To fix this issue, you need to remove the `wait for` statement from the process. If you require a delay, you can move it outside the process or consider using it in a separate process without a sensitivity list. 
+
+Ensure that the process only contains event-driven statements based on the signals listed in the sensitivity list.

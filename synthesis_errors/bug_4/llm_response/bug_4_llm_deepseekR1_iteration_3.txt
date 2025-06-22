@@ -1,0 +1,23 @@
+The bug arises due to a **width mismatch** in the signal assignment. Here's why:
+
+1. **Signal Width Discrepancy**:
+   - `input1` is declared as `std_logic_vector(2 downto 0)` (3 bits)
+   - `output` is declared as `std_logic_vector(3 downto 0)` (4 bits)
+
+2. **Assignment Issue**:
+   - The line `output <= input1` attempts to assign a 3-bit signal to a 4-bit signal
+   - VHDL requires strict matching of vector lengths in direct assignments
+   - The synthesis tool detects that the source (3 bits) and target (4 bits) have different sizes
+
+3. **Simulation/Synthesis Failure**:
+   - The error occurs because the tool cannot automatically determine how to handle the missing bit
+   - No implicit resizing or padding exists for `std_logic_vector` assignments in VHDL
+   - The test bench would fail when driving/checking the full 4-bit output
+
+**Fix Direction**:
+Explicitly resolve the width mismatch by:
+- Expanding `input1` to 4 bits using concatenation (e.g., adding a `'0'` or `'1'` MSB/LSB)
+- Adjusting port declarations to matching widths if design requirements allow
+- Using explicit type conversion with padding logic
+
+The core issue is the **incompatible vector sizes in a direct assignment**, violating VHDL's strong typing rules for array signals.

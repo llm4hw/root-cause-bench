@@ -1,0 +1,22 @@
+The error occurs because the signal `data` is declared as a `wire` but is being procedurally assigned inside an `always` block. Here's why this is problematic:
+
+1. **Net Type Mismatch**: 
+   - `wire` types represent physical connections and can only be driven by continuous assignments (`assign` statements) or module ports.
+   - Procedural assignments (inside `always`/`initial` blocks) require **variable** data types (`reg`, `logic`, etc.) that can store state.
+
+2. **Synthesis Limitation**:
+   - The line `data <= 1'b0` attempts to create sequential logic (flip-flop behavior triggered by `clk`/`rst`), but wires can't hold state across clock cycles.
+   - Synthesis tools require registers (not wires) for sequential assignments to infer flip-flops.
+
+3. **Specific Conflicts**:
+   - The `always @(posedge clk or posedge rst)` block implies sequential logic, but `data` is declared as combinatorial (wire).
+   - The feedback path `data <= ~data` requires persistent storage, which wires don't provide.
+
+**How to Fix**:
+Re-declare `data` as a register type (`reg` or `logic`) instead of `wire`. This allows it to:
+- Store values between clock cycles
+- Legally accept procedural assignments
+- Properly infer flip-flop hardware during synthesis
+
+**Secondary Issue**:  
+The output `out1` uses the *old* value of `data` (pre-update) due to non-blocking assignment semantics. This is legal but may cause unexpected behavior since `out1` isn't reset. Consider adding `out1` to the reset condition if synchronous initialization is needed.

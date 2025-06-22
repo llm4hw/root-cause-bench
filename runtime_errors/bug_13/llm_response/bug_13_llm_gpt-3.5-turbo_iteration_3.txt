@@ -1,0 +1,9 @@
+The bug in the code is due to the incorrect calculation of the expected sum in the testbench task. 
+
+In the `check` task function, the calculation of the expected sum is performed as `expected = a_t + b_t + cin_t;`. For a full adder, the sum should be calculated as a bitwise addition of `a_t`, `b_t`, and `cin_t` rather than a scalar addition. The correct way to calculate the expected sum in this case should be done by including the carry bit as well using concatenation, like this: `expected = {1'b0, a_t} + {1'b0, b_t} + cin_t;`.
+
+The error message occurs because the comparison `{cout, sum} !== expected` expects the carry bit in the sum while the expected sum does not have it in the scalar addition. This inconsistency causes the error where the expected output does not match the calculated output.
+
+To fix this issue, modify the calculation of the expected value in the `check` task by including the carry bit in each number addition. This way, the comparison `expected` value will align correctly with the actual output of the full adder in the simulation. 
+
+Once this correction is made, the simulation should run without generating this error message for the given test cases.

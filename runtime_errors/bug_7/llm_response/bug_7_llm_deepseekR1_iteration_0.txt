@@ -1,0 +1,16 @@
+The bug occurs due to an incorrect state transition in the next-state logic. The state machine transitions from `Ped` back to `Red` instead of moving to `Green` as required by the testbench's expected sequence. Here's the breakdown:
+
+1. **State Encoding Mismatch**:  
+   The testbench expects the sequence **Red (00) → Ped (11) → Green (01) → Yellow (10) → Red**. However, in the code's case statement, the `Ped` state transitions to `Red` (via `next = Red`), which creates a loop between `Red` and `Ped` instead of progressing to `Green`.
+
+2. **Erroneous Transition Logic**:  
+   The `Ped` state's next state is hardcoded to `Red` in the combinational block:
+   ```
+   Ped: next = Red;  // Incorrect transition
+   ```
+   This skips the expected `Green` and `Yellow` states, causing the state machine to cycle between `Red` and `Ped`.
+
+3. **Testbench Expectation vs. Implementation**:  
+   After reset, the first transition (on the clock edge) moves the state from `Red` to `Ped` (correctly). However, the next transition from `Ped` incorrectly goes back to `Red`, violating the testbench's requirement for `Ped → Green`. This leads to the error when the testbench checks for `Green` (expected after `Ped`) but finds `Red` or `Ped` instead.
+
+**Fix**: Modify the transition logic for the `Ped` state to assign `next = Green` instead of `Red`. This aligns the state transitions with the testbench's expected sequence.

@@ -1,0 +1,157 @@
+The bug is that the code updates min for every input that is lower than the current min rather than “locking in” the first input (in order b, then c, then d) that is smaller than a. In the current code for test case 3 (a = 10; b = 15; c = 8; d = 7), even though c is the first input smaller than a, the code later checks d and sees that d (7) is less than the current min (8), so min is updated to 7. However, the requirement is to assign min the value 8 (from c) and ignore any following inputs—even if they are even smaller.
+
+This is occurring because the conditional checks are written as independent if statements:
+  min = a;
+  if (min > b) min = b;
+  if (min > c) min = c;
+  if (min > d) min = d;
+Each if statement is executed sequentially, and any later input that meets the condition (even if it comes after the first “smaller” value) will update min.
+
+To fix this, you need to use mutually exclusive conditions (an if-else if-else chain) so that once you find the first value that is smaller than a (in the order b, then c, then d), none of the later inputs are checked. For example, you can write the logic as follows:
+
+--------------------------------------------------
+module top_module (
+    input  [7:0] a,
+    input  [7:0] b,
+    input  [7:0] c,
+    input  [7:0] d,
+    output reg [7:0] min
+);
+
+always @(*) begin
+    if (b < a)
+        min = b;
+    else if (c < a)
+        min = c;
+    else if (d < a)
+        min = d;
+    else
+        min = a;
+end
+
+endmodule
+--------------------------------------------------
+
+Here’s what happens in test case 3:
+• a = 10, b = 15, c = 8, d = 7
+• The first condition checks if b < a. Since 15 is not less than 10, it moves to the next condition.
+• It then checks if c < a. Since 8 is less than 10, min is set to 8 and the remaining condition (for d) is skipped.
+• Thus, min remains 8 even though d is 7, which satisfies the requirement “assign the first value smaller than a from b, c, and then d.”
+
+This change fixes the bug and causes the test bench’s test case 3 to pass as expected.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: 6.1.3
+Can a test bench be simulated?
+6.1.4
+Can a test bench be synthesized?
+6.1.5
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should use a pro-
+cedural
+block
+and
+individual
+signal
+assignments for each pattern. Your test bench
+should change the input pattern every 10 ns.
+Fig. 6.1...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Section 6.3: Automated Result Checking
+6.3.1
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of...
+
+- source_documents\Quick Start Guide to Verilog.pdf: tively, for the operation’s min:typ:max behavior.
+Declare your module and ports to match the
+block diagram provided. Use the type wire for
+your ports.
+3.4.6
+Design a Verilog model to implement the
+behavior described by the 4-input truth table
+shown in Fig. 3.6. Use continuous assignment
+and conditional operators and give the entire
+operation a delay of 1, 2, and 3 ns, respec-
+tively, for the operation’s min:typ:max behavior.
+Declare your module and ports to match the...
+
+- source_documents\Quick Start Guide to Verilog.pdf: behavior described by the 3-input maxterm
+list shown in Fig. 3.2. Use continuous assign-
+ment with conditional operators. Declare your
+module and ports to match the block diagram
+provided. Use the type wire for your ports.
+3.3.3
+Design a Verilog model to implement the
+behavior described by the 3-input truth table
+shown in Fig. 3.3. Use continuous assignment
+with conditional operators. Declare your mod-
+ule and ports to match the block diagram
+provided. Use the type wire for your ports.
+3.3.4...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.4
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.4. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.3
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.3. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...

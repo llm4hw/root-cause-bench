@@ -1,0 +1,5 @@
+The bug in the provided code is due to the fact that the case statement does not cover all possible values of the `sel` signal. Specifically, the error message indicates that the choice `32'b00000000000000000000000000000011` is missing in the case statement.
+
+This error is occurring because the `sel` signal is defined as a `std_logic_vector` with 2 bits (`1 downto 0`), but the case statement only considers three possible patterns that `sel` can take (`"00"`, `"01"`, and `"10"`). As a result, when the simulator encounters a value of `sel` that does not match any of these patterns, it generates the error message.
+
+To fix this issue, you need to update the case statement to include all possible values of the `sel` signal. This can be achieved by adding a `when others` or default case to catch any other values that were not explicitly mentioned in the initial case statement. Making this change will ensure that the code can handle all possible values of `sel` during simulation.

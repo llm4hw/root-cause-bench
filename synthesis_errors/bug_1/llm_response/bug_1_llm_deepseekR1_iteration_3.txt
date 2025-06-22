@@ -1,0 +1,18 @@
+The bug is a **missing semicolon (`;`)** at the end of the assignment in the `if` branch. Here's why this causes the error:
+
+1. **Syntax Violation**:  
+   VHDL requires every statement to end with a semicolon. The line:  
+   ```data_out <= (others => '0')```  
+   lacks a terminating semicolon, making it syntactically incomplete.
+
+2. **Parser Confusion**:  
+   The VHDL parser expects a semicolon after the assignment in the `if` branch. When it encounters `elsif` immediately after the unterminated statement, it fails to recognize `elsif` as a valid keyword in this context.  
+
+3. **Error Location**:  
+   The error points to `elsif` (line 47) because the parser only detects the problem when it reaches this keyword, but the root cause is the missing semicolon in the preceding line.
+
+**Fix**:  
+Add a semicolon to the reset assignment:  
+```data_out <= (others => '0');```  
+
+This ensures proper statement termination and allows the `elsif` branch to be parsed correctly.

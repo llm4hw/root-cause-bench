@@ -1,0 +1,145 @@
+The error message you're encountering indicates that there is a missing case choice for a specific value, `32'b00000000000000000000000000000011`, in your case statement. However, based on your provided code, `sel` is declared as a 2-bit wide `std_logic_vector`. This suggests that the issue may not be with the original code you've provided but rather with the testbench or the test itself.
+
+Here's a breakdown of the situation:
+
+1. **Error Explanation**: The error message specifies that there is a missing choice for `32'b00000000000000000000000000000011`, which is a 2-bit vector interpreted as a 32-bit value. This does not match the range of values defined by a 2-bit vector (`"00"`, `"01"`, `"10"`, or `"11"`), which indicates a misalignment between the testbench and the component under test.
+
+2. **Cause**: This error might be due to a mismatch between the width of `sel` in your testbench and the width expected by your module. If the testbench is incorrectly driving a 32-bit value into a 2-bit port, this could be the cause.
+
+3. **Fix**: Ensure that the testbench matches the expected input size of `sel`. All testbench inputs or any other driving mechanisms for the `sel` port should be constrained to 2 bits only. Verify that every potential value for a 2-bit wide selection (`"00"`, `"01"`, `"10"`, `"11"`) is covered, while attempting to drive a 32-bit wide vector should be modified to only drive valid 2-bit vectors.
+
+4. **Code Update**: If `"11"` is indeed a valid input, you should also add this to your case statement:
+
+```vhdl
+    process(sel)
+    begin
+        case sel is
+            when "00" =>
+                out1 <= '1';
+            when "01" =>
+                out1 <= '0';
+            when "10" =>
+                out1 <= '0';
+            when "11" =>  -- Added to cover all possible 2-bit combinations
+                out1 <= '1'; -- or any appropriate behavior
+        end case;
+    end process;
+```
+
+Ensure that your testbench is correctly specifying `sel` values that are just 2-bit wide. Once you make these adjustments, the error should be resolved. If the error persists, review your testbench for any logic that might be misinterpreting or mishandling the `sel` port.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: case statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output.
+5.2.7
+Design a Verilog model to implement the
+behavior described by the 4-input truth table
+in Fig. 5.4. Use procedural assignment and an
+if-else statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output. Hint:
+Notice that there are far more input codes pro-...
+
+- source_documents\verilog_fsm.pdf: 48 always@( * ) begin
+49
+Status = 3’b000;
+50
+case (CurrentState)
+51
+STATE_2: begin
+52
+Status = 3’b010;
+53
+end
+54
+STATE_3: begin
+55
+Status = 3’b011;
+56
+end
+57
+endcase
+58 end
+59 //
+--------------------------------------------------------------------
+15...
+
+- source_documents\RTL error analysis.pdf: case(state)
+S0:             y_out = 0; 
+S1,S2,S3:   y_out = ~x_in;
+endcase
+endmodule
+HDL model for state diagram...
+
+- source_documents\Quick Start Guide to Verilog.pdf: always @ (A, B, ALU_Sel)
+begin
+case (ALU_Sel)
+3’b000
+: begin //-- Addition
+//-- Sum and Carry Flag
+{NZVC[0], Result} ¼ A + B;
+//-- Negative Flag
+NZVC[3] ¼ Result[7];
+//-- Zero Flag
+if (Result ¼¼ 0)
+NZVC[2] ¼ 1;
+else
+NZVC[2] ¼ 0;
+//-- Two’s Comp Overflow Flag
+if ( ((A[7]¼¼0) && (B[7]¼¼0) && (Result[7] ¼¼ 1)) ||
+((A[7]¼¼1) && (B[7]¼¼1) && (Result[7] ¼¼ 0)) )
+NZVC[1] ¼ 1;
+else
+NZVC[1] ¼ 0;
+end
+:
+//-- other ALU operations go here...
+:
+default
+: begin
+Result ¼ 8’hXX;
+NZVC
+¼ 4’hX;
+end
+endcase
+end...
+
+- source_documents\verilog_fsm.pdf: 20
+// Place -holder
+transitions
+21
+//
+---------------------------------------
+22
+STATE_5_PlaceHolder : begin
+23
+NextState = STATE_Initial ;
+24
+end
+25
+STATE_6_PlaceHolder : begin
+26
+NextState = STATE_Initial ;
+27
+end
+28
+STATE_7_PlaceHolder : begin
+29
+NextState = STATE_Initial ;
+30
+end
+31
+//
+---------------------------------------
+32
+endcase
+33 end
+Line 3 speciﬁes the beginning of a Verilog case statement. For all FSMs, this case statement is of...

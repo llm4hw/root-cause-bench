@@ -1,0 +1,5 @@
+The bug in the provided code is that the `data` signal is being assigned within the procedural block using nonblocking assignment (`<=`), while it is declared as a `wire` in the module. The error occurs because nonblocking assignments (`<=`) are only allowed for `reg` type variables in Verilog, not for `wire` type.
+
+To fix this issue, you can declare `data` as a `reg` type instead of `wire` in the module. This change will allow you to use nonblocking assignment for `data`. By making this adjustment, you will resolve the error related to the procedural assignment to a non-register data.
+
+In addition to fixing the variable declaration, it is important to ensure that the logic intended to be synthesizable as per the design requirements.

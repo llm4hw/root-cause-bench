@@ -1,0 +1,11 @@
+The error occurs because the code is trying to index (use the (7) suffix) directly on the result of a type conversion. In VHDL, the conversion functions such as the one from integer to an unsigned vector (and then to a std_logic_vector) produce temporary, unnamed values. The synthesis tool does not permit taking an index (extracting a bit) directly from such an anonymous value.
+
+In other words, when you write something like:
+
+  std_logic_vector(to_unsigned(counter, 8))(7)
+
+the conversion function returns a temporary vector that can’t be indexed because it has no declared name. This is why you see the error message stating “cannot index the result of a type conversion.”
+
+To resolve the issue, you would need to assign the converted vector to a temporary, named signal or variable first, and then index that signal. This would give the result a proper name and allow you to extract the desired bit.
+
+The bug is thus due to the VHDL language and tool restrictions regarding indexing on temporary conversion results, and the fix is to refactor the code so that the conversion result is stored before being indexed.

@@ -1,0 +1,25 @@
+The bug occurs because the code attempts to read from an output port (`b`) in a signal assignment. Here's why this is problematic:
+
+1. **Port Mode Violation**: 
+   - Port `b` is declared as `out` mode, which is a **write-only** port from the perspective of the entity's architecture
+   - The assignment `temp_signal <= a and b` attempts to **read** the value of `b`, which violates VHDL's port mode rules
+
+2. **Hardware Implications**:
+   - In hardware terms, an `out` port represents a driven output signal - it doesn't have a readable value inside the module
+   - Reading an output port would require feedback from external circuitry, which isn't modeled in this design
+
+3. **Synthesis Limitation**:
+   - Synthesis tools strictly enforce this rule because it corresponds to actual hardware constraints
+   - The error message explicitly suggests using `buffer` or `inout` mode if reading is required
+
+4. **Test Bench Impact**:
+   - During test bench simulation, this would fail because `b` has no defined input value when read
+   - The output port `b` remains unassigned (no driver) throughout the code, making its value undefined
+
+**Fix Approach**:
+To resolve this, you need to either:
+1. Change the port mode of `b` to `buffer` (if you need to read the driven output value internally), or
+2. Use an internal signal to store the value intended for `b` and read from that signal instead
+3. Re-evaluate the design logic to determine why an output port is being used as an input in the expression
+
+Note that simply changing the port mode may have implications for external connections and should align with the overall design intent. The current expression also appears logically incomplete since `b` has no assigned value.

@@ -1,0 +1,14 @@
+The primary issues causing the testbench error are:
+
+1. **Unconditional Valid Signal**: The `valid` output is set to 1 whenever the design is not in reset, even for invalid inputs (like 10 or 15). This occurs because the sequential logic lacks a check on `num_in`'s validity. The line `valid <= 1` in the `else` block executes for all non-reset cases, incorrectly marking invalid inputs as valid.
+
+2. **Unhandled Invalid States in Output Logic**: The combinational block assigning `output_data` uses a `case` statement that only covers valid states (S0-S9). When an invalid state (e.g., 10) occurs, no `case` matches, causing `output_data` to retain its previous value (latched behavior). The testbench expects `output_data` to reset to 0 for invalid inputs, but this isn't enforced. A missing `default` case or explicit check for invalid states causes this discrepancy.
+
+**Root Causes**:
+- The FSM directly copies `num_in` to `state` without validating if `num_in` is in [0-9], allowing invalid states.
+- `valid` is not gated by the validity of `num_in`, leading to false validations.
+- The output logic doesn't account for invalid states or the `valid` signal, resulting in stale values for `output_data`.
+
+**Fix Approach**:
+1. **Validate `num_in` Before Updating State/Valid**: In the sequential block, only update `state` and set `valid` to 1 if `num_in` is within 0-9. For invalid inputs, set `valid` to 0 and decide whether to reset `state` or leave it unchanged.
+2. **Handle Invalid States in Output Logic**: Add a `default` case to the combinational `case` statement to force `output_data` to 0 when the state is invalid. Alternatively, gate `output_data` assignments with the `valid` signal to override outputs when invalid.

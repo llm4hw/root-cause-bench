@@ -1,0 +1,5 @@
+The bug in the code is that a continuous assignment (``<=``) is being used for the input port ``input1`` in the architecture of the ``top3`` entity. In VHDL, input ports are supposed to be only read from and not written to within the architecture. The error message specifically states that the 'in' object ``input1`` cannot be updated in line 42 of ``top3.vhd``.
+
+The error occurs because attempting to assign a value to an input port violates the basic principles of the design hierarchy in VHDL, where inputs are meant to be driven externally and cannot be assigned within the architecture.
+
+To fix this issue, the code should be modified to remove the assignment of a value to the input port ``input1`` within the architecture. Assigning values directly to input ports should be avoided, and instead, inputs should be read and utilized in the architecture for designing the desired functionality.

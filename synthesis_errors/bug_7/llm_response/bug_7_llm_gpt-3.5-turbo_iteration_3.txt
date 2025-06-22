@@ -1,0 +1,7 @@
+The error message "process cannot have both a wait statement and a sensitivity list" is occurring because in VHDL, a process can either have a sensitivity list or use the wait statement for triggering events, but not both simultaneously.
+
+In this case, the process in the architecture of top7 is using a sensitivity list with the 'clk' signal, and at the same time, it has a wait statement "wait for 10 ns;" inside the process. This combination is not allowed in VHDL.
+
+To fix this issue, you can either remove the sensitivity list from the process and rely solely on the wait statement for triggering events, or you can remove the wait statement and use the sensitivity list with the clock signal for triggering events.
+
+It's important to choose the appropriate method based on the desired functionality of the process in your design.

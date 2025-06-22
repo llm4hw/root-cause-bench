@@ -1,0 +1,91 @@
+The bug is that the process uses both a sensitivity list (clk) and an explicit wait statement ("wait for 10 ns;"). In VHDL, a process must either use a sensitivity list or explicit wait statements—using both in the same process is not allowed. The synthesis and simulation tools therefore produce an error.
+
+This issue occurs because when you specify a sensitivity list (here, the process is triggered on clk events), the process automatically waits for events on the specified signals. Adding an explicit "wait for 10 ns;" conflicts with the sensitivity mechanism, as the process would then have two different methods to control its execution timing.
+
+To fix the error, you need to choose one method. For a clocked (synchronous) process, you should remove the explicit wait statement so that the process only uses the sensitivity list. If you need to control timing within a process (for testing purposes, for example), consider removing the sensitivity list and rely solely on wait statements. However, for typical synchronous logic, simply removing the wait statement is the correct fix.
+
+For example, the corrected process should look like this:
+
+-------------------------------------------------
+process (clk)
+begin
+    if rising_edge(clk) then
+        signal1 <= not signal1;
+    end if;
+end process;
+-------------------------------------------------
+
+This modification keeps the process synchronous with the clk signal and resolves the error message.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: © Sutherland HDL, Inc.
+27
+   
+Procedural Statement Examples
+initial  // A 50 ns clock oscillator that starts after 1000 time units
+  begin
+    clk = 0;
+    #1000 forever #25 clk = ~clk;
+  end
+// In this example, the sensitivity list infers sequential logic
+always @(posedge clk)
+  begin  // non-blocking assignments prevent race conditions in byte swap
+    word[15:8]<= word[7:0];
+    word[7:0] <= word[15:8];
+  end
+// In this example, the sensitivity list infers combinational logic...
+
+- source_documents\verilog_2001_ref_guide.pdf: NOTE: The Verilog language does not have a true “sensitivity list”.  Instead,
+the @ time control at the beginning of a procedure delays the execution of all
+statements within the procedure until an edge occurs on the signals listed.
+Thus, if the @ control is the first thing in the procedure, the entire procedure
+appears to be sensitive to changes in the signals listed. The @ token is a time
+control, however, and not a true sensitivity list.  An edge-sensitive time...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example:
+initial
+begin
+Clock_TB ¼ 1’b0;
+end
+always
+begin
+#10 Clock_TB ¼ ~Clock_TB;
+end
+5.1.1.3 Sensitivity Lists
+A sensitivity list is used in conjunction with a procedural block to trigger when the assignments within
+the block are executed. The symbol @ is used to indicate a sensitivity list. Signals can then be listed
+within parenthesis after the @ symbol that will trigger the procedural block. The following is the base
+syntax for a sensitivity list.
+always @ (signal1, signal2)
+begin...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\verilog_2001_ref_guide.pdf: @* was added in Verilog-2001.
+• Parenthesis are not required when there is only one signal in the list and no
+edge is specified.
+wait (expression) 
+Delays execution of the next statement until the expression evaluates as true.
+10.2 Sensitivity Lists
+The sensitivity list is used at the beginning of an always procedure to infer
+combinational logic or sequential logic behavior in simulation.
+• always @(signal, signal, ... ) infers combinational logic if the list of...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 7.10
+Registers as agents on a data bus—simulation waveform
+CONCEPT CHECK
+CC7.2
+Does RTL modeling synthesize as combinational logic, sequential logic, or both? Why?
+(A)
+Combinational logic. Since only one process is used for each register, it will be
+synthesized using basic gates.
+(B)
+Sequential logic. Since the sensitivity list contains clock and reset, it will
+synthesize into only D-ﬂip-ﬂops.
+(C)
+Both. The model has a sensitivity list containing clock and reset and uses an...

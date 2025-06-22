@@ -1,0 +1,7 @@
+The issue is that within your combinational always block you have created a loop that never terminates. In your always block you have a "while (flag)" loop and since the variable flag remains true throughout, the loop continues indefinitely. During simulation, this causes the simulator to iterate the loop beyond its allowed limit (in this case the tool’s upper limit of 65,536 iterations), eventually triggering the error.
+
+The simulator is detecting that there is no change in the value of flag—so nothing in the loop causes a break or termination—and consequently the loop is endless. This “infinite loop” situation prevents the simulation from completing because the simulation time does not advance within a combinational always block executing continuously.
+
+The fix involves rethinking the design so that the loop condition eventually becomes false or the loop is removed/adapted. Often in RTL design you would use an always block triggered by a clock edge to update signals sequentially rather than attempting to use a while loop that executes forever. Thus, restructuring the design so that it does not rely on an infinite combinational loop would resolve the error.
+
+Remember, the simulation error is not because the simulator is malfunctioning but because the HDL code contains a logical mistake that leads to an infinite loop.

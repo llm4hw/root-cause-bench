@@ -1,0 +1,5 @@
+The bug is caused by a **duplicate case item** for `4'h1` in the `case` statement. 
+
+In Verilog, the `case` statement executes the **first matching branch** and then exits. Here, when `x` is `4'h1`, the first branch (`4'h1: f = 0;`) is executed, setting `f` to `0`. The subsequent `4'h1: f = 1;` branch is unreachable. This leads to `f = 0` for `x = 1`, which conflicts with the testbench's expected value of `1`.
+
+The duplicate case item (`4'h1: f = 1;`) is erroneous and should be removed or corrected to the intended value (likely a typo for a different case, e.g., `4'h2` or another missing hexadecimal value). The test case for `x = 1` fails because the first `4'h1` branch incorrectly assigns `f = 0`.

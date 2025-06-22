@@ -1,0 +1,93 @@
+The error message you're encountering is indicating that `signal2` has not been declared within your VHDL code. The line causing the error is trying to assign a value to `signal2` without it being defined previously. Here’s a breakdown of the issue and how you can fix it:
+
+### Root Cause
+
+1. **Undeclared Signal**: The signal `signal2` is used in the process but is not declared anywhere in the code. VHDL requires all signals used within a design to be declared either as part of the port definitions for the entity, or as internal signals within the architecture.
+
+### How to Fix
+
+To resolve this issue, you need to declare `signal2` in the architecture. Since the signal seems to have a specific functional purpose during a reset (`rst` condition), it should be declared similarly to how `signal1` is declared. 
+
+Here is the corrected code:
+
+```vhdl
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity top8 is
+    Port ( clk : in  STD_LOGIC;
+           rst : in  STD_LOGIC;
+           out1 : out STD_LOGIC);
+end top8;
+
+architecture Behavioral of top8 is
+    signal signal1 : STD_LOGIC := '0';
+    signal signal2 : STD_LOGIC := '0';  -- Declare signal2 here
+begin
+    process (clk, rst)
+    begin
+        if rst = '1' then
+            signal2 <= '0'; 
+        elsif rising_edge(clk) then
+            signal1 <= not signal1;
+        end if;
+    end process;
+
+    out1 <= signal1; 
+end Behavioral;
+```
+
+By adding the declaration `signal signal2 : STD_LOGIC := '0';` in the architecture block, the error should be resolved. Now, `signal2` is properly declared and can be used in the process.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 2.1
+Declaring Verilog module ports
+2.2.3 Signal Declarations
+A signal that is used for internal connections within a system is declared within the module before its
+ﬁrst use. Each signal must be declared by listing its type followed by a user-deﬁned name. Signal names
+of like type can be declared on the same line separated with a comma. All of the legal data types
+described above can be used for signals; however, only types net, reg, and integer will synthesize...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 18
+2.2.3 Signal Declarations .....................................................................................
+19
+2.2.4 Parameter Declarations ..............................................................................
+20
+2.2.5 Compiler Directives .....................................................................................
+20
+3: MODELING CONCURRENT FUNCTIONALITY IN VERILOG .............................
+23...
+
+- source_documents\Quick Start Guide to Verilog.pdf: sensitive block. In this syntax, only rising edge transitions on signal1 or falling edge transitions on signal2
+will cause the block to trigger.
+always @ (posedge signal1, negedge signal2)
+begin
+signal_assignment_1
+signal_assignment_2
+:
+end
+5.1 Procedural Assignment
+•
+67...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Fig. 2.2
+Verilog signals and systems
+20
+•
+Chapter 2: Verilog Constructs...

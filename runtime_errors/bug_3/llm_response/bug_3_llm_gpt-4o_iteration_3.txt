@@ -1,0 +1,24 @@
+The bug in your code arises from the way the carry-out (`o_carry`) is calculated in the `full_half_add_1bit` module. A full adder, when constructed using two half adders, needs to generate the carry-out differently than it currently does in your design.
+
+### Explanation of the Bug:
+1. **Current Implementation of `o_carry`:**
+   - The carry-out (`o_carry`) in your module is assigned using the expression `assign o_carry = w_carry1 & w_carry2;`.
+   - This is incorrect for a full adder. The carry-out of a full adder constructed with two half adders must be the logical OR of the carries from both half adders.
+
+2. **Expected Carry-out Calculation:**
+   - For a full adder utilizing two half adders, the correct expression for the carry-out should be: 
+     `o_carry = w_carry1 | w_carry2`.
+   - The carry from the first half adder (`w_carry1`) and the carry from the second half adder (`w_carry2`) should be combined using an OR operation, not an AND operation.
+
+### Why the Error Occurs:
+- In Test Case 3, the inputs are `1 + 1 + 0`, for which the expected outputs are `Sum: 0, Carry: 1`.
+- The first half adder processes `i_a` and `i_b` (`1 + 1`), giving `w_sum1 = 0`, and `w_carry1 = 1`.
+- The second half adder processes `w_sum1` and `i_cin` (`0 + 0`), giving `o_sum = 0`, and `w_carry2 = 0`.
+- Based on your current design, `o_carry` is calculated as `w_carry1 & w_carry2 = 1 & 0 = 0`.
+- Thus, the condition for `o_carry` to be `1` is not met, as the expression is incorrect.
+
+### How to Fix It:
+To ensure correct full adder functionality, adjust the carry-out logic from an AND to an OR structure:
+- Instead of `assign o_carry = w_carry1 & w_carry2;`, use `assign o_carry = w_carry1 | w_carry2;`.
+
+This will ensure that the carry is correctly propagated when either of the two conditions that generate a carry-out are met, accurately replicating the behavior of a full adder.

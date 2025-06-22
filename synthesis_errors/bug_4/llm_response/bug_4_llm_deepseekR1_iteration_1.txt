@@ -1,0 +1,24 @@
+### Bug Explanation:
+The error occurs due to a **bit-width mismatch** in the assignment `output <= input1;`:
+1. **Target width (`output`)**: Declared as `STD_LOGIC_VECTOR(3 downto 0)` (4 bits).
+2. **Source width (`input1`)**: Declared as `STD_LOGIC_VECTOR(2 downto 0)` (3 bits).
+
+VHDL requires strict matching of vector widths in direct assignments. Here, you're attempting to assign a 3-bit vector to a 4-bit vector, violating this rule.
+
+### Why the Error Occurs:
+During synthesis, the tool detects this width incompatibility and halts with:
+> `[Synth 8-690] width mismatch in assignment; target has 4 bits, source has 3 bits`
+
+### How to Fix:
+**Adjust the bit widths to match** using one of these approaches:
+1. **Extend `input1`** to 4 bits by:
+   - Zero-extending: `'0' & input1`
+   - Sign-extending: `input1(2) & input1` (replicates MSB)
+2. **Resize the ports**:
+   - Change `output` to 3 bits (`STD_LOGIC_VECTOR(2 downto 0)`) if design intent permits
+   - Change `input1` to 4 bits if additional input bits are available
+3. **Partial assignment**:
+   Assign `input1` to a subset of `output` (e.g., `output(2 downto 0) <= input1;`) and explicitly set the remaining bit (e.g., `output(3) <= '0';`).
+
+### Root Cause:
+The fundamental issue is a **port declaration inconsistency** between the entity's input and output vector sizes. The assignment violates VHDL's strict type-checking rules for vector widths.

@@ -1,0 +1,3 @@
+The error message indicates that there is a named port connection for a port 'b' which does not exist in the instantiation of the module 'ChildModule.' The issue is occurring because the port connection `.b(in)` in the instantiation of `ChildModule child_inst` is trying to connect a non-existent port 'b' to the signal 'in'. 
+
+To fix this bug, the port connection `.b(in)` needs to be removed from the instantiation of `ChildModule child_inst` since `ChildModule` only has ports `a` and `c`. Therefore, removing the `.b(in)` line from the instantiation should resolve the error.

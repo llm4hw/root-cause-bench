@@ -1,0 +1,7 @@
+The bug in this code is related to how the shifting operation is implemented in the `shift_register` module. In the `always` block inside the module, the shifting logic is incorrect. The code assigns the same value from the `serial_in` to all positions in the `data` array, resulting in all bits being the same rather than shifting the bits sequentially.
+
+This incorrect behavior is observed in the testbench when checking the output after each shift operation. The expected values are set to reflect a correct shifting operation, but the actual values show that the shifting is not functioning as intended. 
+
+To fix this bug, the shifting logic in the `shift_register` module needs to be modified to correctly implement a serial-in parallel-out shift register. This involves properly propagating the bits through the `data` array when `shift_en` is asserted, such that each bit moves to the next position in the array.
+
+After making this modification, run the testbench again to verify that the shifting operation now works as expected, and the error message no longer appears.

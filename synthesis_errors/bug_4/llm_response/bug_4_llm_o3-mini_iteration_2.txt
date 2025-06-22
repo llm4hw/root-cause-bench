@@ -1,0 +1,7 @@
+The error message indicates that a width mismatch is occurring because you're trying to assign a 3-bit vector (signal input1, declared as 3 bits) directly to a 4-bit vector (signal output, declared as 4 bits). In VHDL, signal assignments must respect the declared widths—here the simulator detects that the source (input1) has only 3 bits, while the target (output) expects 4 bits.
+
+The bug is occurring because the test bench (or synthesis tool) is verifying that both sides of the assignment have matching bit widths, and when they don’t, it flags an error. The root cause is simply the incompatibility between the defined sizes of the input and output ports.
+
+To resolve this issue, you need to adjust the design so that both signals have compatible widths. This can be done by either changing the width of one of the signals (for example, modifying the declaration of input1 to have 4 bits instead of 3) or by properly extending the 3-bit vector to 4 bits in your assignment. This extension might involve appending an additional bit (such as a 0) so that the overall width matches what the output port expects.
+
+Again, note that the explanation here focuses on why the error occurs and what the root cause is, without providing specific code modifications.

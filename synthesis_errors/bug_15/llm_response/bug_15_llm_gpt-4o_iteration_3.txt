@@ -1,0 +1,17 @@
+The error you're encountering, "ERROR: [Synth 8-2576] procedural assignment to a non-register data is not permitted," highlights a common issue in Verilog related to the data types used on the left-hand side of a procedural assignment. In your code, you have declared `data` as a `wire` and then attempted to assign values to it inside an `always` block using a non-blocking assignment (`<=`).
+
+In Verilog, a `wire` is used to represent combinational logic, and you cannot assign a value to a `wire` from within a procedural block (like an `always` block) because a `wire` doesn't maintain state — it cannot "store" a value as a register (`reg`) type can.
+
+### Why the Error Occurs:
+- The `always` block is attempting to conditionally update `data` based on the positive edge of the clock or the reset signal. Such conditional assignments are only possible if the left-hand side, `data` in this case, is a `reg` type since it needs to store the value until the next triggering event.
+- A `wire` can only be driven by continuous assignments (`assign` statements), or be the output of instances of modules or primitives, or be driven by a combination of all three through resolved logic.
+
+### Explanation and the Root Cause:
+- The root cause is trying to use a `wire` to store a value across multiple clock cycles, which is what registers (`reg`) or other state-holding constructs do in hardware description. Procedural assignments expect the storage capability inherently provided by the `reg` data type.
+
+### How to Address the Issue:
+Although I'm not providing a code fix, the general approach to resolve this problem is to examine what you intend `data` to do and ensure its declaration matches this intended use:
+- If `data` is meant to hold its value across clock cycles (i.e., to "remember" its value), it should be declared as a `reg` type rather than a `wire`, since `reg` types can be used in procedural blocks and can hold state.
+- You should ensure that all conditional or temporary storage intended within an `always` block uses `reg` or similar constructs designed for state retention.
+
+This understanding should help guide you in revisiting the nature of `data` and applying the correct Verilog constructs to achieve functional, error-free simulation and synthesis.

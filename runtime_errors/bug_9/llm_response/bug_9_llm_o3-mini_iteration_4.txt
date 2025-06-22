@@ -1,0 +1,7 @@
+The error arises because the state machine for generating the letter O (three dashes) never sequences through all three dash states. In your design you have three distinct states labeled for O (O_DASH1, O_DASH2, O_DASH3), but in the state block you treat them identically. When the counter finishes timing in any of these states, you immediately switch the state to IDLE instead of advancing from O_DASH1 to O_DASH2, and then from O_DASH2 to O_DASH3 before finally returning to IDLE. 
+
+As a result, only one dash is generated for O rather than the intended three. The test bench expects that after the complete transmission of O, the output (“morse_out”) will be 0. However, because of the direct jump to IDLE after the first dash, the timing and waveform for O are incorrect, triggering the error message ("ERROR: Morse for O not correct").
+
+To fix this, you would need to adjust the state transitions for the letter O so that once the dash duration is complete in O_DASH1 the state machine transitions to O_DASH2, then to O_DASH3, and only after the third dash does it return to the idle state. This change would correctly output all three dashes for O, and the test bench would then detect the proper behavior.
+
+Remember, the explanation here describes the issue and why it happens, without providing direct code changes.

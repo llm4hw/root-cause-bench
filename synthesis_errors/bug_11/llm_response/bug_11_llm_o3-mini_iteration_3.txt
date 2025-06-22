@@ -1,0 +1,5 @@
+The error is indicating that your case statement does not cover all possible values of the input signal sel. In your code, sel is declared as a 2-bit vector and can have four possible values ("00", "01", "10", and "11"). However, the case statement only provides branches for "00", "01", and "10". The simulation (or synthesis) tool is complaining because the missing value ("11") is not handled, so when sel equals "11" the behavior is undefined.
+
+The reason this bug occurs is because VHDL requires that a case statement must cover every possible value of the discriminant, or it must include an "others" clause to catch any cases that have not been explicitly mentioned. Without that, the tool flags an error (or warning depending on context) during simulation or synthesis.
+
+To resolve this issue, you can add handling for the missing value ("11") or apply an "others" clause in your case statement so that every possible case is defined.

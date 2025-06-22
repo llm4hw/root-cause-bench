@@ -1,0 +1,11 @@
+The bug arises because the state transitions in the finite state machine (FSM) do not follow the sequence expected by the testbench. Here's the breakdown:
+
+1. **Parameter vs. State Encoding**: The parameters `Red=0`, `Green=1`, `Yellow=2`, `Ped=3` are assigned correctly (2-bit values: 00, 01, 10, 11). The FSM uses a 2-bit `state` variable, which aligns with these encodings.
+
+2. **Incorrect Transition Logic**: The error occurs in the `Ped` state's next state assignment. The code sets `next = Red` when `state == Ped`, but the testbench expects the FSM to transition from `Ped` to `Green`. This causes the FSM to loop between `Red` and `Ped`, never reaching `Green` or `Yellow`.
+
+3. **Testbench Timing**: After reset is released, the first clock edge updates the state to `Ped` (11). The testbench checks at a time when the state is already `Ped`, but the test expects `Red` (00). This discrepancy triggers the error.
+
+**Root Cause**: The `Ped` state's next state is incorrectly set to `Red` instead of `Green`. This breaks the intended transition sequence (`Red → Ped → Green → Yellow → Red`), causing the FSM to cycle between `Red` and `Ped` indefinitely.
+
+**Fix**: Modify the `Ped` state's transition to assign `next = Green` instead of `Red`. This aligns the FSM's transitions with the testbench's expected sequence.

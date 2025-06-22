@@ -1,0 +1,5 @@
+The bug in the code is occurring because the signal `signal2` is being assigned a value in the process without being declared in the entity or architecture. This results in the error message stating that `signal2` is not declared. 
+
+To fix this issue, you need to properly declare `signal2` in the entity or architecture section of the code before using it in the process. Make sure to add the signal declaration for `signal2` in the entity or architecture just like `signal1` is declared. 
+
+After declaring `signal2`, you can assign values to it within the process without any compilation errors.

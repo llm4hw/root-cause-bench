@@ -1,0 +1,101 @@
+The bug is that the while loop never terminates. In the code the condition "while (flag)" remains permanently true because flag is never changed inside the loop. This creates an infinite loop within the always block, causing the simulator to hit the loop limit (65,536 iterations in this case) and generate an error.
+
+Why is it occurring?
+• The always block is written with a combinational sensitivity list (using @*), so the while loop is continuously executed as part of simulation without waiting for any clock edge or time step.
+• Since flag remains set to 1'b1, the condition in the while loop is always true.
+• The simulator detects that the loop is iterating far beyond acceptable simulation limits and stops with an error.
+
+How can it be fixed?
+• Remove the infinite loop. If you intend to toggle the output (out) in a timed manner (for example, to generate a clock), then you should use a clocked process rather than a combinational always block.
+• If a toggling behavior is desired on every clock edge, then change the block to something like:
+
+  
+  module top20(
+      input wire clk,
+      output reg out
+  );
+  
+  initial out = 1'b0; // initialize the output
+  
+  always @(posedge clk) begin
+      out <= ~out;
+  end
+  
+  endmodule
+
+  
+• Alternatively, if you intended to use a loop for some specific iterative computation, make sure to include a proper termination condition within the loop or use delays (like #10) so that the simulation time can advance and eventually exit the loop.
+
+In summary, the error arises because of an infinite loop in a combinational always block; switching to a clocked always block (or otherwise ensuring the loop has a termination) fixes the issue.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: provide a time step event or delay within a forever loop or it will cause a simulation to hang. The following
+is the syntax for a forever loop in Verilog.
+forever
+begin
+statement_1
+statement_2
+:
+statement_n
+end
+Consider the following example of a forever loop that generates a clock signal (CLK) with a period of
+10 time units. In this example, the forever loop is embedded within an initial block. This allows the initial...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 16 times total. For loops allow the loop variable to be used in signal assignments within the block.
+Example:
+initial
+begin
+for (i¼0; i<15; i¼i+1)
+#10 Count ¼ i;
+end
+5.2.8 disable
+Verilog provides the ability to stop a loop using the keyword disable. The disable function only works
+on named statement groups. The disable function is typically used after a certain ﬁxed amount of time or
+within a conditional construct such as an if-else or case statement that is triggered by a control signal....
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Consider the following forever loop example that will generate a clock signal (CLK), but only when an
+enable (EN) is asserted. When EN ¼ 0, the loop will disable and the simulation will end.
+Example:
+initial
+begin
+CLK ¼ 0;
+forever
+begin: loop_ex
+if (EN ¼¼ 1)
+#10 CLK ¼ ~CLK;
+else
+disable loop_ex; // The group name to be disabled comes after the keyword
+end
+end
+CONCEPT CHECK
+CC5.2
+When using an if-else statement to model a combinational logic circuit, is using the else...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...

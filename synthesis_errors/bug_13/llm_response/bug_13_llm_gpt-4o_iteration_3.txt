@@ -1,0 +1,5 @@
+The error message you received, "ERROR: [Synth 8-2715] syntax error near endmodule," points to a syntax error close to the `endmodule` keyword in your Verilog code file. The tool is highlighting an issue at the end of the module definition.
+
+In your code, the line that reads `assign c = a & b` is missing a semicolon at the end of the statement. In Verilog, each statement must be terminated with a semicolon. The missing semicolon results in a syntax error because the Verilog parser expects a statement to be properly terminated and, without the semicolon, it doesn't recognize the end of the statement. Consequently, this leads to a confusion when the parser reaches `endmodule`, expecting further code rather than the end of the module.
+
+To correct this, you should ensure that each Verilog statement ends with a semicolon. Once the semicolon is added to the end of the assignment statement, the syntax error will be resolved, and the code should compile successfully.

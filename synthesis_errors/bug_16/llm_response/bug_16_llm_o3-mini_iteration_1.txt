@@ -1,0 +1,9 @@
+The problem stems from the way the sequential logic is written. Inside the always block you are using two different assignment styles: a nonblocking assignment for the internal signal (data) in the reset branch and a blocking assignment for the output register (out1). This mixing of assignment types in a sequential block, especially one that has an asynchronous reset, causes the synthesis tool to be confused when it tries to infer a flip‐flop with an asynchronous reset for out1.
+
+In particular, because out1 is assigned with a blocking assignment after changing data with nonblocking assignment, during an asynchronous reset the tool cannot properly extract or infer the asynchronous reset behavior for the register out1. The tool expects that all registers with asynchronous resets use a consistent style – typically nonblocking assignments – so it can clearly identify the reset condition for each register. The extraction error indicates that the tool finds it ambiguous what the reset value should be for out1.
+
+The underlying issue is that out1 is not explicitly reset. Even though the reset condition for data is handled correctly, out1 is updated outside that reset branch without a proper asynchronous reset handling, thereby leading to a situation where the intended flip-flop structure for out1 (with reset) cannot be extracted correctly.
+
+To resolve the issue, the coding style should be consistent. The register out1 should be assigned with a nonblocking assignment and its reset value should be specified in the reset branch of the always block so that the synthesis tool can correctly map it to a flip-flop with asynchronous reset. This ensures that both signals are updated in a deterministic and synthesis-friendly manner.
+
+Thus, the bug occurs because the asynchronous reset extraction fails for out1 due to the use of a blocking assignment and the lack of an explicit reset condition for out1 in the same always block.

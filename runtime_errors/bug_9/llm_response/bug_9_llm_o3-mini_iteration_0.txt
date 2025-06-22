@@ -1,0 +1,13 @@
+The problem is that the letter O (which should output three dashes “— — —”) never actually goes through three separate dash phases. The state machine was intended to have three separate states for O (O_DASH1, O_DASH2, O_DASH3) so that the module would output one dash per state before finally deactivating the output. However, the case statement groups these three states together in one branch, and in that branch the logic simply waits for one full dash (using the counter and DASH parameter) and then immediately goes back to the idle state. In effect, only one dash is produced instead of three.
+
+In addition, there is a similar issue with the space between symbols. The SPACE_STATE state tests for a condition that makes sense only for letter A (as it checks “if (state == A_DOT)” to decide whether to go to A_DASH), but it does not provide a proper sequence for letter O or even S. This results in the output not ending in the expected “off” period when testing O (and perhaps it would be problematic for S too).
+
+Because the test bench then checks at a specific time (after 150 time units) and expects morse_out to be deasserted (off) when the full morse sequence is complete, by not going through all three dash phases the simulation ends with morse_out still asserted or not in the correct timing. Consequently, the test bench detects that “Morse for O not correct.”
+
+The root causes are:
+• Combining O_DASH1, O_DASH2, and O_DASH3 in a single case branch so that no sequential progression through the three dashes occurs.
+• An incorrect conditional check in the SPACE_STATE branch (using a condition that is only geared to letter A), which prevents proper spacing and finishing of the dash sequence for O.
+
+To resolve the issue, you would need to adjust the state transitions so that when the select input is for O, the state machine transitions from O_DASH1 to O_DASH2 and then to O_DASH3 (with proper timing and spacing between them) before finally settling to a finished state with morse_out off.
+
+Remember: The explanation here identifies the bug and its cause without providing a direct code fix.

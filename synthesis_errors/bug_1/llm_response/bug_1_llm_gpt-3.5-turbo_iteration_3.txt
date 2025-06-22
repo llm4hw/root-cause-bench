@@ -1,0 +1,15 @@
+The error in the code is due to a missing semicolon (;) after the assignment statement in the if-else construct in the process block. In Verilog and VHDL, each statement within the if-else construct should be terminated with a semicolon.
+
+When the code is missing the semicolon after the assignment statement `data_out <= (others => '0')`, the compiler/parser interprets the `elsif rising_edge(clk) then` line as part of the preceding if statement, which is incorrect syntax and leads to a syntax error.
+
+To fix this bug, you need to add a semicolon at the end of the assignment statement in the if block as shown below:
+
+```vhdl
+if rst = '1' then
+    data_out <= (others => '0');  -- Add semicolon here
+elsif rising_edge(clk) then
+    data_out <= data_in;
+end if;
+```
+
+By adding the semicolon after `(others => '0')`, the code will now correctly interpret the `elsif rising_edge(clk) then` statement as a separate condition within the if-else construct, resolving the syntax error.

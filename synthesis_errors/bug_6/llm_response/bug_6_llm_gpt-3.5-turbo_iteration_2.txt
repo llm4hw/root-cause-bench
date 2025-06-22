@@ -1,0 +1,3 @@
+The error is occurring because in VHDL, variables declared outside of a process must be marked as 'shared'. In this case, the variable `variable1` is declared outside the process and is not marked as 'shared', which is causing the error during simulation.
+
+To fix this issue, you can mark the variable as 'shared' by adding the keyword 'shared' after the variable declaration. This will inform the compiler that the variable is shared and can be accessed by multiple processes.

@@ -1,0 +1,109 @@
+The error you're encountering arises from how the state transition for the pedestrian control is being handled in the Verilog code. According to your design, the transition from the `Red` state goes to the `Ped` state when `pedControl` is activated and should hold there. However, you are expecting it to subsequently move to the `Green` state after a delay in your testbench, which is not aligned with the current state machine design in your `top_module`.
+
+### Analysis:
+
+- The state machine in the provided Verilog code transitions as follows:
+  - `Red`: transitions to `Ped` if `pedControl` is high; otherwise, it transitions to `Green`.
+  - `Ped`: the current implementation of the state machine holds `Ped` as the next state, effectively creating a latch there.
+  - There is no provision to move from `Ped` back to `Green`, neither when `pedControl` is high nor low.
+
+### Why the Error Occurs:
+
+Your testbench expects the state to move from `Ped` to `Green` automatically. However, in your code, once the state goes to `Ped`, it stays there indefinitely due to the transition:
+```verilog
+Ped: next = Ped;
+```
+
+### Fix:
+
+To move from `Ped` to any other state (in your case, to `Green`), you need to define a condition under which the state should transition out of `Ped`. Here is how you can modify the state transition logic:
+
+1. Add logic to transition from `Ped` back to `Green`:
+   ```verilog
+   Ped: if (~pedControl) next = Green;
+   ```
+
+With this change, your state machine will leave the `Ped` state and transition to the `Green` state once `pedControl` is deactivated (logical 0). This change aligns the state transitions with the expectations set in the testbench. Here's how this revised segment looks:
+
+```verilog
+case (state)
+    Red: 
+        if (pedControl) 
+            next = Ped;
+        else 
+            next = Green;
+    Green: 
+        next = Yellow;
+    Yellow: 
+        next = Red;
+    Ped: 
+        if (~pedControl) 
+            next = Green;
+    default: 
+        next = Red;
+endcase
+```
+
+This modification ensures that, given your testbench's expectations, the state will correctly transition from `Ped` back to `Green` once `pedControl` is deactivated.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\Quick Start Guide to Verilog.pdf: case statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output.
+5.2.7
+Design a Verilog model to implement the
+behavior described by the 4-input truth table
+in Fig. 5.4. Use procedural assignment and an
+if-else statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output. Hint:
+Notice that there are far more input codes pro-...
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\verilog_2001_ref_guide.pdf: 34
+   Verilog HDL Quick Reference Guide
+   
+15.2 Path Pulse (Glitch) Detection
+A pulse is a glitch on the inputs of a module path that is less than the delay of the
+path.  A special specparam constant can be used to control whether the pulse
+will propagate to the output (transport delay), not propagate to the output
+(inertial delay), or result in a logic X on the output.
+specparam PATHPULSE$input$output = (reject_limit, error_limit); 
+specparam PATHPULSE$ = (reject_limit, error_limit);...

@@ -1,0 +1,146 @@
+The issue here stems from the mismatch between the expected state transitions in the test bench and the actual state transitions as defined in the `top_module` code. Let's analyze the root cause:
+
+### Problem Breakdown
+
+1. **Initial State Setup:**
+   - Upon reset (`resetn` low), the module sets the initial state to `Red` (`00`).
+   
+2. **State Transitions in the `top_module`:**
+   - `Red` transitions to `Ped`.
+   - `Ped` transitions to `Red`.
+   - `Green` transitions to `Yellow`.
+   - `Yellow` transitions to `Red`.
+
+3. **Testbench Expectations:**
+   - The test bench expects the state sequence to be: `Red` (`00`) -> `Ped` (`11`) -> `Green` (`01`) -> `Yellow` (`10`) -> `Red` (`00`).
+   - However, the code transitions directly from `Red` to `Ped` and from `Ped` back to `Red`, without transitioning to `Green` and `Yellow` unless externally forced.
+
+### Root Cause
+- The state machine defined in `top_module` simply toggles between the `Red` and `Ped` states when the simulation runs, as there's no transition defined from `Ped` to `Green`, nor from `Red` to `Green`.
+
+### Solution
+To fix this, you need to implement the missing transitions to match the sequence anticipated by the testbench:
+
+1. **Modify the State Transitions:**
+   - Add a transition from either `Ped` to `Green` or `Red` to `Green` if it follows the logical flow of your intended design.
+
+2. **Updated Code with Modified Transitions:**
+   - Revise the case statement inside `top_module`:
+
+```verilog
+always @(state) begin
+	case (state)
+		Red: next = Ped;
+		Ped: next = Green; // Changed from transitioning back to Red
+		Green: next = Yellow;
+		Yellow: next = Red;
+		default: next = 2'bxx;
+	endcase
+end
+```
+
+This modification ensures that, once the state transitions to `Ped`, the next transition will be to `Green`, aligning with the expected sequence in the test bench.
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\verilog_fsm.pdf: 24
+end
+25
+STATE_3: begin
+26
+if (!A & B) NextState = STATE_Initial ;
+27
+else if (A & !B) NextState = STATE_4;
+28
+end
+29
+STATE_4: begin
+30
+end
+31
+STATE_5_PlaceHolder : begin
+32
+NextState = STATE_Initial ;
+33
+end
+34
+STATE_6_PlaceHolder : begin
+35
+NextState = STATE_Initial ;
+36
+end
+37
+STATE_7_PlaceHolder : begin
+38
+NextState = STATE_Initial ;
+39
+end
+40
+endcase
+41 end
+42 //
+--------------------------------------------------------------------
+43
+44 endmodule
+45 //...
+
+- source_documents\verilog_fsm.pdf: 48 always@( * ) begin
+49
+Status = 3’b000;
+50
+case (CurrentState)
+51
+STATE_2: begin
+52
+Status = 3’b010;
+53
+end
+54
+STATE_3: begin
+55
+Status = 3’b011;
+56
+end
+57
+endcase
+58 end
+59 //
+--------------------------------------------------------------------
+15...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...

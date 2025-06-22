@@ -1,0 +1,5 @@
+The bug appears because the comparison inside the module is checking whether the input "a" equals a fixed constant (specifically, a 5‐bit literal) rather than checking whether “a” is equal to “b.” In your testbench, you expect the module to output 1 when a and b are the same value, but the module ignores b completely.
+
+Furthermore, the constant used in the if statement is 5 bits long (5'b10101), while a is a 4-bit input; this mismatch in bit widths might cause additional simulation issues, even if the comparison were intended to be with a constant. However, in this scenario, the main issue is that the wrong condition is being used to drive the output result.
+
+This is why the test bench never sees a = b being correctly detected (when a equals b, the comparison of a to 5'b10101 will fail for values other than the specific constant), leading to the error message.

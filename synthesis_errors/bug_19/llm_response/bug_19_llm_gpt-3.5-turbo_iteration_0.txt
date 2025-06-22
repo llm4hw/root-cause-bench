@@ -1,0 +1,5 @@
+The bug in the code is on line 34, where an illegal binary number '2' is assigned to the two-bit signal 'y' using 2'b2. The correct binary representation should only include '0' and '1', as per the binary system.
+
+The error message appears during simulation because the format of 2'b2 is not a valid binary representation and hence is not recognized by the tool.
+
+To fix this bug, you need to correct the illegal binary representation `2'b2` on line 34 and replace it with a valid two-bit binary value that consists only of '0' and '1'.

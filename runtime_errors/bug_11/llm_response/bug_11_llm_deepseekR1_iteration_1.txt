@@ -1,0 +1,12 @@
+The error occurs because the `valid` signal is not correctly determined based on the input `num_in`, and the output `output_data` isn't properly handled for invalid states. Here's the breakdown:
+
+1. **Invalid `valid` Signal**:  
+   In the sequential logic block, `valid` is set to `1` unconditionally whenever `reset` is not active. This means even when `num_in` is outside the 0-9 range (e.g., 10 or 15), `valid` incorrectly stays high. The `valid` signal should instead be derived from whether `num_in` is within the valid range (0-9). For example, `valid` should be `1` only if `num_in ≤ 9`.
+
+2. **Unhandled Invalid States in Output Logic**:  
+   The combinational block assigns `output_data` based on the `state`, but there is no `default` case in the `case` statements. When `num_in` is invalid (e.g., 10), the `state` becomes invalid (not S0-S9), and `output_data` retains its previous value instead of resetting to `0`. This causes the testbench to fail when checking `output_data` for invalid inputs.
+
+**Fix Directions**:  
+- **Update `valid` Logic**: Conditionally set `valid` to `1` only if `num_in` is between 0 and 9 in the sequential block.  
+- **Handle Invalid States**: Add a `default` clause in both `case` statements (under `enableAscii` and its negation) to force `output_data` to `0` when the `state` is invalid.  
+- **State Transition Guard**: Ensure the FSM transitions to a new state *only* when `num_in` is valid (0-9), preventing invalid states entirely.

@@ -1,0 +1,17 @@
+The error you are encountering is due to the use of a `while` loop within an `always` block in Verilog, which is not terminating, leading to an infinite loop situation during simulation. This is indicated by the error message "loop limit (65536) exceeded," which tells us that the synthesizer has a limit on the number of loop iterations it will allow during simulation to prevent potentially infinite loops from hanging the process.
+
+### Reason for the Bug:
+1. **Infinite Loop**: The `while (flag)` loop is infinite because the condition `flag == 1'b1` is always true within the given code, and there is no condition or statement within the loop that modifies `flag`.
+2. **Non-Terminable Condition**: Since `flag` is initialized to `1'b1` and never changed within the loop, the loop will never exit. This results in an infinite loop during simulation.
+3. **Continuous Assignment Issue**: The `always` block is designed to represent combinational logic, but using a `while` loop that does not have a well-defined end condition causes it to go beyond combinational expectations.
+
+### Why it Occurs:
+- In combinational logic (`always @*`), all paths must eventually lead to a stable output given stable inputs. This requirement is violated by the infinite loop, where the output `out <= ~out;` can potentially toggle forever.
+- Such loops without terminating conditions are inherently risky and not synthesizable because they do not describe deterministically bounded hardware behavior.
+
+### Explanation for Fixing the Bug:
+To fix this issue:
+- The conditional structure must allow the loop to terminate or rely on constructs that are better behaved in hardware, such as using a `for loop` with a bounded range or ensuring that a signal like `flag` receives a logical condition that will eventually flip its value to exit the loop.
+- Determine the expected behavior of `out` and modify the logic to use a construct that better fits the intended design (for example, an if-else statement that directly sets stable values for combinational logic).
+
+By addressing these aspects, you can avoid infinite loops and instead create a stable, synthesizable description of your desired behavior.

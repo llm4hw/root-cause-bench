@@ -1,0 +1,17 @@
+The error message indicates that Test 1 of your testbench failed because the expected values for `state`, `output_data`, and `valid` were not obtained. The expected values were `state=3`, `output_data=3`, `valid=1`, but instead, the test observed `0 0 0`.
+
+The issue arises primarily due to the following factors:
+
+1. **Reset Logic:** The current reset block in your FSM uses `@(posedge reset)`. This means the block is only sensitive to changes on the `reset` signal and updates the state when a positive edge of the reset occurs. As a result, the FSM is not operating on clock edges, which prevents it from updating the state and other outputs on clock cycles as intended.
+
+2. **Sequential Logic Misplacement:** In a typical FSM design, the state transitions and outputs should be determined and updated synchronously with the clock signal's positive edge, not just on a condition of reset alone.
+
+Due to these factors, your FSM is not clock-synchronized as expected, which can lead to unexpected results especially if `reset` is no longer high, causing no updates to occur.
+
+To solve this issue, the FSM should be implemented in a way where the state transitions and output logic are synchronized with the clock. This generally involves changing the procedural block to react on the `clk` edge to ensure that the FSM properly transitions states and outputs data according to the clock signal after the reset process is complete.
+
+The key points that need adjustment are:
+- Trigger the FSM logic with the clock signal, not just the reset.
+- Consider using `@(posedge clk or posedge reset)` to ensure the state is reset synchronously as well during the regular clock cycle and asynchronous reset if required.
+
+By modifying the logic to update state and output data based on the clock, you ensure that the FSM operates in a predictable manner according to typical synchronous logic design practices, fixing the issue observed in the test case.

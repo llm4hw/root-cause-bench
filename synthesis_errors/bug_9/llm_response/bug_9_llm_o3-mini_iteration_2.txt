@@ -1,0 +1,3 @@
+The error arises because the code is attempting to read the value of an output port. In VHDL, an output (or "out") port is intended to be only driven (i.e., assigned a value) and not read from inside the architecture. In the line where you compute temp_signal with "a and b", b is used as if it were an input. This is not allowed, which causes the synthesis error.
+
+The suggested fixes are to change the port mode of b to one that allows it to be read (such as "buffer" or "inout") if you really need to use its value inside the design, or alternatively to re-architect the design so that the required signal is available on both the inside and outside without reading from an out-only port.

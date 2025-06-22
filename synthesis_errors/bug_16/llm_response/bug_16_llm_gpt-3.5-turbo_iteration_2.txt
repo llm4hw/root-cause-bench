@@ -1,0 +1,5 @@
+The error message indicates a problem with extracting the asynchronous set/reset for the register `out1_reg` in the module `top16`. This error occurs because in the always block that updates the value of `data`, both the clock (`clk`) and asynchronous reset (`rst`) are used to trigger the updating process. 
+
+The issue arises when assigning the value of `out1` directly from `data` inside the always block, which can lead to a conflict with the synchronous nature of the design due to the presence of asynchronous reset. To resolve this, separating the updates of `data` and `out1` based on the posedge of the clock signal or introducing a synchronous reset logic for `data` instead of using the asynchronous reset `rst` would be a possible solution.
+
+Therefore, the bug can be fixed by revising the logic inside the always block to properly handle both clock and reset signals in a synchronous manner.

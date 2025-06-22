@@ -1,0 +1,5 @@
+The issue is that you're trying to assign a 3-bit signal (input1) to a 4-bit signal (output). In VHDL, both sides of the assignment must have the same width, so when the simulator sees that input1 is only 3 bits but output is declared as 4 bits, it flags a width mismatch error.
+
+This error occurs because, in the design, the designer has declared input1 with a range of 2 downto 0 (3 bits), while output is declared with a range of 3 downto 0 (4 bits), and the assignment is performed element-wise. As a result, there is one bit missing in the source data, causing the simulation to fail.
+
+The fix involves ensuring that both signals have matching widths. This could be done by modifying either the signal declaration or by using a signal conversion method (such as padding) to make their widths match. However, as per your request, I am only explaining the issue and not providing the specific correction code.

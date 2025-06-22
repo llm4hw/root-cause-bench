@@ -1,0 +1,7 @@
+The error message you are encountering indicates that there is an attempt to update or drive the signal `input1` within the architecture of the VHDL code: `input1 <= '0';`. This assignment is incorrect due to the fact that `input1` is defined as an `in` port in the entity declaration.
+
+In VHDL, signals declared with the direction `in` (as is the case with `input1` in your entity) are intended to be inputs to the entity. This means their values are set by external sources or stimuli (such as a test bench) and not by the architecture of the entity itself. You cannot drive or assign a new value to an input port within the same architecture where it is defined; doing so results in the error message you're seeing.
+
+The root cause of this issue is a misunderstanding of input signal direction. Trying to assign a value to an input signal conflicts with its role as receiving input provided from external drivers. Consequently, it goes against the purpose and function of an `in` port in an entity.
+
+To resolve this issue, you should remove the assignment to `input1` within the architecture since its value should be controlled by the environment that instantiates `top3`, such as a test bench or another module. If you need to set `input1` to `'0'` for testing purposes, you should provide that stimulus in your test bench, where `input1` should be connected as an output of a driver signal or component that can appropriately assign it a value.

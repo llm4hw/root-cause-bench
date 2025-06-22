@@ -1,0 +1,21 @@
+The bug occurs because the `case` statement in the VHDL code is **not exhaustive** for the input signal `sel`, which is a 2-bit `std_logic_vector`. Here's why:
+
+1. **Missing Case Coverage**  
+   `sel` can take 4 possible values: `"00"`, `"01"`, `"10"`, and `"11"`. The `case` statement only handles the first three (`"00"`, `"01"`, `"10"`), but **omits `"11"`**. The error explicitly states that the value `32'b...00000011` (the `"11"` case) is missing.
+
+2. **Synthesis Requirement**  
+   Synthesis tools require combinatorial processes (like this `process(sel)`) to either:
+   - Cover all possible input values, or
+   - Include a `when others` clause.  
+   Without this, the tool can't determine the output value for `"11"`, leading to undefined behavior or latch inference.
+
+3. **Simulation vs. Synthesis**  
+   While simulations might ignore uncovered cases (keeping `out1` unchanged), synthesis interprets this as **inferring a latch** for `out1` when `sel="11"`, which violates pure combinatorial logic design rules.
+
+**Fix Approach**:  
+Add a `when others` branch to handle all uncovered cases (including `"11"`, `"UX"`, `"ZZ"`, etc.). Example:  
+```vhdl
+when others => 
+    out1 <= '0';  -- Or any deterministic value
+```  
+Alternatively, explicitly add a branch for `"11"`. This ensures all 2^2=4 cases are covered, resolving the synthesis error.

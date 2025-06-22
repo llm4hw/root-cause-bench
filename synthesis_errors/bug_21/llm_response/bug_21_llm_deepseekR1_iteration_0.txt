@@ -1,0 +1,17 @@
+The error occurs due to a fundamental mismatch between the reset signal's edge sensitivity in the event control and its usage in the conditional expression. Here's the breakdown:
+
+1. **Edge Sensitivity Mismatch**:
+   - The `always` block triggers on `negedge reset` (line 30), implying an *active-low* reset where the reset action should occur when `reset` is low (0).
+   - However, the condition `!reset == 0` evaluates to `true` only when `reset` is high (1), making it behave as an *active-high* reset.
+
+2. **Conditional Logic Flaw**:
+   - `!reset == 0` is logically equivalent to `reset == 1` due to double inversion:
+     - When `reset=1`: `!1 = 0` → `0 == 0` → `true` (reset action)
+     - When `reset=0`: `!0 = 1` → `1 == 0` → `false` (normal operation)
+   - This contradicts the `negedge reset` event, which expects reset logic to activate when `reset` is low.
+
+3. **Synthesis Error Cause**:
+   - Synthesis tools require consistency between edge-triggered events and their corresponding conditional checks. The tool detects that the reset condition (`reset == 1`) triggers on high levels, but the event (`negedge reset`) triggers on falling edges (low-active). This mismatch creates ambiguous reset behavior.
+
+**Fix Direction**:  
+Align the reset condition with the edge trigger by changing the conditional to activate when `reset` is low (0). Replace `!reset == 0` with a check for `reset` being low, such as `reset == 1'b0` or `!reset`. This ensures the reset action occurs when `reset` is low, matching the `negedge reset` event.

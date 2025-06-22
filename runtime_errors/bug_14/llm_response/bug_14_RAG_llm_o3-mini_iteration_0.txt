@@ -1,0 +1,150 @@
+The bug is in the always block that should update the FSM’s state. In the provided code, the always block is written with the sensitivity list "always @(posedge reset)" instead of "always @(posedge clk or posedge reset)". As a result, the block only triggers on changes to the reset signal and never on clk events. Consequently, after reset is deasserted, the state never updates based on num_in, so when num_in is set to 3, the state remains S0 (0) and output_data remains 0, causing the test bench to fail.
+
+To fix the issue, change the sensitivity list of the sequential block to use the clock along with the asynchronous reset. For example:
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+        state <= S0;
+        output_data <= 8'd0;
+        valid <= 0;
+    end else begin
+        if(num_in >= 0 && num_in <= 9) begin
+           state <= num_in;
+           valid <= 1;
+        end else begin
+           state <= S0;
+           output_data <= 8'd0;
+           valid <= 0;
+        end
+    end
+  end
+
+This change ensures that the FSM’s state and outputs are updated on every rising edge of clk (or immediately reset when necessary), so that the test bench’s expected behavior is met.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: 6
+7 always@( * ) begin
+8
+Status = 3’b000;
+9
+case (CurrentState)
+10
+STATE_2: begin
+11
+Status = 3’b010;
+12
+end
+13
+STATE_3: begin
+14
+Status = 3’b011;
+15
+end
+16
+endcase
+17 end
+Alternatively, the output assignment for Status can be combined into the always@( * ) block that
+chooses what the next state should be (see Program 21). It is seperated here for clarity.
+4.5
+A Complete FSM
+In this tutorial we hasve discussed why the Moore machine FSM is useful in digital design and how...
+
+- source_documents\verilog_fsm.pdf: 2
+STATE_1 = 3’b001 ,
+3
+STATE_2 = 3’b010 ,
+4
+STATE_3 = 3’b011 ,
+5
+STATE_4 = 3’b100;
+As 3 bits can specify a total of 8 states (0-7), our encoding speciﬁes 3 potential states not speciﬁed
+as being actual states. There are several ways of dealing with this problem:
+1. Ignore it, and always press Reset as a way of initializing the FSM.
+2. Specify these states, and make non-conditional transitions from them to the STATE_Initial....
+
+- source_documents\Quick Start Guide to Verilog.pdf: S_BEQ_6
+¼ 33,
+S_BEQ_7
+¼ 34,
+S_ADD_AB_4 ¼ 35;
+//-- Addition States
+Within the control unit module, the state memory is implemented as a separate procedural block that
+will update the current state with the next state on each rising edge of the clock. The reset state will be the
+ﬁrst fetch state in the FSM (i.e., S_FETCH_0). The following Verilog shows how the state memory in the
+control unit can be modeled. Note that this block models sequential logic, so non-blocking assignments
+are used....
+
+- source_documents\Quick Start Guide to Verilog.pdf: 116
+8.1.5 Changing the State Encoding Approach ....................................................
+118
+8.2 FSM DESIGN EXAMPLES ........................................................................................
+119
+8.2.1 Serial Bit Sequence Detector in Verilog ......................................................
+119
+8.2.2 Vending Machine Controller in Verilog ........................................................
+121...
+
+- source_documents\verilog_fsm.pdf: CurrentState;
+37 reg [2:0]
+NextState;
+38 //
+--------------------------------------------------------------------
+39
+40 //
+--------------------------------------------------------------------
+41 // Outputs
+42 //
+--------------------------------------------------------------------
+43 // 1-bit
+outputs
+44 assign
+Output1 = (CurrentState == STATE_1) | (CurrentState == STATE_2);
+45 assign
+Output2 = (CurrentState == STATE_2);
+46
+47 // multi -bit
+outputs
+48 always@( * ) begin
+49
+Status = 3’b000;
+50...
+
+- source_documents\verilog_fsm.pdf: Program 23 The complete FSM (part 1) from Figure 1
+1 module
+BasicFsm(
+2
+//
+------------------------------------------------------------
+3
+// Inputs
+4
+//
+------------------------------------------------------------
+5
+input
+wire
+Clock ,
+6
+input
+wire
+Reset ,
+7
+input
+wire
+A,
+8
+input
+wire
+B,
+9
+//
+------------------------------------------------------------
+10
+11
+//
+------------------------------------------------------------
+12
+// Outputs
+13
+//...

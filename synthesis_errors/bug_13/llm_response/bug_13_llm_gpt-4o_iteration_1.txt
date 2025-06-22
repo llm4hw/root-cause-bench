@@ -1,0 +1,17 @@
+The error message you are encountering indicates a syntax error near the `endmodule` keyword in your Verilog file. This type of error typically arises due to a missing semicolon (`;`) in the code preceding `endmodule`. In Verilog, every assignment statement must end with a semicolon.
+
+Looking at the provided code, the issue is in the following line:
+
+```verilog
+assign c = a & b
+```
+
+This line is missing a semicolon at the end of the statement. As a result, the Verilog parser continues to search for the semicolon until it reaches the `endmodule` keyword, where it throws a syntax error because it expected the previous statement to be properly terminated.
+
+To resolve the error, you need to add a semicolon at the end of the assignment statement:
+
+```verilog
+assign c = a & b;
+```
+
+Once the semicolon is added, the Verilog compiler will be able to parse the code correctly, recognizing that the assignment statement is complete before reaching the `endmodule` keyword. This will eliminate the syntax error, allowing the synthesis and simulation to proceed without this particular error.

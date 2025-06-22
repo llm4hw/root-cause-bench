@@ -1,0 +1,7 @@
+The error message indicates that the synthesis tool has encountered a loop that exceeds its loop limit of 65,536 iterations. This suggests that there is an infinite loop or a loop with no terminating condition within the `always` block of your Verilog code.
+
+The root cause of the issue is the `while (flag)` construct inside the `always @*` block, which creates an infinite loop that keeps executing until `flag` becomes false. Since `flag` is initialized to `1'b1` and never updated or changed within the loop or anywhere else in the code, the condition `while (flag)` is always true. This results in an infinite loop where the `out` signal is continuously inverted (`out <= ~out;`), and it never exits the loop.
+
+In RTL design and for synthesis purposes, loops should not be used in this manner inside always blocks, especially without a clear and finite exit condition. Always blocks in Verilog are intended to model combinational logic in `always @*` and sequential logic with clocked `always @(posedge clk)` or `@(negedge clk)`.
+
+The solution to fix this bug is to eliminate the infinite loop inside the always block by removing or replacing the `while` loop with a proper logic implementation that does not rely on infinite iteration. If the purpose of the functionality was to toggle the value of `out` based on some condition, the logic should be implemented with proper combinational or clock-driven behavior that appropriately updates `out` without the use of an infinite loop.

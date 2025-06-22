@@ -1,0 +1,28 @@
+### Bug Explanation:
+The error occurs because you're attempting to assign a value to an **input port** (`input1`), which violates VHDL port mode rules. Here's why:
+
+1. **Port Direction Violation**:
+   - `input1` is declared as `in STD_LOGIC` in the entity, meaning it's a read-only signal that can only receive external values.
+   - The line `input1 <= '0';` tries to *drive* this input port from inside the architecture, which is illegal.
+
+2. **Synthesis Limitation**:
+   - Input ports represent external signals coming *into* the module. Driving them internally creates a hardware conflict (like short-circuiting an input pin to ground).
+   - Synthesis tools explicitly forbid this because it describes physically unrealizable hardware.
+
+3. **Simulation vs. Synthesis**:
+   - While some simulators might allow this (with warnings), synthesis tools strictly enforce port direction rules. This error comes from the synthesis step.
+
+### Fix Approach:
+1. **Remove the Illegal Assignment**:
+   - Delete the line `input1 <= '0';` entirely since input ports can't be assigned values internally.
+
+2. **Redesign the Logic**:
+   - If you need to initialize a signal, use:
+     - An internal signal (e.g., `signal internal_sig : STD_LOGIC := '0';`)
+     - Or drive the **output port** (`output`) instead, if appropriate.
+   - Example: Replace `input1 <= '0';` with `output <= '0';` if you want a constant output.
+
+3. **Check Port Usage**:
+   - Ensure all `in` ports are only used on the right-hand side of assignments (e.g., `output <= input1;`).
+
+> **Key Principle**: Input ports are strictly *sources* of data for the module, not targets for assignment. Output ports (`out`) or internal signals must be used for driving values.

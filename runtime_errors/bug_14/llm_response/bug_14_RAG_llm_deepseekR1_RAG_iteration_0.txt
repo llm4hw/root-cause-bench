@@ -1,0 +1,165 @@
+The bug in the code is due to the state transition logic being triggered only by the reset signal instead of the clock. Here's the breakdown:
+
+**Root Cause**:
+- The state transition logic is inside an `always @(posedge reset)` block, which only updates the state when the reset signal is asserted (rising edge). After reset is released, this block is never triggered again, so the FSM doesn't respond to input changes (`num_in`) or clock edges.
+- The design lacks synchronization with the clock, causing the state to remain in its initial value (S0) even after valid inputs are provided.
+
+**Fix**:
+1. **Modify the sensitivity list** of the sequential block to trigger on the **clock edge** (`posedge clk`) and optionally on reset (`posedge reset`).
+2. **Move non-reset state updates** to execute on clock edges.
+3. **Remove redundant assignments** to `output_data` and `valid` in the sequential block (they belong in combinational logic).
+
+**Corrected Sequential Logic Block**:
+```verilog
+always @(posedge clk or posedge reset) begin
+    if (reset) begin
+        state <= S0; // Reset state
+        valid <= 0;  // Reset valid signal
+    end else begin
+        if (num_in >= 0 && num_in <= 9) begin
+            state <= num_in; // Update state on clock edge
+            valid <= 1;       // Set valid when input is valid
+        end else begin
+            state <= S0; // Default state for invalid input
+            valid <= 0;  // Clear valid signal
+        end
+    end
+end
+```
+
+**Explanation**:
+- The `always` block now triggers on **clock edges** (`posedge clk`), allowing the state to update every clock cycle.
+- `output_data` is entirely handled by the combinational `always @(state)` block, eliminating conflicts from assignments in the sequential block.
+- `valid` is updated synchronously with the state in the clock-triggered block.
+
+**Why This Works**:
+- After reset, the FSM updates its state on each rising clock edge based on `num_in`.
+- The testbench applies `num_in = 3` and waits for a clock edge (`#10`), allowing the state to transition to `S3` and `valid` to assert, matching the test's expectations.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: 6
+7 always@( * ) begin
+8
+Status = 3’b000;
+9
+case (CurrentState)
+10
+STATE_2: begin
+11
+Status = 3’b010;
+12
+end
+13
+STATE_3: begin
+14
+Status = 3’b011;
+15
+end
+16
+endcase
+17 end
+Alternatively, the output assignment for Status can be combined into the always@( * ) block that
+chooses what the next state should be (see Program 21). It is seperated here for clarity.
+4.5
+A Complete FSM
+In this tutorial we hasve discussed why the Moore machine FSM is useful in digital design and how...
+
+- source_documents\verilog_fsm.pdf: 2
+STATE_1 = 3’b001 ,
+3
+STATE_2 = 3’b010 ,
+4
+STATE_3 = 3’b011 ,
+5
+STATE_4 = 3’b100;
+As 3 bits can specify a total of 8 states (0-7), our encoding speciﬁes 3 potential states not speciﬁed
+as being actual states. There are several ways of dealing with this problem:
+1. Ignore it, and always press Reset as a way of initializing the FSM.
+2. Specify these states, and make non-conditional transitions from them to the STATE_Initial....
+
+- source_documents\Quick Start Guide to Verilog.pdf: S_BEQ_6
+¼ 33,
+S_BEQ_7
+¼ 34,
+S_ADD_AB_4 ¼ 35;
+//-- Addition States
+Within the control unit module, the state memory is implemented as a separate procedural block that
+will update the current state with the next state on each rising edge of the clock. The reset state will be the
+ﬁrst fetch state in the FSM (i.e., S_FETCH_0). The following Verilog shows how the state memory in the
+control unit can be modeled. Note that this block models sequential logic, so non-blocking assignments
+are used....
+
+- source_documents\Quick Start Guide to Verilog.pdf: 116
+8.1.5 Changing the State Encoding Approach ....................................................
+118
+8.2 FSM DESIGN EXAMPLES ........................................................................................
+119
+8.2.1 Serial Bit Sequence Detector in Verilog ......................................................
+119
+8.2.2 Vending Machine Controller in Verilog ........................................................
+121...
+
+- source_documents\verilog_fsm.pdf: CurrentState;
+37 reg [2:0]
+NextState;
+38 //
+--------------------------------------------------------------------
+39
+40 //
+--------------------------------------------------------------------
+41 // Outputs
+42 //
+--------------------------------------------------------------------
+43 // 1-bit
+outputs
+44 assign
+Output1 = (CurrentState == STATE_1) | (CurrentState == STATE_2);
+45 assign
+Output2 = (CurrentState == STATE_2);
+46
+47 // multi -bit
+outputs
+48 always@( * ) begin
+49
+Status = 3’b000;
+50...
+
+- source_documents\verilog_fsm.pdf: Program 23 The complete FSM (part 1) from Figure 1
+1 module
+BasicFsm(
+2
+//
+------------------------------------------------------------
+3
+// Inputs
+4
+//
+------------------------------------------------------------
+5
+input
+wire
+Clock ,
+6
+input
+wire
+Reset ,
+7
+input
+wire
+A,
+8
+input
+wire
+B,
+9
+//
+------------------------------------------------------------
+10
+11
+//
+------------------------------------------------------------
+12
+// Outputs
+13
+//...

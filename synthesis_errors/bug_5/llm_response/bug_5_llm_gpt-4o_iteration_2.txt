@@ -1,0 +1,20 @@
+The error in the VHDL code is caused by attempting to directly index the result of a type conversion operation. Specifically, the line where the error occurs is attempting to access a specific bit of a vector that is produced by converting an integer to an unsigned type and then converting that unsigned to a `std_logic_vector`.
+
+Here's the problematic line:
+
+```vhdl
+out1 <= std_logic_vector(to_unsigned(counter, 8))(7);
+```
+
+### Explanation of the Error:
+1. **Type Conversion:** The `to_unsigned(counter, 8)` function converts an integer `counter` to an `unsigned` type of size 8 bits.
+2. **Secondary Conversion:** The subsequent `std_logic_vector(...)` converts this `unsigned` type into a `std_logic_vector` type.
+3. **Illegal Indexing:** Immediately attempting to access the 7th index of the `std_logic_vector` resulting from the conversion is not allowed in the single line of VHDL as per the synthesis tool's rules. This is because the result of the conversion is a temporary object and directly accessing an index on such an expression is not permitted in this context.
+
+### Cause of the Error:
+The issue arises because VHDL does not allow you to index directly into the result of a function or type conversion, particularly when using complex chaining in a single line operation. The synthesis tool is unable to handle indexing directly after evaluating the function to produce a temporary result.
+
+### Explanation for Fix:
+To resolve this issue, you'll need to separate out the conversion and indexing into two distinct steps. By first assigning the result of `to_unsigned` converted to a `std_logic_vector` to a signal or variable, you can then safely index into that object.
+
+In summary, restructure the code such that the conversion result is stored in an intermediary signal or variable that can then be indexed to obtain the desired bit. This approach would allow for proper indexing that adheres to VHDL's rules regarding indexing temporary values.

@@ -1,0 +1,5 @@
+The bug in the code is caused by the incorrect instantiation of the full adders in the `full_add_4bit` module. The interconnections between the full adders are incorrect, leading to an incorrect carry propagation mechanism.
+
+The bug occurs because the `w_carry1`, `w_carry2`, and `w_carry3` wires are not properly connected in the `full_add_4bit` module. In the instantiation of `fa2`, the `i_cin` input is connected to `w_carry3`, which is incorrect as it should be connected to `w_carry1`. This mistake propagates through the subsequent full adder instantiations and results in incorrect carry propagation, leading to incorrect sums.
+
+To fix this bug, make sure to correctly connect the carry wires between the full adder instances in the `full_add_4bit` module. Update the connections in the instantiations of `fa2`, `fa3`, and `fa4` to ensure proper carry propagation between the full adders. Once the connections are corrected, simulate the code again to verify that the expected results are obtained.

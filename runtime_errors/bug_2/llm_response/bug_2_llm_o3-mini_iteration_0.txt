@@ -1,0 +1,5 @@
+The problem arises from the assignment in the module. In the code, q is defined as the result of a bitwise AND between a and the constant 0. Since any value AND 0 always produces 0, q is forced to be 0 regardless of the inputs. This is why even in Test Case 4—where both a and b are 1 and the expected q is 1—the result is still 0.
+
+The test bench checks for the condition when both controllers are on (a = 1 and b = 1) expecting the light (q) to be on (q = 1). However, the logic using a&0 never allows that outcome because the constant 0 nullifies any effect of a.
+
+The root cause is simply using the constant 0 instead of using the input b (or the correct logic that should involve both a and b). The fix involves changing the expression so that it properly evaluates both inputs.

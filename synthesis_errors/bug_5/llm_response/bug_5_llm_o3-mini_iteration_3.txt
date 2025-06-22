@@ -1,0 +1,5 @@
+The problem comes from trying to index an expression result that isn’t a statically declared array. In the failing assignment, the code converts an integer (counter) to an unsigned vector and then to a std_logic_vector all in one expression, and then it attempts to directly extract its 7th element. The synthesis tool is not allowed to index the result of such a type conversion directly, and that’s why it complains.
+
+This error occurs because, in VHDL, the result of a type conversion function is considered an anonymous temporary value. The language rules (and the synthesis tool’s interpretation of them) do not permit indexing into that temporary array result directly. In other words, while you can perform type conversions and assignments, using a part-select directly on the conversion call is not supported.
+
+The typical way to fix the issue is to assign the value returned by the conversion to an intermediate signal and then index that signal for the required bit. This makes the conversion result a named object that can then be safely indexed.

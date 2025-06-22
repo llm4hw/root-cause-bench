@@ -1,0 +1,37 @@
+### Bug Explanation
+The core issue is an **infinite combinational loop** caused by the `while (flag)` construct inside an `always @*` block. Here's why:
+
+1. **Combinational Loop Formation**:
+   - `always @*` triggers whenever any signal in its sensitivity list changes (here, `flag` and `out`).
+   - Since `flag` is hardcoded to `1'b1`, the loop condition `while (flag)` is always true.
+   - The statement `out <= ~out` continuously schedules new updates to `out`, which retriggers the `always @*` block.
+
+2. **Simulation Behavior**:
+   - Simulation enters an infinite loop at time-zero because:
+     - `out` starts as `x` (uninitialized), then `~x` remains `x`.
+     - The assignment `out <= ~out` creates a zero-delay oscillation, overwhelming the event scheduler.
+   - The simulator eventually aborts when hitting the loop limit (65536 iterations).
+
+3. **Synthesis Failure**:
+   - Synthesis tools attempt to unroll loops statically but cannot bound this loop (no exit condition).
+   - The tool exhausts its loop-unrolling limit (65536 cycles) and throws the observed error.
+
+### Why This Is Incorrect
+- **Combinational vs. Sequential Logic**: Combinational blocks (`always @*`) must resolve within a single timestep. Infinite loops violate this.
+- **Lack of Flow Control**: No mechanism breaks the loop (e.g., no clock edge, delay, or `flag` toggle).
+- **Missing Clock Utilization**: The unused `clk` input suggests this should be sequential logic, but the design ignores it.
+
+### Fix Guidance
+1. **Convert to Sequential Logic**:
+   - Replace `always @*` with `always @(posedge clk)` to use the clock.
+   - Remove the `while` loop entirely.
+
+2. **Implement Toggle Logic Correctly**:
+   - Inside the clocked block, use `if (flag) out <= ~out;` to toggle `out` only when `flag=1`.
+   - Add a reset condition to initialize `out` (e.g., via synchronous/asynchronous reset).
+
+3. **Handle `flag` Properly**:
+   - Ensure `flag` can be disabled externally (not hardcoded to `1`) unless intentional.
+   - If continuous toggling is desired, retain `flag=1` but gate it with clock edges.
+
+By restructuring the logic to use clock edges instead of combinational looping, you avoid infinite iterations and make the design synthesizable.

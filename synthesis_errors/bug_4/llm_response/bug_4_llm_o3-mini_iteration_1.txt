@@ -1,0 +1,5 @@
+The problem here is that you are trying to assign a 3-bit vector (input1) to a 4-bit output. The output port is declared as a 4-bit std_logic_vector (bits 3 downto 0), while the input is only 3 bits wide (bits 2 downto 0). This width mismatch causes the synthesizer (or simulation tool) to throw an error, because it doesn't know how to fit a three-bit value into a four-bit space.
+
+The error occurs because the hardware description language expects the source and target widths to match when an assignment is made. Without explicit instructions on how to align or extend the bits, the tool cannot safely infer what should happen with the extra bit.
+
+The fix involves making sure that both the input and output have the same width. This can be done either by changing the output's size to 3 bits or by extending the input to 4 bits so that the assignment becomes valid.

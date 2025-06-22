@@ -1,0 +1,28 @@
+The error message you are encountering, "ERROR: [Synth 8-2715] syntax error near elsif" is due to a missing semicolon in the VHDL code. If we look at the relevant section of the provided code:
+
+```vhdl
+    process (clk, rst)
+    begin
+        if rst = '1' then
+            data_out <= (others => '0')
+        elsif rising_edge(clk) then
+            data_out <= data_in;
+        end if;
+    end process;
+```
+
+The issue lies in the lack of a semicolon at the end of the assignment statement inside the `if rst = '1' then` clause:
+
+```vhdl
+            data_out <= (others => '0')
+```
+
+VHDL requires that all signal assignment statements be terminated with a semicolon. The absence of this semicolon causes the VHDL compiler to misinterpret the subsequent `elsif` keyword as part of the `if` statement, leading to a syntax error. The error is being flagged at the `elsif` because the code parser does not expect it immediately following what it has interpreted (incorrectly) as an incomplete assignment statement.
+
+To fix this issue, a semicolon should be added at the end of the `data_out <= (others => '0')` assignment line, like so:
+
+```vhdl
+            data_out <= (others => '0');
+```
+
+This will correctly terminate the assignment statement, allowing the `elsif rising_edge(clk) then` clause to be properly recognized as part of the `if` construct.

@@ -1,0 +1,5 @@
+The problem is due to the duplicate case labels for the value 1. In the case statement, there are two entries for when the input equals 1—with one branch assigning f to 0 and the second assigning f to 1. This duplication causes ambiguous behavior because only one unique case should match a given value. As a result, when x is 1, the simulator selects the first matching branch (which assigns f to 0), while the testbench expects a value of 1.
+
+Because the ordering or selection is ambiguous when there are duplicate case labels, this is causing the simulation error. The fix involves ensuring that each possible value of x appears only once in the case statement so that the intended assignment for x = 1 is unambiguous.
+
+Remember, removing any duplicated case conditions in the design helps ensure that the behavior of the module matches the testbench expectations.

@@ -1,0 +1,19 @@
+The error occurs because the code attempts to index the result of a type conversion function directly, which is not supported by the VHDL synthesis tool. Here's why:
+
+1. **Type Conversion Issue**:  
+   The expression `std_logic_vector(to_unsigned(counter, 8))` performs a nested type conversion:  
+   - `to_unsigned(counter, 8)` converts the integer `counter` to an `unsigned` type.  
+   - `std_logic_vector(...)` then converts this `unsigned` result to `std_logic_vector`.  
+
+2. **Invalid Indexing**:  
+   The code tries to directly index the result of this conversion using `(7)`. VHDL synthesis tools (like Xilinx Vivado) cannot apply an index (bit-select) to the output of a type conversion function. The tool treats the conversion result as an intermediate expression that cannot be indexed immediately after the conversion.
+
+3. **Redundant Conversion**:  
+   The conversion to `std_logic_vector` is unnecessary for indexing. The `unsigned` type returned by `to_unsigned` is already a vector of `std_logic` elements and can be indexed directly without conversion.
+
+**How to Fix**:  
+Instead of converting to `std_logic_vector` before indexing, directly index the `unsigned` vector. Remove the redundant conversion and index the output of `to_unsigned` directly. For example:  
+```vhdl
+out1 <= to_unsigned(counter, 8)(7);  
+```  
+This eliminates the unsupported indexing of a type conversion result while preserving the intended behavior (outputting bit 7 of the counter).

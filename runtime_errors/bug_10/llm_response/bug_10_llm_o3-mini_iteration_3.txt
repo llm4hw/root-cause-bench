@@ -1,0 +1,5 @@
+The problem is caused by the use of blocking assignments in your sequential always block. In sequential logic, blocking assignments update signals immediately in the order they are written, so when you assign one bit to another, the update of earlier bits becomes visible in later lines of the same clock event. In your code, after setting the least significant bit from the serial input, each subsequent assignment copies the already updated bit, which causes all four bits of the register to become the same value (for example, 1 becomes 1111 when you expected 0001 after one shift).
+
+This bug is occurring because the simulator processes the assignments one after the other, rather than updating all bits simultaneously. When you expect the register to shift in a serial bit, you want to use nonblocking assignments so that the entire register is updated only at the end of the time step, using the values that were present at the beginning of the clock edge.
+
+The fix is to change the way assignments are made in your always block. However, as requested, I’m only explaining the error here without providing the fixed code.

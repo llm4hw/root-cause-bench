@@ -1,0 +1,5 @@
+The bug arises because you are trying to assign a 3-bit signal to a 4-bit signal. In your design, the signal named "input1" is defined as a 3-bit vector (bits 2 downto 0), whereas the "output" port is defined as a 4-bit vector (bits 3 downto 0). Since VHDL does not automatically adjust the widths between signals in an assignment, the synthesis tool complains that the target (4 bits) does not match the source (3 bits).
+
+This issue is occurring when the test bench attempts to simulate the design, and the embedded width mismatch in the assignment "output <= input1;" triggers the error message. Essentially, the simulation environment expects the sizes to line up, and when they do not, the simulation cannot interpret which bit should correspond to which, leading to the width mismatch error.
+
+To fix this issue, you need to ensure that both signals are of the same width by adjusting either the port definitions or by explicitly handling the bit extension/contraction during the assignment. This will resolve the mismatch between the source and target signals.

@@ -1,0 +1,14 @@
+The error message you're encountering indicates that the signal `signal2` is not declared within your VHDL code. This is confirmed by examining the line in your provided code that tries to assign a value to `signal2` within the process.
+
+The process attempts to use `signal2`:
+
+```vhdl
+if rst = '1' then
+    signal2 <= '0'; 
+```
+
+However, if you look through your architecture declaration, you will see that only `signal1` is declared as a signal, and there is no declaration for `signal2`. In VHDL, every signal you use must be declared with its type before you can assign any values to it.
+
+This error occurs because the compiler cannot find a definition for `signal2` in the current scope, which in this case, is your architecture `Behavioral`.
+
+To fix this issue, you need to declare `signal2` within the architecture before it is referenced in your process. Since the error does not provide a specific purpose or further usage for `signal2`, you need to determine the intended purpose of this signal in the design. If `signal2` is supposed to be used or controlled just like `signal1`, or if it is intended to drive an output or intermediate logic, it has to be correctly declared with the desired type, such as `STD_LOGIC`, and potentially given an initial value if needed.

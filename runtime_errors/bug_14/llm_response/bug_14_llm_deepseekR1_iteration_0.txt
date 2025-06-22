@@ -1,0 +1,9 @@
+The bug arises because the state transitions in the FSM's sequential logic block are not synchronized to the clock. The `always @(posedge reset)` block only triggers on reset events, not clock edges. This means:
+
+1. **State transitions don't occur** when inputs change during normal operation (non-reset conditions), as the block isn't sensitive to the clock. The FSM remains in its initial state (S0) after reset is released.
+
+2. **Outputs depend on unupdated states** - Since the state never changes from S0 after reset, the combinational output logic (triggered by state changes) produces default outputs (0s) instead of values corresponding to input-driven state transitions.
+
+3. **Valid signal remains inactive** because it's only updated during reset events, not when valid inputs are applied during normal operation.
+
+The design incorrectly treats reset as the sole synchronization event rather than using clock edges for state updates. The FSM is effectively non-functional after reset because it lacks clock-driven transitions.

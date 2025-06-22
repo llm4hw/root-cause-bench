@@ -1,0 +1,11 @@
+The bug occurs because the state machine gets stuck in the `Ped` state, failing to transition to `Green` as expected. 
+
+**Root Cause:**  
+In the combinational `always` block, when the current state is `Ped`, the next state is set to `Ped` unconditionally. This creates an infinite loop in the `Ped` state. The testbench expects the state to transition from `Ped` to `Green` after one clock cycle, but the code lacks this transition.
+
+**Explanation:**  
+- The `Ped` state's next state is hardcoded to itself (`next = Ped`), causing the state machine to remain in `Ped` indefinitely.  
+- The testbench triggers `pedControl` during the `Red` state, transitioning to `Ped`. However, since `Ped` does not transition to `Green` in the next cycle, the output remains `11` (Ped), leading to the error when `Green` (01) is expected.  
+
+**Fix Direction:**  
+Modify the transition logic for the `Ped` state to set `next = Green` instead of `next = Ped`. This ensures the state exits `Ped` after one cycle and proceeds to `Green`, aligning with the testbench's expectations.

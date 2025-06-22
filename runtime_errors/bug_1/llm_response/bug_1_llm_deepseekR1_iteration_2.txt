@@ -1,0 +1,11 @@
+The bug occurs because the code incorrectly uses bitwise AND operations between vectors instead of combining the reduction ANDs of each group properly. 
+
+For `p1y`, the current code computes the bitwise AND of two 3-bit vectors, resulting in a 3-bit value. Since `p1y` is a single bit, it only takes the least significant bit (LSB) of this result. However, the intended logic requires `p1y` to be 1 if **all** inputs in **either** the first group (`p1a`, `p1b`, `p1c`) **or** the second group (`p1d`, `p1e`, `p1f`) are 1. The correct approach is to compute the reduction AND for each group separately and then OR the two results. 
+
+Similarly, `p2y` has a related issue where the code incorrectly applies a bitwise AND between a single-bit result (from the first group's reduction AND) and a 2-bit vector (from the second group). This leads to truncation and unexpected behavior. The intended logic for `p2y` requires the reduction AND of **all four** inputs, which means combining the reduction AND of each pair of groups with another AND.
+
+**Fix Steps:**  
+1. For `p1y`, compute the reduction AND of each group (e.g., `&{p1a, p1b, p1c}` and `&{p1d, p1e, p1f}`) and then OR these two results.  
+2. For `p2y`, compute the reduction AND of each pair (e.g., `&{p2a, p2b}` and `&{p2c, p2d}`) and then AND these two results.  
+
+This ensures the correct logical combination of the inputs as intended by the test cases.

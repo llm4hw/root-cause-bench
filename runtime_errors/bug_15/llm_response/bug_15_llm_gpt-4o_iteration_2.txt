@@ -1,0 +1,27 @@
+The issue you are encountering originates from a feedback wiring problem in the ring oscillator, which is part of a circuit designed to generate an oscillating signal. Let's explore why the issue is occurring.
+
+### Problem Explanation:
+
+1. **Ring Oscillator Basics:**
+   - A ring oscillator typically consists of an odd number of inverters connected in a loop, such that the output of the last inverter feeds into the input of the first. This causes the signal to repeatedly invert, generating an oscillation.
+   - The output of the oscillator should oscillate indefinitely as long as the circuit is active.
+
+2. **Feedback Wiring Issue:**
+   - In your code, you intend to create a chain of 11 inverters (`not_with_delay` modules) that should form a loop. These inverters are instantiated in a generate block.
+   - The problem lies in how the feedback loop is connected. The output from the `lut_outs` array is meant to feed back into the `lut_ins` array, forming a closed loop.
+   - You set up the connection as follows: `assign lut_ins = {lut_outs[10], lut_outs[9:0]};`. This line is expected to connect the output of the last inverter (`lut_outs[10]`) back to the input of the first inverter (`lut_ins[0]`).
+
+3. **Static Assignment:**
+   - The `assign lut_ins = {lut_outs[10], lut_outs[9:0]};` continuously connects the outputs back to the inputs, but simulation initialization and testbench force intervention can lead to hang ups.
+   - The testbench uses `force uut.lut_ins[0] = 1'b1;`, which overrides the internal feedback temporarily. When this force is released, the signal may not find the right conditions to start oscillating due to any initial simulation conditions or potential static states missed by the simulator.
+
+4. **Delay Modeling:**
+   - Each inverter has a delay of `#1`, which is correct for modeling delayed transitions. However, the static assignment post-release might not immediately lead to a dynamic change, especially when initial conditions (force applied) are controlled externally without guarantees of native simulation behavior favoring oscillation.
+   
+### Explanation of the Fix:
+
+- Ensure that the initialization conditions and the start-up stimulation allow initial toggling. Inevitably you will want to confirm the simulation starts with favoring a signal change that can start oscillation.
+- Instead of relying on a force and release from a testbench, try to give a known state by allowing natural oscillation with:
+  - Utilize an odd number of inverters with a break in initialization with signal that can promote the feedback tunneled back directly into the next cycle refresh.
+
+Ultimately, this will require careful calibration of initial forced states, simulator initial conditions, and circuit topology to favor start-up behavior that aligns naturally with expected oscillator function, without manual interventions leading to unanticipated static phenomena.

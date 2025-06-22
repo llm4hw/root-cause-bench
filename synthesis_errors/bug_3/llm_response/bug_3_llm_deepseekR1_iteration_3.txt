@@ -1,0 +1,19 @@
+The error occurs because you are attempting to assign a value to an input port (`input1`), which violates fundamental VHDL port mode rules. Here's why:
+
+1. **Port Mode Violation**:  
+   `input1` is declared as `in STD_LOGIC`, meaning it's an **input-only** port. Input ports can only be *read* within the architecture, not *driven*. The assignment `input1 <= '0'` illegally tries to drive this input.
+
+2. **Synthesis Limitation**:  
+   Synthesis tools cannot resolve this because inputs are externally driven signals. Driving them internally creates multiple drivers (external testbench vs. internal assignment), causing unresolved signal conflicts.
+
+3. **Testbench Conflict**:  
+   During simulation, the testbench would drive `input1`, while your design simultaneously tries to drive it to `'0'`. This creates a signal contention (multiple drivers), which is illegal in digital logic.
+
+**Fix Required**:  
+- Remove the assignment `input1 <= '0'`.  
+- If you need a constant `'0'` in your logic:  
+  - Use it to drive an *output* (e.g., `output <= '0'`), or  
+  - Connect `input1` to an internal signal (e.g., `signal internal_sig : STD_LOGIC;`) and use that signal in your logic.  
+- Input ports should only be read, never assigned.
+
+**Key Principle**: Input ports are strictly for receiving external values; they cannot be modified internally.

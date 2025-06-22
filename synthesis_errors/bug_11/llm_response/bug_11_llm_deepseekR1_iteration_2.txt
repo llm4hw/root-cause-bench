@@ -1,0 +1,26 @@
+The error occurs due to an incomplete case statement in the VHDL code. Here's the breakdown:
+
+1. **Signal Declaration Issue**:
+   - `sel` is declared as a 2-bit vector (`std_logic_vector(1 downto 0)`)
+   - This allows 4 possible values: "00", "01", "10", and "11"
+
+2. **Missing Case Coverage**:
+   - The case statement only handles:
+     * `"00"` → `out1 <= '1'`
+     * `"01"` → `out1 <= '0'`
+     * `"10"` → `out1 <= '0'`
+   - The value `"11"` (binary 3) has no corresponding branch
+
+3. **Synthesis Requirement**:
+   - VHDL requires all possible values of the case expression to be explicitly handled
+   - Synthesis tools treat uncovered cases as errors (not warnings) to prevent inferred latches or undefined behavior
+
+4. **Error Message Interpretation**:
+   - The 32-bit representation (`32'b00000000000000000000000000000011`) is the tool's internal representation of the missing value
+   - The last two bits ("11") correspond to the actual missing case value
+
+**Fix Approach**:  
+Add a branch for the `"11"` case OR include a `when others` clause to cover all remaining possibilities. The choice depends on the intended behavior for the `"11"` input state. Note that `when others` must be the last branch and will handle any unlisted cases (including "11" and meta-values like 'X'/'U').
+
+**Critical Note**:  
+The current implementation would also infer a latch for `out1` during synthesis when `sel="11"` since no assignment occurs in that case. The fix must provide explicit output assignments for all input combinations.

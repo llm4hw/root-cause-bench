@@ -1,0 +1,10 @@
+The problem is not with the half‐adder or even the one‐bit full adder logic, but with how the four 1‐bit adders are connected together in the 4‐bit adder module. In a proper ripple-carry adder, each adder’s carry-out should feed the next adder’s carry-in in the proper order (from bit 0 to bit 1, bit 1 to bit 2, and so forth). 
+
+In this case, the wires that carry the carry signals between the individual adders have been mis-assigned. For example, instead of passing the carry from the least significant bit (fa1) to the second bit (fa2), the design mistakenly connects carry outputs to the wrong inputs in the chain. As a result, when you add 3 and 5 (which should produce 8, or 01000 as a 5-bit result), the mis-wired carry chain causes the wrong combination of carry and sum outputs to appear (here, 10010).
+
+To summarize:
+• The bug is that the chaining of the one‐bit adders is incorrect—each full adder is not receiving the proper carry input from its preceding stage.
+• This happens because the wires carry signals from the wrong instantiations (the carry outputs are mismatched with the correct inputs).
+• Fixing the bug requires reassigning the carry wires so that the carry output of the 0th adder goes to the 1st adder’s carry input, the 1st adder’s carry goes to the 2nd adder, and so on, ensuring the ripple-carry chain is implemented in the correct order.
+
+This explains the root cause and points to the proper way to fix it without providing the actual code changes.

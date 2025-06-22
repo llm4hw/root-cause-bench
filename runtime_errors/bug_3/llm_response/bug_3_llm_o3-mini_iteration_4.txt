@@ -1,0 +1,7 @@
+The issue is with how the final carry output is calculated. In your full adder design, after chaining two half-adders together, you combine the intermediary carry signals using an AND operation. This is incorrect for a full adder.
+
+For a full adder, the final carry should be generated when either the first half-adder produces a carry or when the second half-adder’s operation produces a carry (or both). By using an AND operator, the code only produces a carry when both half-adder outputs are active, which does not match the expected behavior.
+
+This discrepancy is why, in Test Case 3 (inputs 1, 1, 0), the simulation produces no carry (0) instead of the expected carry (1).
+
+To resolve this, the expression for the output carry should combine the intermediary carry signals in a way that reflects a logical OR rather than a logical AND.

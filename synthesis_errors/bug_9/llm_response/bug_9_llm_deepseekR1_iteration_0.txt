@@ -1,0 +1,30 @@
+### Root Cause Analysis
+The core issue occurs because you're attempting to **read from an output port** (`b`) in the expression `a and b`. In VHDL:
+- Ports declared as `out` are **write-only** within their own entity
+- Reading an `out` port violates VHDL's mode restrictions (it's undefined behavior)
+
+### Why This Error Occurs
+1. **Port Mode Violation**:  
+   The line `temp_signal <= a and b;` tries to read the value of `b`, but `b` is strictly an output port. VHDL forbids reading outputs because:
+   - Output ports represent signals driven *externally* from the entity
+   - There's no defined value for an `out` port *inside* the entity
+
+2. **Tool Enforcement**:  
+   The synthesis tool (Xilinx Vivado) detects this illegal read operation and throws error `[Synth 8-1779]`, explicitly stating the port mode conflict.
+
+### Correct Fix Approach
+To resolve this, you must **reconfigure how the output port is accessed**:
+1. **Preferred Solution**:  
+   Create an **internal copy** of the output signal:
+   - Declare an internal signal (e.g., `b_internal`)
+   - Drive the actual output port `b` from this internal signal
+   - Use `b_internal` in your logic instead of directly reading `b`
+
+2. **Alternative (Less Recommended)**:  
+   Change the port mode of `b` to:
+   - `buffer` (allows reading the driven output value)
+   - `inout` (bidirectional, allows reading but overcomplicates simple outputs)
+
+### Critical Note
+Your current code has a **secondary issue**:  
+The output port `b` is never assigned any value. Even after fixing the read error, you'll need to drive `b` (or its internal equivalent) somewhere in the architecture to avoid undefined output.

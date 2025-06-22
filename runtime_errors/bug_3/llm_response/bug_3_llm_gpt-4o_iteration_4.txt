@@ -1,0 +1,22 @@
+The issue stems from the way `o_carry` is calculated in the `full_half_add_1bit` module. In a full adder implementation, the carry-out (`o_carry`) for a three-input adder (inputs `i_a`, `i_b`, and `i_cin`) should be calculated using the following logic:
+
+1. The first half-adder computes the sum and carry from inputs `i_a` and `i_b`. The sum of these inputs is stored in `w_sum1`, and the carry is stored in `w_carry1`.
+   
+2. The second half-adder processes this sum (`w_sum1`) and the carry-in (`i_cin`). The sum is given to `o_sum`, and the carry from this operation is stored in `w_carry2`.
+
+The typical carry-out for a full adder in terms of logic should be given by:
+
+\[ o\_carry = w\_carry1 \text{ OR } w\_carry2 \]
+
+However, in this design, the assignment is:
+
+\[ o\_carry = w\_carry1 \text{ AND } w\_carry2 \]
+
+The use of `AND` instead of `OR` leads to incorrect behavior in certain cases, such as Test Case 3 (inputs `i_a = 1`, `i_b = 1`, `i_cin = 0`). Here, the following happens:
+
+- `i_a = 1`, `i_b = 1`: First half-adder gives `w_sum1 = 0` and `w_carry1 = 1`.
+- `w_sum1 = 0`, `i_cin = 0`: Second half-adder gives `o_sum = 0` and `w_carry2 = 0`.
+
+With logical `AND`, `o_carry = w_carry1 & w_carry2 = 1 & 0 = 0`, which is incorrect (the expected result is a carry of 1).
+
+The root cause of the error is the incorrect logical operation for calculating the final carry-out, which should be changed from `AND` to `OR`. This will ensure that if either half-adder has a carry, the overall carry-out reflects that.

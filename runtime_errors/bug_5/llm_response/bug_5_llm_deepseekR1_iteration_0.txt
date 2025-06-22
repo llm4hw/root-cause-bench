@@ -1,0 +1,22 @@
+The bug occurs because the code is designed to find the **overall minimum value** among inputs `a`, `b`, `c`, and `d`, but the requirement specifies that it should find the **first value smaller than `a`** in the order `b` → `c` → `d` (and if none exist, keep `min = a`). 
+
+### Why the bug occurs:
+1. **Incorrect comparison logic**:  
+   The code initializes `min = a`, then sequentially checks if the current `min` is greater than `b`, `c`, or `d`.  
+   This updates `min` to **any lower value** it encounters (not just the first one smaller than `a`).  
+   For example, in Test Case 3:
+   - `a=10`, `b=15` → `min` stays `10` (since `10 > 15` is false).
+   - `min=10` is greater than `c=8` → `min` updates to `8`.
+   - `min=8` is greater than `d=7` → `min` updates to `7` (final result).  
+   **Expected behavior**: `c=8` is the first value smaller than `a=10` in the order `b`→`c`→`d`, so `min` should be `8` and stop.
+
+2. **Violation of the "first match" requirement**:  
+   The requirement mandates stopping at the **first value** in the sequence `b`, `c`, `d` that is smaller than `a`. The current code does **not stop** after finding such a value—it continues checking all inputs, potentially overriding the first match with a later smaller value (like `d=7` overriding `c=8`).
+
+### How to fix:
+Replace the sequential independent `if` statements with a **priority chain** (using `if-else if`). Specifically:  
+- Compare `a` directly against `b`, `c`, and `d` (not the dynamically updating `min`).  
+- Assign `min = b` if `a > b` (first priority), else check `c`, then `d`.  
+- If no value is smaller than `a`, default to `min = a`.  
+
+This ensures the first value in the sequence `b`→`c`→`d` smaller than `a` is selected, and subsequent values are ignored.

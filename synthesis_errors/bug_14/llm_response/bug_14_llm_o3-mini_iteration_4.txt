@@ -1,0 +1,5 @@
+The problem is that the always block is attempting to assign a value from a signal named “data” to the "out1" register, but no such signal “data” has ever been declared in the module. In other words, the code is referencing an undeclared identifier, which is why the synthesis (or simulation tool in this context) reports that “data is not declared.”
+
+This bug occurs because the module is trying to use “data” while only “clk” and “out1” have been defined. The simulation (or synthesis) process doesn’t know what "data" refers to, causing it to fail when it hits that reference.
+
+To fix the issue, the module should either declare the “data” signal with the proper type and width if it is intended to be used, or you must update the assignment so that it uses a correctly declared signal.

@@ -1,0 +1,9 @@
+The bug in this code is occurring because of a misunderstanding in the testbench logic. 
+
+In the testbench code, during the "Activate PedControl" scenario, the expected sequence is Red -> Ped -> Green. However, after setting pedControl to 1 and waiting for 10 time units, the expected result is Green (01), but the comparison is done against Ped (11) instead.
+
+The reason for the error message "Expected Green (01), but got 11" is that the check for the expected output after PedControl is incorrect in the testbench code. The testbench is checking for the expected output immediately after setting pedControl to 1, without allowing the design to progress to the next clock edge where the state transition occurs from Red to Ped and then to Green.
+
+To fix this bug, the testbench code should be modified to allow enough time for the state machine in the design to transition from Red to Ped to Green before checking for the expected output. This can be achieved by adding additional delay before checking the output after setting pedControl to 1 and ensuring that the expected output is correctly identified based on the state machine transitions.
+
+By making these adjustments in the testbench code, the bug causing the error message "Expected Green (01), but got 11" can be resolved.

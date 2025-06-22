@@ -1,0 +1,9 @@
+The problem stems from using the bit‐wise AND operator on two 3‑bit vectors and then assigning the result to a single‑bit output. In the failing test case, the first three inputs are all 1 and the second three are all 0, so the bit‑wise AND of the two 3‑bit vectors produces 3 bits of 0. When that 3‑bit result is truncated or reduced to fit the 1‑bit output, the value becomes 0 instead of the intended 1.
+
+In other words, the design’s approach of concatenating the inputs into two 3‑bit vectors and using the "&" operator causes each bit position to be AND‑ed separately rather than checking whether one of the whole 3‑bit groups is all ones. The test bench expects p1y to be 1 when one of the groups is entirely 1’s (even if the other group is all 0’s), but the bit‑wise AND never produces that value.
+
+The bug occurs because the intended logic (to output 1 if either the first trio or the second trio of inputs are all 1) is not implemented correctly. Instead of comparing full 3‑bit groups (or reducing them with an appropriate operator), the code is doing a bit‑by‑bit AND on misaligned groups.
+
+To fix the bug, the design would need to adjust the logic so that it properly checks whether one of the 3‑bit groups is all ones and then produces a single‑bit 1. This can be accomplished by first reducing or comparing each 3‑bit vector to its expected value and then combining the results with a logical operator.
+
+Thus, the root cause is the incorrect combination of bit‑wise vector operations and inappropriate assignment to a 1‑bit output, leading to an unexpected result in the simulation.

@@ -1,0 +1,5 @@
+The bug occurs because the logic keeps updating the output for every comparison rather than stopping when the first value smaller than a is found. In the test case (with a = 10, b = 15, c = 8, d = 7), the code first finds c (8) is smaller than a (10) and assigns min = 8. However, because the code then independently checks d without any mutual exclusion or early exit, it sees that 7 is smaller than 8 and updates min to 7. This behavior violates the requirement to assign the first encountered smaller value (which should be c, or 8) rather than the overall minimum.
+
+The issue arises because the if statements are independent and sequential. That is, even after meeting the condition for c, the subsequent statement for d is still evaluated, and if d is even lower, it overwrites the correct value.
+
+To fix the bug one would need to structure the comparisons so that after a smaller value is found (in the order b then c then d), no further comparisons alter min. This could typically be achieved by making the comparisons mutually exclusive (for example, using an if-else chain or additional flag) so that once a smaller value is assigned, the subsequent inputs are ignored.

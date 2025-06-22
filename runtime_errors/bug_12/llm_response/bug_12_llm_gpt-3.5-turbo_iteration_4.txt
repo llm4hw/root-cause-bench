@@ -1,0 +1,7 @@
+The bug in the code is that the comparison in the always block is checking if a is equal to 5'b10101 (which is equivalent to decimal 21) to set the result to 1. However, the testbench is expecting the result to be 1 when a is equal to b (test case 1: a == b), which is not properly handled in the faulty_comparator module.
+
+In the test case where a = 4'd9 and b = 4'd9, the faulty_comparator module is checking if a == 5'b10101 (which is not true for a = 9) and setting the result to 0 instead of 1.
+
+To fix this issue, the comparison condition in the always block of the faulty_comparator module should be modified to check if a is equal to b instead of comparing it to a specific value (5'b10101). This change will ensure that the result is set to 1 when a is equal to b and 0 otherwise.
+
+You can modify the condition to "if (a == b)" in the always block of the faulty_comparator module to fix this bug.

@@ -1,0 +1,19 @@
+The error message, "ERROR: Ring oscillator output (OUT) never toggled. Likely feedback wiring issue," indicates that the ring oscillator circuit is not functioning as intended.
+
+In the provided ring oscillator module, the logic is designed to create a feedback loop of inverters to oscillate. However, there are some key points that are likely causing the oscillator not to toggle and remain stable:
+
+1. **Feedback Loop Problem**:
+   - The feedback loop is constructed by assigning `lut_ins` as `{lut_outs[10], lut_outs[9:0]}`. This means `lut_ins[0]` is effectively driving `lut_outs[0]` to `lut_outs[9]`, creating a shift register-like scenario rather than a true ring oscillator feedback.
+   - The assignment creates a situation where the last element of `lut_outs` is fed back into the first input (`lut_ins[0]`), but the condition needed for initiation of oscillation (e.g., non-zero initial condition) isn't properly established, or the initial force/release logic in the test bench isn't allowing the initial feedback loop to sustain.
+
+2. **Timing and Simulation Initialization**:
+   - When using a `force` and `release` in the testbench, as seen with `force uut.lut_ins[0] = 1'b1;` this momentarily forces an initial condition. However, the issue arises because the forced signal is a single pulse and potentially not enough to sustain the ring oscillation through the chain without a proper initialization of every part of the ring.
+   - Once `release` is done, the oscillation may not continue, because the initial force isn't adequate for creating sustained toggling, reverting the chain to a stable state.
+
+**Explanation of Fix**:
+To rectify the situation, a few modifications are necessary to ensure the circuit begins oscillating properly:
+- **Reevaluate Feedback Initialization**: Ensure that at least one inverter is fed back properly and starts with a complementary initial condition (e.g., alternating '0' and '1' states in the chain).
+- **Proper Initial Conditions**: Make sure that the ring starts with an imbalance (like some driven values or flip-flops initialized differently), this may require customizing the initial force condition or refining the initial conditions within the code.
+- **Simulation Precision**: Ensure timestep in simulation sufficiently captures the propagation delays and proper feedback delay is accounted for.
+
+In summary, the key is ensuring that the loop has appropriate initial conditions or disturbances to start oscillating. This typically means examining the inverter chain setup and ensuring the feedback integration permits sustained oscillations, not stabilization.

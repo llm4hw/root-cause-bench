@@ -1,0 +1,7 @@
+The bug in the code is caused by using a variable (`variable1`) outside of the process in VHDL. Variables in VHDL are local to the process where they are defined, and they cannot be shared or accessed outside of the process unless they are declared in a shared context (such as a package). In this case, `variable1` is being used in the assignment to `out1`, which is violating this rule.
+
+To fix this issue, you can either move the declaration of `variable1` inside the process where it is being used or change it to a signal that can be accessed outside of the process.
+
+Additionally, in VHDL, signals are the preferred way to model data flow between processes, while variables are typically used for temporary storage and calculations within a process. So, it is recommended to use signals for connecting modules and processes together.
+
+Make sure to make the necessary adjustments to the code to resolve this issue.

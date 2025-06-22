@@ -1,0 +1,5 @@
+The error is occurring because the process refers to "signal2" even though no such signal was declared in the architecture. In the architecture only "signal1" is declared. This mismatch results in the simulator (or synthesis tool) reporting that "signal2" is not found.
+
+The root cause is likely either a typo (where "signal1" was intended) or an omission (where "signal2" should have been declared but wasn't). In either case, the test bench is signaling the error because it encountered an assignment to a signal that doesn’t exist.
+
+To resolve this issue, you would need to either declare "signal2" in the architecture or replace its reference with the correct signal that was meant to be used.

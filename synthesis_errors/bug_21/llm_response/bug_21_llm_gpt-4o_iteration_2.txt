@@ -1,0 +1,21 @@
+The error message you're encountering in your Verilog code relates to how the conditional expression in the `if` statement inside your always block is formulated. The specific line of code raising the error is:
+
+```verilog
+if (!reset == 0) begin
+```
+
+**Issue Explanation:**
+
+1. **Problematic Expression:** The expression `(!reset == 0)` is not clear in terms of intent because it seems like you might be trying to check for when `reset` is deasserted or asserted. However, this expression is syntactically confusing.
+
+2. **Operator Precedence:** The preprocessor evaluates `!reset == 0` in a way that may not be initially apparent. It evaluates `!reset`, which negates the reset signal to a 1-bit result and then compares this with 0 using the `==` equality operator. The result of `!reset` will be either `1` or `0`, making this a confusing way to express a condition: if you want to specifically check the value of `reset`, you should do so directly.
+
+3. **Event Control:** In your always block sensitivity list, you have `posedge clk or negedge reset`. This indicates you want to execute the block either on the rising edge of the `clk` or the falling edge of `reset`. The `if (!reset == 0)` check might be intended to check if `reset` is low; however, this is an awkward expression to express such intent.
+
+**Root Cause:**
+The expression in the `if` statement doesn't match what is likely your intended control logic for a reset condition, and the synthesis tool is checking for consistency between how edges are used in the event control and within the body of the always block.
+
+**Resolution Explanation:**
+To correctly assess the `reset` condition, you should write the if condition more clearly in a way that directly checks the state of the `reset` signal. Instead of using `!reset == 0`, you can simply check if `reset` is low by directly using `reset` in a clear logical condition. Reevaluate the logic based on how you intend to handle the reset active state, considering the event control's specification.
+
+In summary, modify the if statement to clearly reflect your intent to check the reset signal state rather than using a possibly misleading combination of negation and equality comparison. The synthesis error points out this inconsistency in intention and operational clarity between your signal edge conditions and your described logic.

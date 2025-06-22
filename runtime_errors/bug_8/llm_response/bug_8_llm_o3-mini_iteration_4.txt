@@ -1,0 +1,5 @@
+The problem is that once the state machine enters the Ped state (which outputs 11), it never leaves that state. In the logic that determines the next state, the Ped state is defined to loop back to itself rather than transition back to Green (or any other state). As a result, when the test bench expects that after a cycle in Ped the output should change back to Green (01), the design keeps producing Ped (11), and the error is generated.
+
+This occurs because the next-state logic for Ped unconditionally sets the next state to Ped. Most likely, the designer intended for the machine to move from Ped back to a normal state (such as Green) after a brief interval or under a certain condition (for example, when pedControl goes low or after one cycle). Instead, it remains stuck.
+
+To fix the issue, the designer should modify the state machine's transition logic for the Ped state so that the machine eventually transitions out of Ped (for example, to Green) once the ped control condition has been fulfilled.

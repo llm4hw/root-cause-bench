@@ -1,0 +1,7 @@
+The problem is that the state machine’s transition for one of the states doesn’t match the expected sequence from the test bench. In your design you’ve encoded the transitions so that when the state is Pedestrian the next state is set to Red. However, the test bench expects the sequence to go from Pedestrian to Green, not back to Red. In other words, after starting at Red (00) and then going to Ped (11) the test bench expects the next state to be Green (01) but the design forces a transition from Ped directly back to Red (00).
+
+This mismatch causes the simulation to detect an error (it finds 11 when it expected 00 or vice versa, depending on the check ordering) because the state machine never goes into the Green (01) and Yellow (10) states as expected. The error message “Expected Red (00), but got 11” is generated when the test bench compares the actual state with the expected state from the predefined traffic light sequence.
+
+The root cause is that the transition defined for the Pedestrian state in your combinational next‐state logic is incorrect relative to the intended state sequence. To fix the issue you would need to change the transitions so that the next state following Ped is Green. (In your debugging process, make sure that every defined state transition in the code matches the intended sequence in your test bench.)
+
+Remember: The fix would involve modifying the state transition for Ped rather than leaving it to go back to Red.

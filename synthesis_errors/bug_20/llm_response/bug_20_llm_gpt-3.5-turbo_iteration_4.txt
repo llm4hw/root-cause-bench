@@ -1,0 +1,7 @@
+The bug in the provided code is that the `while` loop inside the `always` block is causing an infinite loop. The error message "loop limit (65536) exceeded" is likely occurring because the simulator is detecting that the loop runs indefinitely and hence exceeds the loop limit constraint.
+
+In Verilog, the `always` block gets executed whenever there is a change in any of its input signals. Since the loop is running continuously without any condition to break out of it, it leads to an infinite loop scenario.
+
+To fix this issue, the loop needs to have a conditional exit statement within the `always` block so that it can break out of the loop at some point. Adding a proper condition to exit the loop, such as checking a specific number of iterations or a flag that changes based on some condition, would prevent this infinite loop and resolve the issue.
+
+It's important to review the design's intended functionality and determine the correct exit condition for the loop to ensure proper operation.

@@ -1,0 +1,27 @@
+The error message you encountered, "ERROR: Test Case 6 failed. outResult = 101 (Expected > 110)," indicates that when you expect the `outResult` to be greater than `110` (which could imply `111` as it is a 3-bit signal), the `outResult` is `101` during Test Case 6. Here's an analysis of the issue:
+
+### Problem Analysis:
+
+1. **Understanding State Transitions:**
+   - Your state machine has states: `Red`, `Green`, `Yellow`, and `Ped`.
+   - When in the `Ped` state, the code determines `outResult` based on the `longTimeHold` signal. If `longTimeHold` is `1`, `outResult` is set to `101`. If `longTimeHold` is `0`, `outResult` is set to `110`.
+  
+2. **Test Case 6:**
+   - You are in a scenario where the pedestrian signal is triggered and `longTimeHold` is `1`.
+   - The expected behavior (according to your test bench) is for `outResult` to be greater than `110`.
+
+3. **Configuration Mistake:**
+   - The current configuration does not allow `outResult` to be greater than `110`, since the only possible values for `outResult` when in the `Ped` state are `101` and `110`.
+   - There might be an inconsistency between the expected behavior in the test bench and the implemented logic for the `Ped` state when `longTimeHold` is `1`. The value `111` (greater than `110`) isn't being used or defined in your state machine.
+
+### Conclusion:
+
+- The test bench's expectation for `outResult` to be greater than `110` during Test Case 6 is incorrect given your current state machine implementation. The test bench expects a behavior that isn't modeled in the design.
+  
+### Explanation of Fix:
+  
+- You must either adjust the test bench expectation to match the current implementation or modify your design to produce a value greater than `110` when `longTimeHold` is `1` in the `Ped` state, if that's actually the intended behavior.
+  
+- If intended behavior aligns with the test bench's expectations, update the state machine logic to set `outResult` to a value that satisfies `outResult > 110` (such as `111`) when `longTimeHold` is `1` in the `Ped` state. If the current logic is correct, adjust the test case to expect `101` when `longTimeHold` is `1`.
+
+This discrepancy needs to be resolved depending on the correct functional requirement expected from the system.

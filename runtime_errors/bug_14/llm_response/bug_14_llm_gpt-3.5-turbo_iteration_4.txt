@@ -1,0 +1,8 @@
+The bug in the code is related to how the expected state is being checked in the testbench when providing input '3' to the FSM module. 
+
+In the testbench, the condition for checking state in Test 1 is incorrect. The expected state has been set to '4'd3' (which corresponds to the binary representation of '0011'), but the check in the if statement is comparing it to '3' instead of '4'd3'. So, the if statement condition should be updated to compare against '4'd3'.
+
+To fix it, in Test 1 of the testbench code, the comparison should be updated to:
+```if (state !== 4'd3 || output_data !== 8'd3 || valid !== 1)```
+
+After making this change, run the simulation again to verify if the issue is resolved and the test passes successfully.

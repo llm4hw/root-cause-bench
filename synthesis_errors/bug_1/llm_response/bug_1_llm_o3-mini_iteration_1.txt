@@ -1,0 +1,7 @@
+The error stems from a parsing issue in the VHDL code. In this architecture, each sequential statement inside the process must be properly terminated by a semicolon. Here, the assignment in the reset branch:
+
+  data_out <= (others => '0')
+
+is missing its terminating semicolon. As a result, when the compiler encounters the following line with the elsif keyword, it does not recognize it as starting a new branch. Instead, it treats the elsif as an unexpected continuation of the previous statement, leading to the syntax error near "elsif".
+
+In summary, the problem is due to a missing semicolon at the end of the statement for the reset condition. This causes the compiler to misinterpret the structure of the if-elsif block, which is why the error is generated during simulation.

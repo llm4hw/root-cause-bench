@@ -1,0 +1,16 @@
+The error occurs because the signal `data` is declared as a `wire` but is assigned within a procedural block (`always @(posedge clk or posedge rst`). Here's why this is invalid:
+
+1. **Declaration Conflict**:
+   - `wire` types can only be driven by continuous assignments (`assign` statements) or module ports. They cannot be assigned inside procedural blocks like `always`.
+
+2. **Procedural Assignment Attempt**:
+   - The code tries to make non-blocking assignments (`<=`) to `data` inside the `always` block (both during reset and normal operation). This requires a variable of `reg` type.
+
+3. **Inconsistent Signal Types**:
+   - `out1` is correctly declared as `output reg`, making it valid for procedural assignments. But `data` is declared as `wire`, causing the conflict.
+
+**Fix Required**:
+Change the declaration of `data` from `wire` to `reg` since it needs to store state across clock cycles and is assigned procedurally. This will resolve the synthesis error while preserving the intended flip-flop behavior.
+
+**Note on Secondary Issue**:
+The assignment `out1 <= data` uses the *previous* value of `data` due to non-blocking assignment semantics. If you intended `out1` to reflect the *newly calculated* value of `data`, move the assignment inside the `else` branch or adjust the logic sequence. This doesn't cause the current error but may lead to unexpected behavior.

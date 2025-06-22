@@ -1,0 +1,9 @@
+The error indicates that when the test bench expected the light to have returned to Green (binary 01) after displaying Pedestrian (binary 11), the module was still outputting Pedestrian (11). In other words, the state machine never left the Ped state and remained "stuck" there.
+
+Looking at the code, you can see that there is a state transition defined for each state. In the case for the Ped state, the next state is hard-coded to remain as Ped. Because the state machine is clocked, once it enters the Ped state (triggered by a high pedControl input when in the Red state), it will continue to reassign the next state to Ped—even on subsequent clock cycles. Therefore, during simulation the output remains at 11, even when the test bench anticipates it should be green.
+
+The bug is occurring because when pedControl is active and the state transitions from Red to Ped, the state machine does not include a transition out of the Ped state to continue normal operation (for example, moving to Green). This design flaw causes the Ped state to become an absorbing state.
+
+To fix this issue, you would need to adjust the state transition logic for the Ped state so that it does not remain locked in Ped. Instead, after the required interval (or under the correct condition), the state machine should transition from Ped to Green (or another appropriate state) as expected by the test bench.
+
+Remember, this explanation is strictly describing the issue and why the error occurs.

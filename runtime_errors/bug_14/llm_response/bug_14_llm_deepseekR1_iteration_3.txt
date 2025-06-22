@@ -1,0 +1,9 @@
+The bug occurs because the state transition logic is incorrectly triggered by the positive edge of `reset` instead of the clock (`clk`). Here's the breakdown:
+
+1. **Incorrect Sensitivity List**: The sequential `always` block uses `@(posedge reset)`, meaning it only reacts to reset events. State updates (and related outputs) only occur during reset assertion, not on clock edges. After reset is released, the FSM never processes input changes because there's no clock-driven logic.
+
+2. **Lack of Clock Synchronization**: Since the state isn't updated on clock edges, the `num_in` value in Test 1 is never processed. The FSM remains in `S0` (initial state), causing `output_data` and `valid` to stay at 0.
+
+3. **Valid Signal Mismanagement**: The `valid` signal is only set in the reset-triggered block. Without clock-driven updates, it can't respond to valid inputs after reset is deasserted.
+
+**Fix**: Modify the sequential logic block to trigger on `posedge clk` instead of `posedge reset`. This ensures the FSM evaluates inputs and updates state/valid on clock edges. Reset handling should be moved inside the clock-synchronized block (e.g., `if (reset) ... else ...`).

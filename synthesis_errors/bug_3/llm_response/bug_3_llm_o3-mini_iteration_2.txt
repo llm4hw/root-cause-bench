@@ -1,0 +1,5 @@
+The error is happening because the code is trying to assign a value to an input port. In VHDL, ports declared as inputs are read-only, meaning they can only receive values from outside the entity and should not be assigned within the architecture. The assignment "input1 <= '0';" attempts to drive the input port, which is not permitted.
+
+The root cause is that the signal "input1" is defined in the entity with a mode of "in", so any attempt to update or drive this signal from within the architecture violates the read-only constraint of an input port.
+
+To resolve this, you need to stop driving the input port from inside the architecture or change its mode if the design requires it to be driven internally. This adjustment will adhere to VHDL's rules regarding input port handling.

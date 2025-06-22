@@ -1,0 +1,7 @@
+The problem is that the addition operator is not defined for the type of the operands you are using. In your code, the ports a and b are declared as std_logic_vector. However, the standard addition operator that you are trying to use (a + b) has no definition for two std_logic_vector types. The error indicates that no matching definition for the operator “+” was found when given these operands.
+
+This occurs because the package you are using (IEEE.numeric_std) provides arithmetic operators only for types like signed or unsigned—not directly for std_logic_vector. The simulator is looking for an operator overloading that matches std_logic_vector and isn’t able to find one, which is why it reports “0 definitions of operator '+' match here.”
+
+To resolve the issue, you need to convert the std_logic_vector operands into numeric_std types (either unsigned or signed) so that the addition operator becomes defined. Then after performing arithmetic, you would convert the result back to std_logic_vector if necessary. This conversion tells the compiler exactly which numeric operations to use, ensuring that a valid definition of “+” is used.
+
+By addressing the type discrepancy between std_logic_vector and the types that actually support arithmetic, the simulation error will be avoided.

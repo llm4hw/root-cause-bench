@@ -1,0 +1,5 @@
+The bug in the code is that the testbench is checking for the states after specific delays without advancing the clock between these checks. Since the state transitions are dependent on the clock signal, the testbench is not allowing the necessary clock cycles for the next state to be updated.
+
+As a result, when the testbench checks the states immediately after a delay, it is still observing the previous state stored in the register, not reflecting the expected transition. This causes the error messages stating that the expected states do not match the observed states.
+
+To fix this issue, the testbench should advance the clock after each state transition check to allow the internal logic of the design to update the state accordingly. By synchronizing the state checks with the clock signal, the testbench will correctly validate the state transitions at the appropriate times, resolving the discrepancy between expected and actual states observed during simulation.

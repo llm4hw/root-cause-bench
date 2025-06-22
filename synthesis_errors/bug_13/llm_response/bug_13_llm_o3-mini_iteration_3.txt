@@ -1,0 +1,5 @@
+The error message indicates that the synthesis tool encountered a syntax error at the very end of the module. On close inspection, the root cause is that there is no semicolon terminating the assign statement (assign c = a & b). In Verilog, every statement must be properly terminated with a semicolon, and missing one can cause the parser to continue reading into the following text (in this case, the endmodule keyword), resulting in a syntax error.
+
+Since the tool reports the error at the endmodule, it means the parser was still expecting the proper termination of the previous statement. This is why the test bench thrown error during simulation—the code did not conform to the expected language syntax.
+
+To resolve the bug, check that all statements inside your module are properly terminated with a semicolon so the parser can correctly identify the end of each statement before reaching the module conclusion.

@@ -1,0 +1,14 @@
+The error occurs due to an incorrect state transition in the finite state machine (FSM) design. The testbench expects the sequence **Red → Ped → Green → Yellow → Red**, but the implemented FSM transitions **Red → Ped → Red** indefinitely, bypassing Green and Yellow entirely.
+
+**Root Cause:**  
+In the combinational block defining `next` state logic, the `Ped` state incorrectly transitions back to `Red` instead of `Green`. Specifically, the line:
+```verilog
+Ped: next = Red;
+```
+forces the FSM to loop between `Red` and `Ped`, never reaching `Green`. This violates the testbench's expected sequence, causing the first error when the FSM is stuck at `Ped` (11) instead of transitioning to `Green` (01).
+
+**Why the Test Fails:**  
+After reset, the FSM starts at `Red` (00). On the first clock edge post-reset, it transitions to `Ped` (11). The testbench checks for `Red` (00) *after this transition has already occurred*, leading to the mismatch. Subsequent checks for `Green` (01) also fail because the FSM never progresses beyond the `Red`-`Ped` loop. 
+
+**Fix Required:**  
+Modify the transition logic for the `Ped` state to assign `next = Green;` instead of `Red`. This ensures the FSM follows the intended sequence, allowing it to progress to `Green` and subsequent states.

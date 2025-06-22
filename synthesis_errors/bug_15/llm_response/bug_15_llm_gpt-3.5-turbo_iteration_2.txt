@@ -1,0 +1,7 @@
+The bug in the code is due to attempting to assign a value directly to a wire 'data' within the always block. In Verilog, procedural assignments directly to wires (which are continuous assignment) are not allowed inside procedural blocks like always blocks. This is because wires can only be assigned using continuous assignments (assign statements) outside procedural blocks.
+
+The error message "procedural assignment to a non-register data is not permitted" indicates this issue. To fix this bug, you can change the wire 'data' to a reg type. Since you are intending to use it as a register (based on the assignments inside the always block), it is appropriate to change 'wire data' to 'reg data'.
+
+After changing 'wire data' to 'reg data', ensure that the sensitivity list of the always block includes all the signals on which the logic depends, in this case 'data', 'rst', and 'clk'. This will ensure that the always block triggers when any of these signals change.
+
+Making these changes should resolve the bug in the code.

@@ -1,0 +1,3 @@
+The error is caused by a reference to a port name ("b") that doesn't exist in the definition of ChildModule. In ChildModule, only two ports are declared—"a" and "c"—so when the instantiation in the top18 module tries to connect a signal using ".b(in)", the synthesis tool cannot locate any matching port. This mismatch results in the error because the named connection is invalid.
+
+The issue can be fixed by ensuring that the port connections in the instantiation match exactly the port names declared in ChildModule. Since ChildModule does not have a port "b", you should remove the erroneous connection or update the module definition accordingly to include the missing port if that was the intent.

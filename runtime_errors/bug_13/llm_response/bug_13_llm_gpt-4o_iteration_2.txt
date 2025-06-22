@@ -1,0 +1,25 @@
+The error message you are encountering indicates a mismatch between the expected and actual outputs of your 4-bit full adder module. Specifically, when `a = 3`, `b = 5`, and `cin = 0`, the expected output is `01000` (which represents `8` as a 5-bit binary number with the carry-out concatenated), but the actual output is `10010` (which represents `18` as a 5-bit binary).
+
+Let's analyze the module connections and carry propagation to understand the problem:
+
+1. **Module Instantiation and Wiring Issue:**
+   - You have four instances of `full_half_add_1bit`, named `fa1`, `fa2`, `fa3`, and `fa4`. Each of these is supposed to add a single bit from `i_a` and `i_b`, along with a carry-in bit, producing a sum and a carry-out.
+   - The problem arises particularly from the carry chaining between these adders:
+     - `fa1` correctly uses `i_cin` as its carry-in and produces `w_carry1`.
+     - `fa2` incorrectly uses `w_carry3` as its carry-in, which is the carry-out from `fa4`, potentially causing a cycle and wrong timing-dependent carry propagation.
+     - `fa3` uses `w_carry1`, which should be used by `fa2`.
+     - `fa4` uses `w_carry2`, when it should use the carry-out from `fa3` (which would require fixing the chain first).
+
+2. **Carry Propagation:**
+   - Proper carry propagation should be sequential through `fa1` to `fa4`. However, due to incorrect wiring, the carry out from `fa4` is getting fed back into `fa2`, which is against the correct full adder chain logic. 
+
+3. **Expected Behavior vs. Actual Behavior:**
+   - The expected behavior was that the carry produced by each adder (especially by `fa1`, `fa2`, and `fa3`) should be correctly forwarded to the next stage, which isn’t happening due to the mentioned wiring issues. Thus, the carry bits are not evaluated properly, leading to the incorrect results.
+
+To fix this issue:
+- Correct the carry chain as follows:
+  - `fa2` should use `w_carry1` as its carry-in instead of `w_carry3`.
+  - `fa3` should use `w_carry2` as its carry-in instead of `w_carry1`.
+  - `fa4` should use the carry-out from `fa3` as its carry-in and output the final carry-out through `o_carry`.
+
+This will ensure that the carry propagates sequentially through the chain of 1-bit full adders, as it should, thereby producing the correct summation results.

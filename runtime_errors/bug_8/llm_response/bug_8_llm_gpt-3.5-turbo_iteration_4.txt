@@ -1,0 +1,7 @@
+The bug in this code is occurring because the simulation is not behaving as expected due to the comparison logic in the testbench. 
+
+In the testbench, there is a comparison that checks the value of `outResult` after `pedControl` is set to 1. The testbench expects `outResult` to be `2'b11` right after setting `pedControl` to 1, which signifies the transition to the Ped state. However, due to the way the check is implemented, the testbench is not accounting for the delay in state transitions. 
+
+The simulation follows a cycle-based model, and changing the value of `pedControl` and subsequently `outResult` does not take immediate effect because of the clock cycles. The testbench immediately checks `outResult` after setting `pedControl` to 1, without allowing for the state transition from Green to Ped to take place in between. As a result, the testbench incorrectly flags an error. 
+
+To fix this issue, you can introduce a delay in the testbench after setting `pedControl` to 1 before checking the value of `outResult`. This delay should allow enough time for the state transition from Green to Ped to occur before performing the comparison. By doing this, you synchronize the expected behavior with the simulation time frame, ensuring accurate comparisons.

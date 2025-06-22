@@ -1,0 +1,21 @@
+The error occurs because the synthesis tool cannot infer an asynchronous reset for the register `out1_reg` (which corresponds to the `out1` output). Here's why:
+
+1. **Missing Reset Handling for `out1`:**
+   - The `always` block triggers on both `posedge clk` and `posedge rst`, indicating asynchronous reset behavior.
+   - In the `rst` branch, only `data` is reset to `0`, but `out1` is not assigned any value during reset.
+   - The assignment `out1 = data` occurs *outside* the reset condition, meaning `out1` has no defined reset behavior.
+
+2. **Blocking vs. Non-Blocking Assignment Conflict:**
+   - `data` uses non-blocking assignment (`<=`) in the reset branch but blocking assignment (`=`) in the clock branch.
+   - `out1` uses blocking assignment (`=`), which is inappropriate for sequential logic.
+   - Mixing blocking and non-blocking assignments for sequential elements creates ambiguity during synthesis.
+
+3. **Synthesis Limitation:**
+   - The tool expects all registers in an asynchronous reset block to have explicit reset values.
+   - Since `out1` has no reset assignment, the tool cannot map it to a hardware flip-flop with asynchronous reset.
+
+**How to Fix:**
+- **Option 1:** Explicitly reset `out1` in the `rst` branch and convert all assignments to non-blocking (`<=`).
+- **Option 2:** Move `out1` to a separate continuous assignment (`assign out1 = data;`) and remove `out1` from the `always` block. Change `data`'s clock-driven assignment to non-blocking (`<=`).
+
+Both solutions ensure all registers have defined reset behavior and use consistent non-blocking assignments for sequential logic.

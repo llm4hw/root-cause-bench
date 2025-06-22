@@ -1,0 +1,21 @@
+The error occurs because the `case` statement for the 2-bit `sel` signal does not handle all possible input combinations. Specifically:
+
+1. **Missing Case for "11"**:  
+   The `sel` input is declared as `std_logic_vector(1 downto 0)`, which has **4 possible values**: "00", "01", "10", and "11". The `case` statement only covers three of these ("00", "01", "10"). The value "11" (binary 3, represented internally as `32'b...00000011` in the error) is unhandled.
+
+2. **Synthesis Requirement**:  
+   VHDL requires all possible values of the case expression to be explicitly covered in combinatorial logic (no inferred latches). The synthesis tool flags "11" as a missing choice because it must account for every possible state of `sel`.
+
+3. **Simulation vs. Synthesis**:  
+   In simulation, encountering "11" would cause the process to execute without assigning `out1`, retaining its previous value (latch behavior). Synthesis forbids this as it creates unintended hardware latches.
+
+### Fix:
+Add an `others` clause or explicitly handle the "11" case in the `case` statement. For example:  
+```vhdl
+when "11" => 
+    out1 <= '0';  -- Or any required logic
+-- OR
+when others => 
+    out1 <= '0';  -- Covers "11" and any undefined states
+```  
+This ensures all 4 combinations of `sel` are handled, eliminating the latch inference and satisfying synthesis checks.

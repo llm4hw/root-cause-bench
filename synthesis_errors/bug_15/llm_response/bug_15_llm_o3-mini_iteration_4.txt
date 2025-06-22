@@ -1,0 +1,5 @@
+The issue is that you are assigning a value to a signal declared as a wire inside an always block. In Verilog, any signal that’s assigned procedurally (using non-continuous assignments) must be declared as a register (or reg type), not as a wire. Since “data” is declared as a wire, the tool flags an error when you try to use the nonblocking assignment (the “<=” assignment) in a procedural block.
+
+The error is occurring because the synthesis tool expects signals on the left-hand side of such assignments to be of type reg. Changing the declaration of “data” to a register type would resolve this conflict.
+
+This bug happens because of the mismatch between the procedural assignment and the declared type of the signal. The fix is to ensure that any signal you drive inside an always block is declared with a type that supports procedural assignments (like reg).

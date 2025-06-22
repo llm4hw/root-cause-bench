@@ -1,0 +1,5 @@
+The problem is that your case statement in the process doesn’t handle the situation when sel has the value "11" (interpreted by the simulator as 32'b...0011 in its binary form). In your case branches, you only cover "00", "01", and "10", so when the simulation provides "11" the statement reaches an unhandled condition and the simulator flags an error.
+
+This occurs because VHDL case statements are required to cover all possible values of the selector (or include a catch-all branch using when others) to avoid undefined behavior during simulation. In this instance, the simulation (or some part of your test bench) applies the input "11", which isn’t covered by any of your case choices.
+
+The fix would be to modify your case statement to cover the "11" scenario or include a when others clause to safely address any other input.

@@ -1,0 +1,33 @@
+The error message indicates a misuse of VHDL process constructs. Specifically, you are attempting to use both a sensitivity list and a `wait` statement within the same process. This is not allowed in VHDL for synthesis and simulation purposes due to the way these constructs are intended to function. 
+
+### Explanation of the Bug
+
+1. **Sensitivity List vs. Wait Statement:**
+   - **Sensitivity List:** When a process includes a sensitivity list (in this case, `(clk)`), it automatically wakes up and executes the process body whenever there is an event (typically a change) on any signal in that list. This approach is generally synchronous because the process execution is controlled by clocks or specific signals.
+   - **Wait Statement:** A process can also control execution using `wait` statements, which can pause the process until certain conditions are met or for a specific duration. In a typical design, `wait` statements are used for more precise control or in scenarios where sensitivity lists won't suffice.
+
+2. **Conflict:**
+   - In the provided code, the process has a sensitivity list with `clk`, meaning it is expected to trigger on any event on `clk`, thereby suggesting synchronous behavior.
+   - The `wait for 10 ns;` line within this process introduces a contradiction. It's attempting to suspend the process execution for 10 nanoseconds, which is an asynchronous operation and hence conflicts with the concept of triggering solely based on the sensitivity list.
+
+### Why the Bug is Occurring
+
+- Actions controlled by a sensitivity list imply an event-driven, synchronous model, primarily triggered by clock edges.
+- The inclusion of a `wait` statement within the same process, in this context, introduces asynchronous behavior, which is not compatible with the sensitivity list.
+- This mix can confuse simulators and synthesis tools, leading to errors since such a construct is ambiguous in terms of when the process should execute.
+
+### Fix
+
+To resolve this issue, you can choose one of the following approaches based on your design intent:
+
+1. **Remove the Sensitivity List:**
+   - If you desire to use `wait` statements to control timing explicitly, remove the sensitivity list from the process declaration.
+   - Use `wait on clk` combined with `wait for 10 ns;` to manage events based on clock changes and the specific wait time.
+
+2. **Move Wait to Separate Process:**
+   - If you need to keep a sensitivity list for the main process but also require certain timed behavior, separate the timing control into another process that does not have a sensitivity list.
+
+3. **Refactor for the Correct Timing Control:**
+   - If this timing behavior is specifically required for simulation (and not synthesis), ensure the timing constructs are within separate testbench constructs where `wait` statements are typically more acceptable.
+
+By adhering strictly to either event-driven or time-controlled paradigms within each process, you can avoid conflicts and errors.

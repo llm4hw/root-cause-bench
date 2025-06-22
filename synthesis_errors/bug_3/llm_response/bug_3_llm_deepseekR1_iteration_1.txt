@@ -1,0 +1,22 @@
+The bug occurs because you are attempting to assign a value to an input port (`input1`) within the architecture. Here's why this is invalid:
+
+1. **Port Direction Violation**:  
+   `input1` is declared as `in STD_LOGIC` in the port list. Input ports are **read-only** from the entity's internal perspective. They can only be driven externally (e.g., by a testbench or parent module).
+
+2. **Illegal Assignment**:  
+   The line `input1 <= '0';` tries to drive the input port from inside the `top3` architecture. This creates a conflict since:
+   - Input ports must only receive values from outside the module
+   - Synthesis tools prohibit driving inputs internally (as reflected in the error)
+
+3. **Missing Output Logic**:  
+   The architecture contains no valid assignments to the output port `output`. The only assignment targets an input, which is fundamentally incorrect.
+
+---
+
+**Fix Required**:  
+Remove the illegal input assignment and implement proper output logic. For example:  
+- To hard-wire the output: `output <= '0';`  
+- To pass through the input: `output <= input1;`  
+- Or implement combinational/sequential logic using `input1` to drive `output`
+
+The core issue is violating VHDL's port direction rules—inputs cannot be driven internally. The solution involves redesigning the architecture to only drive outputs/internal signals.

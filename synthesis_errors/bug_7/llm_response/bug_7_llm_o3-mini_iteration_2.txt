@@ -1,0 +1,5 @@
+The error occurs because the process is defined with a sensitivity list (in this case, it’s sensitive to the clock signal) and also contains an explicit wait statement. In VHDL, you are not allowed to mix a sensitivity list with wait statements in the same process. The presence of both mechanisms for process control causes a conflict in how the simulation should suspend and resume the process.
+
+The bug is occurring because the process header specifies that the process should automatically trigger whenever the clock signal changes, while the wait statement inside the process instructs the simulation to pause the process for a fixed duration (10 ns). These two approaches are mutually exclusive, which is why the synthesizer raises an error.
+
+To fix the issue, you need to choose one mechanism for controlling the process execution. Either remove the sensitivity list and use wait statements to control the timing of the process, or remove the wait statement and rely solely on the sensitivity list and clock edge detection.

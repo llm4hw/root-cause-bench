@@ -1,0 +1,7 @@
+The bug in this code is occurring because the state assignment in the FSM (finite state machine) sequential logic block is incomplete. When the input `num_in` is in the valid range of '0' to '9', the state is correctly updated, but the `output_data` and `valid` signals are not set accordingly. This results in the failed Test 1 where the expected values for state, output data, and valid signal are not met.
+
+To fix this bug, the `output_data` and `valid` signals should also be updated when a valid input is detected in the FSM sequential logic block along with the state update.
+
+Additionally, it is recommended to modify the sensitivity list of the second `always` block to include both `state` and `enableAscii` signals instead of just `state` to ensure proper updates based on state changes and ASCII enable flag.
+
+Ensuring complete updates for `output_data` and `valid` signals based on the input state in the FSM logic block will resolve the error and lead to passing Test 1 as expected.

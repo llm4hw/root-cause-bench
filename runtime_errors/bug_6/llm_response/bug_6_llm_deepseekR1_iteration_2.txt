@@ -1,0 +1,21 @@
+The bug occurs in Test Case 6 due to a mismatch between the testbench's expected output and the actual behavior of the state machine. Here's why:
+
+1. **State Machine Behavior**: 
+   - When `longTimeHold=1` and the state is `Ped` (value 3), the design correctly outputs `3'b101` as specified in the combinational output logic (`if(longTimeHold) outResult = 3'b101`).
+   - The state transitions from `Ped` to `Green` on the next clock edge, but this transition hasn't occurred yet at the time of checking (after 10 time units).
+
+2. **Testbench Issue**:
+   - Test Case 6 sets `longTimeHold=1` while in the `Red` state (after Test Case 5) and waits 10 time units.
+   - During this wait, a clock edge triggers a transition to `Ped` state (since `pedControl` is still 1 from Test Case 2).
+   - The testbench expects `outResult > 3'b110` (i.e., >6 in decimal), but the design outputs `3'b101` (5 in decimal) in the `Ped` state with `longTimeHold=1`.
+
+3. **Root Cause**:
+   - The testbench incorrectly assumes the design should output a value >6 when `longTimeHold=1` is triggered. The design never outputs any value >6 (`3'b110` is 6) in any state.
+   - The actual correct output for `Ped` state with `longTimeHold=1` is `3'b101`, which is less than the testbench's expected threshold.
+
+4. **Secondary Testbench Issue**:
+   - Test Case 2 also contains an inconsistency: It checks for `3'b110` but prints "Expected: 101" in its error message, indicating a likely copy-paste error in the testbench.
+
+**Why This Happens**: The testbench expectations don't match the design's specified behavior for the `Ped` state with `longTimeHold=1`. The design works as coded, but the testbench requires correction to expect `3'b101` in Test Case 6.
+
+**Fix Direction**: Modify Test Case 6 in the testbench to expect `3'b101` instead of checking for `outResult > 3'b110`. Also correct the error message in Test Case 2 to show the proper expected value (`3'b110`).

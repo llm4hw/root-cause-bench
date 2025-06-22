@@ -1,0 +1,5 @@
+The error in your VHDL code arises from attempting to assign a value to an input port, `input1`. In VHDL, input ports are meant to receive signals from outside the entity and cannot be driven by internal logic within the architecture. The line of code `input1 <= '0';` is incorrect because it tries to drive the input port, which is not allowed.
+
+The reason for this restriction is that input ports are specifically designated to accept signals, not to output or relay signals from the internal architecture. Attempting to assign a value to an input port effectively conflicts with its intended purpose, leading to the synthesis error.
+
+To resolve this issue, you should remove the line `input1 <= '0';` from your architecture. If there is a need to set a signal to '0' within the architecture for internal logic, you should declare an internal signal separately and assign values to that signal instead. This way, the input port is solely used to receive incoming signals, adhering to VHDL's structural rules.

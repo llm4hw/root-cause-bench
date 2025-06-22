@@ -1,0 +1,13 @@
+The error arises because the check in the if condition is written in a way that doesn’t properly correspond to the asynchronous reset event in the always block. In the sensitivity list you’re detecting the falling (negative) edge of reset, but in your if statement you use an expression (!reset == 0) that is confusing the synthesis tool regarding what condition is actually being tested.
+
+Here’s what’s happening:
+
+• The always block is sensitive to posedge clk and negedge reset. This means that when reset goes low (active low reset), the block should immediately evaluate and clear led.
+
+• The condition in the if statement, written as (!reset == 0), is overly complex. The synthesis tool expects a direct indication of when the asynchronous reset is active (typically expressed as checking if reset is low, for example by simply using the inversion of reset). Instead, it is seeing an expression that doesn’t clearly match the edge (negedge reset) defined in the sensitivity list.
+
+• Because the condition is written with a logical negation (!reset) and then compared to 0, the tool must evaluate operator precedence and type conversions. This causes a mismatch between the reset edge triggering the block (i.e., the falling edge) and the condition used to actually perform the asynchronous action. Essentially, the condition does not directly reflect the active low nature of the reset signal, which confuses the tool.
+
+The underlying bug is that the expression complicates the reset check. The correct intent (to detect an active low reset) should be captured by simply checking the reset signal’s level rather than performing a comparison after a logical NOT. When the condition and the event control are not matched in this clear way, the synthesis tool produces an error.
+
+To fix the issue, the reset condition in the if statement should be written so that it unambiguously checks for the low level of the reset signal. This ensures that the condition in the always block matches the negedge reset in the sensitivity list.

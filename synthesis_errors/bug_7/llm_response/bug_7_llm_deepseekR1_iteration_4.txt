@@ -1,0 +1,18 @@
+The error occurs because the process in the VHDL code combines two mutually exclusive triggering mechanisms:  
+
+1. **Sensitivity List Conflict**:  
+The process declares a sensitivity list (`(clk)`) which implicitly creates a `wait on clk` statement at the end of the process. This means the process should pause and only resume when `clk` changes.  
+
+2. **Explicit Wait Statement**:  
+The `wait for 10 ns;` statement explicitly forces the process to pause for 10 ns, conflicting with the sensitivity list's behavior.  
+
+**Why this is invalid**:  
+- VHDL requires processes to use **either** a sensitivity list **or** explicit `wait` statements, but not both.  
+- The sensitivity list implies the process is triggered by signal events (edge-triggered for synchronous logic), while `wait for` introduces time-based delays (only valid in testbenches, not synthesizable hardware).  
+- Synthesis tools reject this construct because real hardware cannot "wait for 10 ns" – timing is controlled by clock edges alone.  
+
+**How to fix**:  
+- **For synthesis**: Remove the `wait for 10 ns;` line entirely. The sensitivity list and `rising_edge(clk)` already define correct synchronous behavior.  
+- **For testbench delays**: Move the `wait` statement to a separate process *without* a sensitivity list (only allowed in simulation-only code).  
+
+**Root cause**: The `wait` statement is misplaced in a process designed for synthesizable register inference, violating VHDL synthesis rules. Hardware registers cannot include arbitrary time delays.

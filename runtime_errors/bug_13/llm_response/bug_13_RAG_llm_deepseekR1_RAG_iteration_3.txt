@@ -1,0 +1,128 @@
+The error occurs due to incorrect carry signal connections between the full adder modules in the 4-bit ripple carry adder. Specifically, the carry-out of one stage is not properly connected to the carry-in of the next stage, creating a broken carry chain.
+
+**Root Cause**:  
+In the `full_add_4bit` module:
+1. `fa2` incorrectly uses `w_carry3` (from `fa4`) as its carry-in instead of `w_carry1` (from `fa1`).
+2. `fa3` incorrectly uses `w_carry1` (from `fa1`) as its carry-in instead of `w_carry2` (from `fa2`).
+3. The final carry-out (`o_carry`) is taken from `fa3` instead of `fa4`.
+
+**Fix**:  
+Reconnect the carry signals sequentially and assign the final carry-out from the last adder stage (`fa4`):
+
+```verilog
+// Corrected full_add_4bit module
+module full_add_4bit(
+    input  [3:0] i_a, i_b,
+    input        i_cin,
+    output [3:0] o_sum,
+    output       o_carry
+);
+    wire w_carry1, w_carry2, w_carry3;
+
+    full_half_add_1bit fa1(
+        .i_a(i_a[0]), .i_b(i_b[0]), .i_cin(i_cin),
+        .o_sum(o_sum[0]), .o_carry(w_carry1)
+    );
+    full_half_add_1bit fa2(
+        .i_a(i_a[1]), .i_b(i_b[1]), .i_cin(w_carry1),  // Fixed
+        .o_sum(o_sum[1]), .o_carry(w_carry2)
+    );
+    full_half_add_1bit fa3(
+        .i_a(i_a[2]), .i_b(i_b[2]), .i_cin(w_carry2),  // Fixed
+        .o_sum(o_sum[2]), .o_carry(w_carry3)
+    );
+    full_half_add_1bit fa4(
+        .i_a(i_a[3]), .i_b(i_b[3]), .i_cin(w_carry3),  // Fixed
+        .o_sum(o_sum[3]), .o_carry(o_carry)            // Final carry from fa4
+    );
+endmodule
+```
+
+**Explanation**:  
+- The corrected code ensures the carry propagates sequentially: `fa1 → fa2 → fa3 → fa4`.
+- The final carry-out (`o_carry`) now comes from the most significant bit (`fa4`), as required for a 4-bit adder.
+- This fixes the erroneous carry logic, allowing proper ripple-carry addition.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: EXAMPLE 4.5 DESIGN OF A HALF ADDER ............................................................. ............................................................. 56
+EXAMPLE 4.6 DESIGN OF A FULL ADDER ............................................................. ............................................................. 57
+EXAMPLE 4.7 DESIGN OF A FULL ADDER OUT OF HALF ADDERS .............................................. ............................................. 58...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 11.3.4
+Add the functionality to the computer model
+from 11.3.3 the ability to perform the addition
+instruction ADD_AB. Test your addition instruc-
+tion by simulating the following program. The
+ﬁrst addition instruction will perform x“FE” +
+x“01”
+¼
+x“FF”
+and
+assert
+the
+negative
+(N) ﬂag. The second addition instruction will
+perform x“01” + x“FF” ¼ x“00” and assert the
+carry (C) and zero (Z) ﬂags. The third addition
+instruction will perform x“7F” + x“7F” ¼ x“FE”...
+
+- source_documents\Quick Start Guide to Verilog.pdf: parallel to each other; thus, the delay through the half adder is due to only one level of logic.
+Example 4.5
+Design of a half adder
+4.2.2 Full Adders
+A full adder is a circuit that still produces a sum and carry out, but considers three inputs in the
+computations (A, B, and Cin). Example 4.6 shows the design of a full adder using the classical design
+56
+•
+Chapter 4: Structural Design and Hierarchy...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 4.9
+Structural model of a full adder using two half adders
+Example 4.10 shows the structural model of a 4-bit ripple carry adder in Verilog. The RCA is created
+by instantiating four full adders. Notice that a logic 1’b0 can be directly inserted into the port map of the
+ﬁrst full adder to model the behavior of C0 ¼ 0.
+60
+•
+Chapter 4: Structural Design and Hierarchy...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The ability to implement the carry out logic using the expression Cout ¼ AB + (A  B)Cin allows us to
+implement a full adder with two half adders and the addition of a single OR gate. Example 4.7 shows this
+approach. In this new conﬁguration, the sum is produced in two levels of logic while the carry out is
+produced in three levels of logic.
+Example 4.7
+Design of a full adder out of half adders
+4.2.3 Ripple Carry Adder (RCA)...
+
+- source_documents\Quick Start Guide to Verilog.pdf: always @ (A, B, ALU_Sel)
+begin
+case (ALU_Sel)
+3’b000
+: begin //-- Addition
+//-- Sum and Carry Flag
+{NZVC[0], Result} ¼ A + B;
+//-- Negative Flag
+NZVC[3] ¼ Result[7];
+//-- Zero Flag
+if (Result ¼¼ 0)
+NZVC[2] ¼ 1;
+else
+NZVC[2] ¼ 0;
+//-- Two’s Comp Overflow Flag
+if ( ((A[7]¼¼0) && (B[7]¼¼0) && (Result[7] ¼¼ 1)) ||
+((A[7]¼¼1) && (B[7]¼¼1) && (Result[7] ¼¼ 0)) )
+NZVC[1] ¼ 1;
+else
+NZVC[1] ¼ 0;
+end
+:
+//-- other ALU operations go here...
+:
+default
+: begin
+Result ¼ 8’hXX;
+NZVC
+¼ 4’hX;
+end
+endcase
+end...

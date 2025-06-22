@@ -1,0 +1,21 @@
+The error occurs because the VHDL process combines two incompatible constructs: a sensitivity list and a `wait` statement. Here's why this is problematic:
+
+1. **Fundamental Conflict**:  
+   VHDL processes must exclusively use either:
+   - A **sensitivity list** (e.g., `process(clk)`) where the process wakes up *only* when signals in the list change, or
+   - **Wait statements** (e.g., `wait for 10 ns;`) where the process controls its own suspension/resumption.  
+   Combining both creates ambiguous behavior for simulation/synthesis tools.
+
+2. **Specific Issue in the Code**:  
+   The process has:
+   - A sensitivity list (`(clk)`) requiring it to execute on every `clk` change
+   - A `wait for 10 ns;` statement attempting to suspend execution for 10 ns  
+   Synthesis tools cannot map this mixed behavior to hardware, as real flip-flops (implied by `rising_edge(clk)`) don't support arbitrary `wait` delays.
+
+3. **Simulation vs. Synthesis**:  
+   While some simulators might allow this (with undefined behavior), synthesis tools strictly reject it because:
+   - The `wait for` statement implies a timed delay, which has no physical counterpart in digital hardware
+   - The sensitivity list expects edge-triggered logic (flip-flops)
+
+**How to Fix**:  
+Remove the `wait for 10 ns;` line entirely. The process should only contain synchronous logic controlled by the clock edge. The corrected process will behave as a standard flip-flop that toggles `signal1` on each rising clock edge without artificial delays. If a 10 ns timing requirement exists (e.g., for output stability), it must be handled through clock frequency or external timing constraints—*not* via in-process delays.

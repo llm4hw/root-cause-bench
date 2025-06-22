@@ -1,0 +1,7 @@
+The root cause of the error is that the part of the state machine intended to generate three dashes for the letter O is not really sequencing through three distinct phases. In your code the states for O (O_DASH1, O_DASH2, and O_DASH3) have been combined into one branch. As soon as the counter reaches the duration for a dash (DASH), the code always transitions immediately to the IDLE state instead of moving from O_DASH1 to O_DASH2 and then O_DASH3. This means only one dash is actually output for the letter O rather than the expected three dashes.
+
+This bug occurs because when you list multiple state names separated by commas in the same case branch, they get treated uniformly by that block of code. The branch only tests for counter length and then resets the state to IDLE rather than implementing a specific progression from the first dash to the second and third dash.
+
+To fix the issue, the state machine must be restructured so that each dash for the letter O is separated by its own state. That way, after the first dash (while in state O_DASH1), when the counter reaches the required value the state machine will move into O_DASH2, then after another dash into O_DASH3, and finally return to IDLE only after the third dash. This correct sequencing will meet the expected Morse code timing and signal for the letter O.
+
+In summary, the bug is that by grouping O_DASH1, O_DASH2, and O_DASH3 together, the logic never steps through the three dashes in order, and so the simulation does not generate the proper Morse signal for O.

@@ -1,0 +1,7 @@
+The root of the problem is that once the finite state machine enters the Ped state, its logic never exits that state. In the state transition block, the Ped state unconditionally sets the next state to Ped. That means, after pedControl is activated (causing a transition from Red to Ped), the state machine remains in the Ped state (output value 11) instead of moving on to Green as the testbench expects.
+
+In other words, the bug occurs because the transition for the Ped state is incomplete: it does not incorporate any condition or mechanism to advance to the Green state (output 01) in the cycle that follows. Since the simulation checks for Green after one cycle in Ped (pedControl 2 test), but the machine is still outputting Ped, the error message is generated.
+
+The fix (conceptually) is to adjust the state transition logic so that the Ped state is only transient. That is, once pedControl has triggered a Ped state transition, the machine should move from Ped to Green rather than remaining in Ped indefinitely. This requires modifying the state machine's transition for the Ped state to exit that state after the intended time (or upon the deassertion of pedControl).
+
+By ensuring that the Ped state has a proper exit condition (for example, a one‐cycle duration that then transitions to Green), the simulation will then produce the expected output.

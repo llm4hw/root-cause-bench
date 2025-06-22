@@ -1,0 +1,7 @@
+The error arises due to two key issues in the 4-bit adder's carry chain:
+
+1. **Incorrect Carry Propagation Order**: The carry-out of each full adder is not correctly connected to the next higher bit's carry-in. Instead of a sequential ripple (fa1 → fa2 → fa3 → fa4), the current wiring creates a loop (e.g., fa2's carry-in comes from fa4's carry-out). This disrupts the correct flow of carry signals between stages.
+
+2. **Wrong Final Carry Source**: The output carry (`o_carry`) is taken from the third adder (fa3) instead of the fourth (fa4). The final carry must come from the most significant bit (fa4) to represent the correct result.
+
+**Root Cause**: The carry signals are cross-wired between the adder stages, causing incorrect intermediate calculations. Additionally, the final carry is sourced from the wrong bit position. This leads to erroneous sum and carry outputs when the adder operates.

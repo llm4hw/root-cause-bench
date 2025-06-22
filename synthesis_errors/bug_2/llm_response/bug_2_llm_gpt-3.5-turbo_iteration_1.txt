@@ -1,0 +1,9 @@
+The bug in this code is due to the usage of the operator "+" between two std_logic_vector signals, 'a' and 'b', in the line `c <= a + b;`. In VHDL, the "+" operator is not directly applicable to std_logic_vector types by default. 
+
+The error message `[Synth 8-944] 0 definitions of operator "+" match here` indicates that the compiler is unable to find a suitable definition of the "+" operator for std_logic_vector operands. 
+
+To fix this issue, you can use the package `numeric_std` and the function `unsigned` to convert the std_logic_vector signals to integers. Then apply the "+" operator to the unsigned integers.
+
+Make sure to include the library `ieee.numeric_std.all` at the beginning of the file. Additionally, you should use the function `unsigned` to convert 'a' and 'b' to unsigned before performing addition.
+
+After making these changes, you should be able to simulate the code successfully.

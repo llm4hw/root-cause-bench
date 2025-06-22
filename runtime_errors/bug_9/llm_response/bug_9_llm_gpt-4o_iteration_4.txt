@@ -1,0 +1,12 @@
+The issue arises from how the state transitions are set up for generating the Morse code for the letter 'O', which is represented by three dashes ("---"). 
+
+In the provided code, the states `O_DASH1`, `O_DASH2`, and `O_DASH3` are intended to represent the sequence of three dashes. However, all three states transition to `IDLE` after completing one dash instead of progressing through all three dash states to form the letter 'O'.
+
+Here's a breakdown of why the error occurs:
+1. When the state `O_DASH1` is reached, the system correctly outputs the first dash. 
+2. After the counter reaches the duration for a dash (`DASH`), the code resets the counter and transitions the state immediately to `IDLE`, skipping the intermediate states `O_DASH2` and `O_DASH3`.
+3. Consequently, only one dash is generated, and the system returns to the `IDLE` state, instead of outputting the full sequence of three dashes required for the Morse code for 'O'.
+
+To fix this, the state machine needs to sequentially transition through `O_DASH1` to `O_DASH2`, then to `O_DASH3`, before returning to `IDLE` to ensure the full sequence of three dashes is produced. The problem can be addressed by modifying the state transitions within the `O_DASH1`, `O_DASH2`, and `O_DASH3` blocks to move to the next respective dash state after each dash period is complete, rather than immediately returning to `IDLE`.
+
+Understanding the root issue allows you to correct the state transitions to ensure the accurate Morse code generation for 'O'.

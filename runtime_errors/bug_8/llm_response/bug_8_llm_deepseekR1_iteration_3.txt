@@ -1,0 +1,10 @@
+The bug occurs because the Ped state in the state machine does not transition to the next state (Green) but remains in Ped indefinitely. 
+
+**Root Cause:**  
+In the combinational block that determines the next state, the Ped case unconditionally assigns `next = Ped`. Once the FSM enters the Ped state, it never exits, causing `outResult` to stay at `11` (Ped). The testbench expects the FSM to transition from Ped to Green after one clock cycle, but this transition is missing in the code.
+
+**Explanation:**  
+The Ped state's next state logic is incorrect. The test assumes that after activating `pedControl`, the FSM goes from Red → Ped (for one cycle) → Green. However, the code keeps the FSM in Ped until `resetn` is asserted. Since the Ped state does not check `pedControl` or transition to Green, the FSM remains in Ped, leading to the error where `11` (Ped) is observed instead of `01` (Green).
+
+**Fix Required:**  
+Modify the Ped state's next state logic to transition to Green (or another appropriate state) instead of looping back to Ped. This ensures the FSM progresses as expected after the Ped state.

@@ -1,0 +1,33 @@
+The error occurs during synthesis because the tool cannot infer an asynchronous reset for the register `out1_reg`. Here's why:
+
+1. **Asynchronous Reset Inference Failure**: 
+   - The `always @(posedge clk or posedge rst)` block implies that all registers inside should have asynchronous resets.
+   - However, `out1` is assigned unconditionally (`out1 = data;`) without being included in the reset condition. Only `data` is explicitly reset when `rst` is high.
+   - During reset, `data` is asynchronously set to `0` via non-blocking assignment (`<=`), but `out1` is assigned using a blocking assignment (`=`) immediately afterward. This creates ambiguity about `out1`'s reset behavior.
+
+2. **Blocking/Non-blocking Assignment Conflict**:
+   - The `else` branch uses a **blocking assignment** (`data = ~data;`) for sequential logic, which is incorrect. Blocking assignments in clock-triggered processes cause simulation-synthesis mismatches.
+   - `out1` also uses a blocking assignment (`out1 = data;`), which prevents the tool from recognizing it as a register with a clear reset path.
+
+3. **Reset Propagation Issue**:
+   - When `rst` is high, `data` is reset to `0`, but `out1` is assigned the *current* value of `data` (which hasn't updated yet due to non-blocking assignment semantics). This breaks the expected reset behavior for `out1`.
+
+**How to Fix**:
+- **Use non-blocking assignments (`<=`) for all register updates** in the `always` block.
+- **Include `out1` in the reset condition** to explicitly define its value during reset.
+- **Separate reset and clock-triggered logic** clearly within the `always` block.
+
+**Example Fix Structure**:
+```verilog
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        data <= 1'b0;
+        out1 <= 1'b0; // Explicit reset for out1
+    end
+    else begin
+        data <= ~data; // Non-blocking for sequential logic
+        out1 <= data;  // Non-blocking and after reset logic
+    end
+end
+```
+This ensures both registers have well-defined reset behavior and use proper non-blocking assignments for synchronous updates.

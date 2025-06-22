@@ -1,0 +1,7 @@
+The error message "ERROR: [Synth 8-6842] Cannot extract Asynchronous Set/Reset for register 'out1_reg' in module 'top16' [D:/chip chat/new_structure/bug_16/rtl/top16.v:37]" indicates that the design tool is unable to infer the asynchronous set/reset behavior for the register 'out1_reg' in module 'top16'. This error is occurring because the 'out1' output signal is being driven by a sequential always block that uses both the positive edge of the clock and the positive edge of the asynchronous reset signal 'rst'. The tool cannot determine a clear distinction between synchronous and asynchronous behavior in this scenario.
+
+To fix this issue, you can separate the synchronous and asynchronous behaviors explicitly. You can keep the asynchronous reset logic outside of the always block and use it to reset the 'data' register. Then, inside the always block, only use the positive edge of the clock for sequential behavior. By doing this, you provide a clearer distinction between synchronous and asynchronous logic, allowing the tool to correctly infer the design.
+
+Additionally, consider using non-blocking assignments (<=) inside the always block for better modeling of sequential logic. 
+
+Make sure to test the modified code thoroughly after applying these changes to ensure the functionality remains correct.

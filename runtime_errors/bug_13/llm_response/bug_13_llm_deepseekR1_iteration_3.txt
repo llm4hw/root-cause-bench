@@ -1,0 +1,19 @@
+The bug is due to an **incorrect carry chain connection** between the 1-bit full adder modules in the 4-bit adder. 
+
+**Why it occurs:**
+- The carry-out of each full adder is not properly connected to the carry-in of the next higher bit. Instead, there are **cross-connections** and **circular dependencies**:
+  - Bit 1's carry-in (`fa2`) incorrectly uses the carry-out from Bit 3 (`fa4`).
+  - Bit 2's carry-in (`fa3`) uses the carry-out from Bit 0 (`fa1`), skipping Bit 1.
+  - This breaks the sequential propagation of the carry from the least significant bit (LSB) to the most significant bit (MSB).
+
+**Effect:**
+- The adder cannot compute the correct sum and carry because the carry signals do not flow linearly. For example, in the test case `3 + 5`, the circular dependency causes incorrect intermediate carries, leading to a wrong result (sum=2, carry=1 instead of sum=8, carry=0).
+
+**Fix:**
+- Reconnect the carry signals to follow a **linear chain**:
+  - Bit 0's carry-out → Bit 1's carry-in.
+  - Bit 1's carry-out → Bit 2's carry-in.
+  - Bit 2's carry-out → Bit 3's carry-in.
+  - The final carry-out should come from Bit 3's carry-out. 
+
+This ensures proper carry propagation from LSB to MSB, resolving the calculation errors.

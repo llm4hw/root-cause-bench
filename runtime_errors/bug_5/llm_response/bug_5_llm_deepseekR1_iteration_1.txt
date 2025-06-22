@@ -1,0 +1,38 @@
+### Root Cause Analysis
+
+The core issue is that the logic does not match the specified requirement: **"assign the 1st value smaller than `a` to `min` in the order of b-c-d"**. The current implementation finds the *absolute minimum* value among all inputs rather than the *first value smaller than `a` in the sequence b→c→d*.
+
+### Why the Bug Occurs:
+1. **Incorrect Condition Logic**:
+   - The code uses `if (min > b)` instead of `if (b < a)`. This means:
+     - After setting `min = a`, it compares subsequent values to the *current* `min` (which may have been updated) rather than to the original `a`.
+     - For example, in Test Case 3:
+       - `a=10`, `b=15` → `min=10` (15 > 10, no update).
+       - `c=8` → `min=10 > 8` → `min=8` (correct so far).
+       - `d=7` → `min=8 > 7` → `min=7` (incorrectly updates again).
+
+2. **Lack of Priority Handling**:
+   - The requirement mandates checking values in strict order (b→c→d) and stopping at the *first* value smaller than `a`. The current code checks *all* values unconditionally, allowing later smaller values (like `d=7`) to override earlier valid candidates (like `c=8`).
+
+3. **Misinterpreted Requirement**:
+   - The code implements a "rolling minimum" (tracking the smallest-so-far) instead of a "priority selector" (first match in sequence).
+
+### How to Fix:
+- **Replace rolling-minimum with priority selection**:
+  - Compare `b`, `c`, and `d` directly against `a` (not against the current `min`).
+  - Use `else if` to ensure sequential checking stops after the first match.
+- **Correct condition structure**:
+  - First, check if `b < a`. If true, set `min = b` and skip later checks.
+  - If false, check if `c < a`. If true, set `min = c` and skip `d`.
+  - If false, check if `d < a`. If true, set `min = d`.
+  - If all are false, keep `min = a`.
+
+### Expected Post-Fix Behavior in Test Case 3:
+- Inputs: `a=10`, `b=15`, `c=8`, `d=7`.
+- Steps:
+  1. `b=15` is not `< 10` → skip.
+  2. `c=8` is `< 10` → set `min = 8` (first valid match).
+  3. `d=7` is **not checked** (stopped after first match).
+- Result: `min=8` (matches expectation).
+
+This aligns with the requirement to prioritize the *first smaller value in the sequence b→c→d* over finding the global minimum.

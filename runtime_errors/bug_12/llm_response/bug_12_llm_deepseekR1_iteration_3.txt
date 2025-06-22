@@ -1,0 +1,7 @@
+The bug occurs because the **design incorrectly compares the 4-bit input `a` to a 5-bit constant** (`5'b10101`), which is impossible. Here's why:
+
+1. **Input Size Mismatch**: `a` is declared as `[3:0]` (4 bits), but the code checks if it equals `5'b10101` (5 bits). Verilog automatically pads shorter operands with zeros during comparisons, so `a` is effectively compared to `4'b0101` (since only the lower 4 bits of the 5-bit constant are used). This means the equality check `a == 5'b10101` can never be true.
+
+2. **Missing Comparison Between `a` and `b`**: The design was intended to compare `a` and `b`, but instead it erroneously compares `a` to a hardcoded value. This explains why the test case `a = 9, b = 9` fails—the module isn’t checking `a` against `b`.
+
+**Fix**: Replace the comparison `a == 5'b10101` with `a == b` to correctly check equality between the two 4-bit inputs. Remove the hardcoded 5-bit constant.

@@ -1,0 +1,3 @@
+The bug in the provided code is that the `data` signal is declared as a wire but assigned values within an `always` block. In Verilog, procedural assignments can only be made to `reg` type variables, not to `wire` type variables. When attempting to assign a value to `data` within the `always` block, the synthesizer generates the error message `procedural assignment to a non-register data is not permitted`.
+
+To fix this issue, the `wire data;` declaration should be changed to `reg data;` so that it is of type `reg`. This will allow the `data` variable to be assigned values within the `always` block without generating the error.

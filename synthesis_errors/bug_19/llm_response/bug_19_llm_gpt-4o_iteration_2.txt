@@ -1,0 +1,7 @@
+The error occurs due to the line `y = 2'b2;` in the Verilog code. The issue is related to the way binary numbers are represented in Verilog.
+
+Verilog uses a specific notation for defining binary numbers, which includes a width followed by a base (like `b` for binary) and then the actual digits in that numerical base. In this context, `2'b2` is incorrect because `2'b` implies a 2-bit wide binary number. Binary numbers can only contain the digits `0` and `1` since they are base-2.
+
+The attempt to use `2` as a binary digit causes the error message about an "illegal character in binary number" because `2` is not valid in a binary number. In binary, only `0` and `1` are permitted.
+
+To fix this bug, ensure that assignments use valid binary numbers. Since the output `y` is 2 bits wide, the correct binary numbers for all bits should be either `0` or `1`.

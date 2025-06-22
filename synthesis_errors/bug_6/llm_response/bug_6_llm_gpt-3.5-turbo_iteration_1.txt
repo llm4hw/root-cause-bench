@@ -1,0 +1,9 @@
+The error message "variable outside of subprogram or process must be 'shared'" is occurring because in VHDL, variables declared at the architecture level (i.e., outside of any process or subprogram) are not automatically shared among all processes like signals are. 
+
+In this particular case, the variable `variable1` is declared at the architecture level, but it is being assigned values in a process. This is causing the error because VHDL requires explicitly marking such variables as 'shared' using the shared keyword when they are declared in order to be accessed by multiple processes.
+
+To fix this issue, you have a couple of options:
+1. You can move the declaration of the variable inside the process, so it becomes local and is no longer required to be shared.
+2. If you need the variable to be shared among processes, you can declare it using the shared keyword at the architecture level.
+
+By addressing this issue, the error message should be resolved, and the code should simulate without any further complications.

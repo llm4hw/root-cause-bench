@@ -1,0 +1,5 @@
+The error message points out that the identifier "data" is used but never declared in the module. In your always block, you have a statement that assigns "data" to "out1." However, since there is no wire, reg, or port declared with the name "data" in the module, the synthesizer cannot resolve what "data" refers to, leading to the error.
+
+The root cause is a missing declaration for "data." This could be due to a typo or an oversight where you intended to use a different signal that is actually declared or forgot to declare a register or wire for "data."
+
+To resolve the issue, you need to ensure that any signal you use inside your module is properly declared.

@@ -1,0 +1,27 @@
+The error you're encountering is related to the sequence of state transitions in your design. Specifically, the test bench expects the states to transition in a specific sequence: Red -> Ped -> Green -> Yellow -> Red. However, the actual sequence implemented in the `top_module` does not match the expected sequence from the test bench.
+
+Here's what's happening step-by-step:
+
+1. **Reset Condition**: On reset (when `resetn` is 0), the state is correctly initialized to `Red` (00).
+
+2. **State Transition Logic**: When not in the reset state, your state machine transitions are defined in the `always @(state)` block. The case statement transitions are:
+   - `Red` to `Ped`
+   - `Ped` to `Red`
+   - `Green` to `Yellow`
+   - `Yellow` to `Red`
+
+3. **Test Bench Sequence**: The test bench expects the sequence to follow:
+   - Start from `Red` (00)
+   - Transition to `Ped` (which is incorrectly mapped to 11 in the test bench)
+   - Transition to `Green` (01)
+   - Transition to `Yellow` (10)
+   - Then return to `Red` (00)
+
+4. **Discrepancy**: The error indicates an expectation for the `Ped` state to be `11`, but the implemented state sequence doesn't include a transition to a state value of `11`. Instead, your Verilog code first transitions from `Red` to `Ped`, which in your case means incorrectly assumed as `11` as per expectations but the design does not go to Green state.
+
+5. **Root Cause**: The mismatch comes from the interpretative expectation that `Ped` in the system means a specific state which is `11`, and this isn't in sequence or part of the transition logic currently implemented. There is no mapping for state `Ped` in the test bench to Green or Ped should be defined as 11. 
+
+To correct this, any one step needs the following:
+- Ensure that the states are correctly defined and corresponding to the sequence assumed by the test bench. Either update the `state` variables to fit the `testbench` logic or verify the expected sequence in the `testbench` aligns with the implemented logic. Likely your state for `Ped` is mismatched and not corresponding to `11` in the expectations. The state 'Green' is not reached which causes the sequence deviation.
+
+In essence, the error arises because the test bench's expected sequence doesn't match the state transition logic in the `top_module`. Ensure you systematically address this by synchronizing both descriptions of your traffic light system (both logical design in Verilog and the expectations in your test).

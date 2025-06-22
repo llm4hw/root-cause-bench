@@ -1,0 +1,5 @@
+The error is happening because the process is written with both a sensitivity list and a wait statement. In VHDL, if you specify a sensitivity list on a process, you are defining the events that trigger the process. Adding a wait statement inside such a process conflicts with that definition—VHDL does not allow a process to have both a sensitivity list and a wait statement.
+
+In your code, the process is sensitive to changes on clk, but inside the process there is also a directive to "wait for 10 ns." This creates ambiguity about when and how the process should be activated and resumed. The synthesis or simulation tool therefore generates an error.
+
+To fix the bug, you need to choose one mechanism to control process execution. Either remove the wait statement if you want the process to strictly react to signal changes defined in the sensitivity list, or eliminate the sensitivity list and rely solely on wait statements to drive your process activation.

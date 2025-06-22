@@ -1,0 +1,5 @@
+The bug in the provided code is in the comparator module's always block condition. In the always block, the condition `if (a == 5'b10101)` is checking for the value of 'a' to be equal to 5'b10101 (which is 21 in decimal), but in the testbench, the value of 'a' is being assigned as 4'd9. Since 9 is not equal to 21, the condition is not satisfied, and as a result, 'result' is always assigned as 0.
+
+This bug leads to the incorrect behavior where 'result' is not set to 1 when 'a' is equal to 'b', causing the error message during simulation stating "Expected result = 1 when a = b".
+
+To fix this bug, the condition inside the always block should be modified to check if 'a' is equal to 'b' directly, as the goal is to compare 'a' and 'b' for equality. Once this change is made, the module should function correctly during simulation.

@@ -1,0 +1,7 @@
+The error message "procedural assignment to a non-register data is not permitted" is occurring in the provided Verilog code due to the assignment of `data <= 1'b0;` inside the `always` block. 
+
+In Verilog, the `data` wire is declared outside the always block, and it cannot be directly assigned a value inside an always block as it is not a register type. The `data` wire is treated as a continuous assignment outside the always block. As a result, when you try to assign a value to `data` inside the `always` block, the error occurs.
+
+To fix this issue, you should declare `data` as a `reg` type instead of a `wire` type and ensure that the assignment of `data` happens inside an `always` block. This way, the register type `reg` can be assigned a value within the `always` block, allowing the intended functionality without error.
+
+Make sure to declare `data` as `reg data;` and modify the assignments accordingly inside the `always` block in the code.

@@ -1,0 +1,173 @@
+system: You are a helpful assistant which debugs RTL and HDL code in Verilog and VHDL. Do not provide code in your answer. Explain what has gone wrong and why a bug is occurring, but do not attempt to fix the bug yourself. 
+
+ user: Error message: ERROR: Morse for O not correct.
+
+Full code file:```module morse_code (
+    input wire clk,
+    input wire reset,
+    input wire [1:0] select,
+    output reg morse_out
+);
+
+    parameter DOT = 10;
+    parameter DASH = 30;
+    parameter SPACE = 10;
+
+    reg [7:0] counter;
+    reg [3:0] state;
+
+    localparam IDLE = 0,
+               A_DOT = 1,
+               A_DASH = 2,
+               O_DASH1 = 3,
+               O_DASH2 = 4,
+               O_DASH3 = 5,
+               S_DOT1 = 6,
+               S_DOT2 = 7,
+               S_DOT3 = 8,
+               SPACE_STATE = 9;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            counter <= 0;
+            state <= IDLE;
+            morse_out <= 0;
+        end else begin
+            case (state)
+                IDLE: begin
+                    case (select)
+                        2'b00: state <= A_DOT;  // A
+                        2'b01: state <= O_DASH1; // O
+                        2'b10: state <= S_DOT1;  // S
+                        default: state <= IDLE;
+                    endcase
+                    counter <= 0;
+                    morse_out <= 0;
+                end
+                A_DOT: begin
+                    morse_out <= 1;
+                    if (counter < DOT) begin
+                        counter <= counter + 1;
+                    end else begin
+                        counter <= 0;
+                        state <= SPACE_STATE;
+                    end
+                end
+                A_DASH: begin
+                    morse_out <= 1;
+                    if (counter < DASH) begin
+                        counter <= counter + 1;
+                    end else begin
+                        counter <= 0;
+                        state <= IDLE;
+                        morse_out <= 0;
+                    end
+                end
+                O_DASH1, O_DASH2, O_DASH3: begin
+                    morse_out <= 1;
+                    if (counter < DASH) begin
+                        counter <= counter + 1;
+                    end else begin
+                        state <= IDLE;
+                        counter <= 0;
+                        morse_out <= 0;
+                    end
+                end
+                S_DOT1, S_DOT2, S_DOT3: begin
+                    morse_out <= 1;
+                    if (counter < DOT) begin
+                        counter <= counter + 1;
+                    end else if (state == S_DOT1) begin
+                        state <= S_DOT2;
+                        counter <= 0;
+                    end else if (state == S_DOT2) begin
+                        state <= S_DOT3;
+                        counter <= 0;
+                    end else begin
+                        state <= IDLE;
+                        counter <= 0;
+                        morse_out <= 0;
+                    end
+                end
+                SPACE_STATE: begin
+                    morse_out <= 0;
+                    if (counter < SPACE) begin
+                        counter <= counter + 1;
+                    end else begin
+                        counter <= 0;
+                        if (state == A_DOT) state <= A_DASH;
+                        else state <= IDLE;
+                    end
+                end
+            endcase
+        end
+    end
+endmodule```
+
+Testbench Code:```module tb_morse_code;
+    reg clk, reset;
+    reg [1:0] select;
+    wire morse_out;
+
+    // Instantiate the module
+    morse_code uut (
+        .clk(clk),
+        .reset(reset),
+        .select(select),
+        .morse_out(morse_out)
+    );
+
+    // Clock generation
+    always #5 clk = ~clk;
+
+    initial begin
+        $display("Testbench started.");
+        clk = 0;
+        reset = 1;
+        select = 2'b00;  // A
+        #10 reset = 0;
+
+        // Test 'A' -> .-
+        #10 select = 2'b00;
+        #150;  // Wait for DOT and DASH
+        if (!morse_out) begin
+            $display("Morse for A generated correctly.");
+        end else begin
+            $display("ERROR: Morse for A not correct.");
+            $fatal;
+        end
+        
+        // Test 'O' -> ---
+        #10 select = 2'b01;
+        reset = 1;
+        #10 reset = 0;
+        #150;
+        if (!morse_out) begin
+            $display("Morse for O generated correctly.");
+        end else begin
+            $display("ERROR: Morse for O not correct.");
+            $fatal;
+        end
+        
+        // Test 'S' -> ...
+        #10 select = 2'b10;
+        reset = 1;
+        #10 reset = 0;
+        #150;
+        if (!morse_out) begin
+            $display("Morse for S generated correctly.");
+        end else begin
+            $display("ERROR: Morse for S not correct.");
+            $fatal;
+        end
+        
+        $display("All test cases passed.");
+        $finish;
+    end
+endmodule
+```
+
+What is the bug, why is it occurring, and how can it be fixed?
+
+    Note: this error occurred during the simulation of the test bench and code file below. It is an error message generated by the test bench itself. You should determine the root cause of the issue and explain the fix.
+     

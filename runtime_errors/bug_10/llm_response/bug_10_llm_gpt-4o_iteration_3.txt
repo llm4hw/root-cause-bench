@@ -1,0 +1,17 @@
+The error in the code arises from the way the shift register functionality is implemented. The aim is to shift in a new bit through `serial_in` and output the shifted 4-bit value on `data`. 
+
+The existing implementation has the following issues:
+
+1. **Sequential Assignment Issue:** 
+   - In the `always` block, the assignments of `data` are made using blocking assignments (i.e., `=`) instead of non-blocking assignments (i.e., `<=`). 
+   - Blocking assignments (`=`) in a sequential block will assign values in a step-by-step manner within a single cycle. Therefore, when progressing through the assignments `data[1] = data[0];`, `data[2] = data[1];`, and `data[3] = data[2];`, each previous line of assignment affects subsequent lines within the same clock edge. In the current code, this results in `data[0]` being shifted to `data[1]`, to `data[2]`, and finally to `data[3]` all within a single cycle, effectively copying `serial_in` to all bits of `data`.
+
+2. **Incorrect Shift Operation:**
+   - As per the expected testbench outcome, the desired operation is a shift where each bit is moved to the higher position on each clock cycle, and a new bit is introduced from the least significant bit (`data[0]`).
+   - The current implementation copies the same least recent value across the register in each cycle.
+
+**Explanation of Failure:**
+- At the first check after feeding `serial_in = 1`, one would expect `data = 0001`. However, due to the blocking assignments making all `data` bits equal to `data[0]`, `data` becomes `1111`. Therefore, the test bench error triggers with "ERROR: Expected 0001 got 1111."
+
+**Fix Explanation:**
+- Use non-blocking assignments (`<=`) within the `always @` block to ensure that all updates to `data` are done concurrently after evaluating all right-hand side expressions. This will ensure that `data` is updated as a true shift operation, where each bit moves to its intended position (one step to the right) per clock cycle, with `serial_in` being fed into the least significant bit (`data[0]`) only.

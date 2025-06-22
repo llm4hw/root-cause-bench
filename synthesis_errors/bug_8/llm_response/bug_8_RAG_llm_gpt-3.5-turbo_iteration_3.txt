@@ -1,0 +1,78 @@
+The error message "ERROR: [Synth 8-1031] signal2 is not declared [D:/chip chat/new_structure/bug_8/rtl/top8.vhd:46]" indicates that there is an issue with the signal "signal2" not being declared in the code. 
+
+In the provided Verilog code, the signal "signal1" is declared and used, but the signal "signal2" is not declared anywhere in the architecture. This leads to the error when there is an assignment to "signal2" in the process block.
+
+To fix this issue, you need to declare the "signal2" signal in the architecture just like "signal1" is declared. You can include it before using it in the process block. Here is an updated snippet of the architecture with the declaration of "signal2":
+
+```vhdl
+architecture Behavioral of top8 is
+    signal signal1 : STD_LOGIC := '0';
+    signal signal2 : STD_LOGIC := '0'; -- Added declaration for signal2
+begin
+    process (clk, rst)
+    begin
+        if rst = '1' then
+            signal2 <= '0'; 
+        elsif rising_edge(clk) then
+            signal1 <= not signal1;
+        end if;
+    end process;
+
+    out1 <= signal1; 
+end Behavioral;
+```
+
+By adding the declaration of "signal2" in the architecture, you should be able to resolve the error related to "signal2 is not declared" during the simulation of the test bench.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 2.1
+Declaring Verilog module ports
+2.2.3 Signal Declarations
+A signal that is used for internal connections within a system is declared within the module before its
+ﬁrst use. Each signal must be declared by listing its type followed by a user-deﬁned name. Signal names
+of like type can be declared on the same line separated with a comma. All of the legal data types
+described above can be used for signals; however, only types net, reg, and integer will synthesize...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 18
+2.2.3 Signal Declarations .....................................................................................
+19
+2.2.4 Parameter Declarations ..............................................................................
+20
+2.2.5 Compiler Directives .....................................................................................
+20
+3: MODELING CONCURRENT FUNCTIONALITY IN VERILOG .............................
+23...
+
+- source_documents\Quick Start Guide to Verilog.pdf: sensitive block. In this syntax, only rising edge transitions on signal1 or falling edge transitions on signal2
+will cause the block to trigger.
+always @ (posedge signal1, negedge signal2)
+begin
+signal_assignment_1
+signal_assignment_2
+:
+end
+5.1 Procedural Assignment
+•
+67...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Fig. 2.2
+Verilog signals and systems
+20
+•
+Chapter 2: Verilog Constructs...

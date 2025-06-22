@@ -1,0 +1,7 @@
+The error message "ERROR: [Synth 8-2108] illegal character in binary number" indicates a syntax problem in the Verilog code, specifically with how a binary literal is being represented.
+
+In Verilog, binary literals are specified using the format `b'binary_digits`, where `b` indicates the base (binary, in this case), and `binary_digits` represents the actual binary number. The issue arises because the literal `2'b2` is invalid; `2'b2` is interpreted as a binary number with 2 bits, but '2' is not a valid binary digit (binary digits can only be 0 or 1).
+
+The problem is occurring because you have specified a binary number `2'b2` with an invalid digit. This type of mistake causes the synthesis tool to flag an error because it cannot interpret '2' as a binary digit. In binary representation, only the digits '0' and '1' are allowed. Since '2' doesn't represent either of these, it causes an error.
+
+To resolve this issue, the binary value must be valid. You likely intended to use a binary value that fits within a 2-bit range, which includes `2'b00`, `2'b01`, `2'b10`, and `2'b11`. This part of the code seems to indicate default behavior for the output `y`, assuming it's for any value of `a` not explicitly checked earlier. To fix this error, determine which valid 2-bit binary number represents the desired state or handling for this default case. If you're looking for `a = 2'b10` or `2'b11`, you'll need to rewrite the logic accordingly to use valid binary values.

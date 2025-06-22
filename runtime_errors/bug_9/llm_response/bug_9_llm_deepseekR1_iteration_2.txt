@@ -1,0 +1,11 @@
+The bug occurs because the state machine for encoding 'O' (---) does not properly transition between the three required dashes. Here's the breakdown:
+
+1. **State Transition Logic**: When encoding 'O', the design enters O_DASH1 state but immediately returns to IDLE after completing one DASH duration (30 counts). There's no progression to O_DASH2 or O_DASH3 states after each dash.
+
+2. **Missing Intermediate Steps**: The code for O_DASH1/O_DASH2/O_DASH3 states unconditionally transitions back to IDLE after completing a dash. This results in only one dash being generated instead of three.
+
+3. **No Inter-Dash Spacing**: Morse code requires intra-character spacing (one dot duration) between elements (dots/dashes). The 'O' sequence lacks these intermediate SPACE_STATE transitions between dashes.
+
+4. **Testbench Timing**: The testbench waits for 150 time units - sufficient for three dashes (30*3=90) plus spacing. But since only one dash (30) is generated, the output is low (due to SPACE_STATE or IDLE) by the check time, incorrectly passing if the code were correct. However, since the test checks after reset, it's detecting incomplete execution due to the state machine flaw.
+
+**Root Cause**: The state machine for 'O' does not sequence through O_DASH1 → (space) → O_DASH2 → (space) → O_DASH3, causing only a single dash to be transmitted.

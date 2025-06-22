@@ -1,0 +1,5 @@
+The bug in the provided code is occurring because the process in the architecture body of `top7` entity has both a `wait for 10 ns;` statement and a sensitivity list (`(clk)` in this case). In VHDL, a process cannot have both a sensitivity list and a `wait` statement at the same time.
+
+The sensitivity list specifies the signals that may cause the process to execute, while the wait statement determines when the process should wait before resuming. Having both defined can lead to conflicting instructions for the simulator.
+
+To fix this issue, you should choose to use either a sensitivity list or a `wait` statement in the process. You can achieve the desired functionality by either removing the sensitivity list if the intent was to use a fixed delay using `wait`, or replacing the `wait for 10 ns;` statement with an additional condition in the sensitivity list based on your design requirements.

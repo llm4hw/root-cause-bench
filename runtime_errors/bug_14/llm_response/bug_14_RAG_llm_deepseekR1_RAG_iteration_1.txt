@@ -1,0 +1,200 @@
+The bug in the provided Verilog code arises because the state transitions are not triggered by the clock, and the `output_data` is incorrectly assigned in two different procedural blocks. Here's the detailed breakdown and solution:
+
+### **Root Causes of the Bug**
+1. **Incorrect Sensitivity List for Sequential Logic**:
+   - The state transition logic is placed in an `always @(posedge reset)` block, which only activates on reset events. This prevents the state from updating on clock edges, causing the FSM to remain in the initial state (`S0`) even after valid inputs are applied.
+
+2. **Conflicting Assignments to `output_data`**:
+   - `output_data` is assigned in both the sequential block (during reset/invalid inputs) and the combinational block (based on state). This creates a race condition, as a single variable cannot be driven by multiple procedural blocks.
+
+3. **Incomplete Combinational Sensitivity List**:
+   - The combinational block for `output_data` is sensitive only to `state`, but it also depends on `enableAscii`. Changes in `enableAscii` won't trigger updates unless the state changes, leading to stale output values.
+
+---
+
+### **Fix and Explanation**
+1. **Update the Sequential Block Sensitivity**:
+   - Trigger the state transitions on **clock edges** (not reset) to ensure the FSM updates correctly. Handle reset asynchronously within the clock-triggered block.
+
+2. **Remove `output_data` from Sequential Logic**:
+   - Let the combinational block handle `output_data` exclusively based on `state` and `enableAscii`. The sequential logic should only manage `state` and `valid`.
+
+3. **Fix Combinational Sensitivity**:
+   - Use `always @(*)` to automatically capture dependencies on `state` and `enableAscii`, ensuring `output_data` updates whenever either changes.
+
+---
+
+### **Corrected Code Snippets**
+#### **Sequential Logic (State Transitions)**
+```verilog
+always @(posedge clk or posedge reset) begin
+    if (reset) begin
+        state <= S0;  // Reset state and outputs
+        valid <= 0;
+    end else begin
+        if (num_in >= 0 && num_in <= 9) begin
+            state <= num_in;  // Update state on valid input
+            valid <= 1;
+        end else begin
+            state <= S0;      // Reset on invalid input
+            valid <= 0;
+        end
+    end
+end
+```
+
+#### **Combinational Logic (Output Assignment)**
+```verilog
+always @(*) begin  // Sensitive to state and enableAscii
+    if (enableAscii) begin
+        case (state)
+            S0: output_data = 8'd48;  // ASCII '0'
+            S1: output_data = 8'd49;  // ... and so on
+            // (Include all cases as in original code)
+        endcase
+    end else begin
+        case (state)
+            S0: output_data = 8'd0;
+            S1: output_data = 8'd1;
+            // (Include all cases as in original code)
+        endcase
+    end
+end
+```
+
+---
+
+### **Summary of Changes**
+- **Sequential Logic**: Now updates on clock edges (`posedge clk`) and handles reset asynchronously.
+- **Combinational Logic**: Properly assigns `output_data` based on `state` and `enableAscii` without conflicts.
+- **Valid Signal**: Correctly set in the sequential block to reflect valid inputs at clock edges.
+
+These fixes ensure the FSM transitions states on clock cycles, resolves conflicting assignments, and updates outputs correctly, addressing the test failure.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: 6
+7 always@( * ) begin
+8
+Status = 3’b000;
+9
+case (CurrentState)
+10
+STATE_2: begin
+11
+Status = 3’b010;
+12
+end
+13
+STATE_3: begin
+14
+Status = 3’b011;
+15
+end
+16
+endcase
+17 end
+Alternatively, the output assignment for Status can be combined into the always@( * ) block that
+chooses what the next state should be (see Program 21). It is seperated here for clarity.
+4.5
+A Complete FSM
+In this tutorial we hasve discussed why the Moore machine FSM is useful in digital design and how...
+
+- source_documents\verilog_fsm.pdf: 2
+STATE_1 = 3’b001 ,
+3
+STATE_2 = 3’b010 ,
+4
+STATE_3 = 3’b011 ,
+5
+STATE_4 = 3’b100;
+As 3 bits can specify a total of 8 states (0-7), our encoding speciﬁes 3 potential states not speciﬁed
+as being actual states. There are several ways of dealing with this problem:
+1. Ignore it, and always press Reset as a way of initializing the FSM.
+2. Specify these states, and make non-conditional transitions from them to the STATE_Initial....
+
+- source_documents\Quick Start Guide to Verilog.pdf: S_BEQ_6
+¼ 33,
+S_BEQ_7
+¼ 34,
+S_ADD_AB_4 ¼ 35;
+//-- Addition States
+Within the control unit module, the state memory is implemented as a separate procedural block that
+will update the current state with the next state on each rising edge of the clock. The reset state will be the
+ﬁrst fetch state in the FSM (i.e., S_FETCH_0). The following Verilog shows how the state memory in the
+control unit can be modeled. Note that this block models sequential logic, so non-blocking assignments
+are used....
+
+- source_documents\Quick Start Guide to Verilog.pdf: 116
+8.1.5 Changing the State Encoding Approach ....................................................
+118
+8.2 FSM DESIGN EXAMPLES ........................................................................................
+119
+8.2.1 Serial Bit Sequence Detector in Verilog ......................................................
+119
+8.2.2 Vending Machine Controller in Verilog ........................................................
+121...
+
+- source_documents\verilog_fsm.pdf: CurrentState;
+37 reg [2:0]
+NextState;
+38 //
+--------------------------------------------------------------------
+39
+40 //
+--------------------------------------------------------------------
+41 // Outputs
+42 //
+--------------------------------------------------------------------
+43 // 1-bit
+outputs
+44 assign
+Output1 = (CurrentState == STATE_1) | (CurrentState == STATE_2);
+45 assign
+Output2 = (CurrentState == STATE_2);
+46
+47 // multi -bit
+outputs
+48 always@( * ) begin
+49
+Status = 3’b000;
+50...
+
+- source_documents\verilog_fsm.pdf: Program 23 The complete FSM (part 1) from Figure 1
+1 module
+BasicFsm(
+2
+//
+------------------------------------------------------------
+3
+// Inputs
+4
+//
+------------------------------------------------------------
+5
+input
+wire
+Clock ,
+6
+input
+wire
+Reset ,
+7
+input
+wire
+A,
+8
+input
+wire
+B,
+9
+//
+------------------------------------------------------------
+10
+11
+//
+------------------------------------------------------------
+12
+// Outputs
+13
+//...

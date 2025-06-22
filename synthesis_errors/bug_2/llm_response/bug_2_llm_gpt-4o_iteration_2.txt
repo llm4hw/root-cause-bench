@@ -1,0 +1,9 @@
+The error message indicates that the operator "+" as used in the expression `c <= a + b;` is not properly defined for the operands `a` and `b`. This is a common issue in VHDL when attempting to perform arithmetic operations on `std_logic_vector` types. 
+
+In VHDL, `std_logic_vector` is simply a vector of bits with no inherent arithmetic meaning, which means that the "+" operator cannot be applied directly to `std_logic_vector` types. The `numeric_std` library provides arithmetic operations, but these are defined for the `unsigned` and `signed` data types, not directly for `std_logic_vector`.
+
+The root of the bug is the mistreatment of `std_logic_vector` as an arithmetic type, which VHDL does not permit directly with its standard libraries. Consequently, the VHDL compiler cannot find a matching overload of the "+" operator for `std_logic_vector`.
+
+To address this, the `std_logic_vector` values need to be explicitly cast to a compatible type, such as `unsigned` (or `signed` if dealing with signed numbers), perform the addition, and then cast the result back to `std_logic_vector`. This approach ensures that the arithmetic operation is correctly defined in terms of the available operator overloads provided by the `numeric_std` library.
+
+Thus, the issue arises from incorrect data type usage for arithmetic operations, and the solution involves typecasting to enable proper arithmetic operation according to the types supported by `numeric_std`.

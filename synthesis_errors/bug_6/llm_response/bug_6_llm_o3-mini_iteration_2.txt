@@ -1,0 +1,5 @@
+The error arises because you declared a variable outside of any subprogram (process or function). In VHDL, variables are intended to be local to processes or subprograms; when declared outside, the language expects them to be marked as "shared" for simulation purposes. Without that keyword, the simulator complains because it cannot guarantee proper behavior for a variable that is global to the architecture.
+
+In your code, you have declared the variable in the architecture's declarative region alongside signals. However, since variables declared outside a process must be declared as shared (and using shared variables has its own limitations and isn’t generally synthesizable), the tool flags this as an error.
+
+To resolve this issue, you would typically either move the variable declaration inside the process where it is used (thus making it a local entity to that process) or replace it with a signal if you need to retain the state outside the process. The latter choice is usually preferred in a synthesizable design.

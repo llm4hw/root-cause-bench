@@ -1,0 +1,9 @@
+The bug in the provided code is that the assignment `input1 <= '0';` is attempting to update the 'in' object `input1`, which is not allowed in VHDL. 
+
+In VHDL, signals declared as `in` within an entity are meant to be inputs to the design and cannot be directly assigned within the architecture as it violates the concept of the input being driven externally.
+
+To fix this issue, you need to change the `in` type of `input1` to `inout` or `buffer`, or define an internal signal to hold the value '0' and then assign that signal to `input1` in the process.
+
+Additionally, as a good practice, avoid using signal assignments in the architecture body for inputs and instead connect them in the testbench. 
+
+To resolve this issue correctly and maintain the intended signal directionality, consider the proper use of signal types and avoid updating the `in` signals directly within the architecture.

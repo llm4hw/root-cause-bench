@@ -1,0 +1,23 @@
+The error message you encountered indicates a fundamental issue with your VHDL code's process definition. In VHDL, a process block can either include a sensitivity list or use wait statements to control when the process should suspend and resume. These two mechanisms for controlling process execution are mutually exclusive; they cannot be used together in the same process.
+
+In the provided code, there's a process that includes both a sensitivity list (`process (clk)`) and a wait statement (`wait for 10 ns;`). This combination leads to the error because VHDL does not allow both constructs in the same process. The sensitivity list makes the process execute every time the specified signal (`clk`) changes, but the wait statement attempts to introduce an additional suspension condition based on a time delay. This creates a conflict in how the VHDL simulator should manage the process execution.
+
+### Why is the bug occurring?
+
+Here’s the breakdown of the problem:
+
+1. **Sensitivity List**: The sensitivity list `(clk)` indicates that the process should begin executing when there is a change in the signal `clk`, typically to handle synchronous logic driven by clock edges.
+
+2. **Wait Statement**: The `wait for 10 ns;` statement tries to insert a delay, making the process wait for 10 nanoseconds before proceeding further. However, VHDL processes with sensitivity lists are designed to be driven by events on the sensitivity list signals, and not by time delays.
+
+The presence of both within the same process block is invalid and leads to the synthesis tool generating the error message.
+
+### Possible Fix
+
+To resolve this issue, you need to decide between using a sensitivity list or a wait statement for time-based suspensions but not both. Here's a conceptual guidance (not code):
+
+1. **If you choose to synchronize with the clock (typical for hardware designs):** Remove the wait statement, and structure your logic or testbench to handle temporal behavior differently, likely using a separate process without a sensitivity list where you can use `wait` statements freely for delays.
+
+2. **If you are in a testbench context and need delays:** Consider moving the behavior that requires a delay to a different process without a sensitivity list, fully managed by time-based `wait` statements.
+
+By doing so, you ensure that your VHDL code adheres to the language rules regarding process control and execution timing. This will resolve the synthesis error and align your design with correct VHDL practices.

@@ -1,0 +1,7 @@
+The issue is that the condition inside the always block isn’t expressed in a way that matches the asynchronous reset’s edge as defined in the event control list. In your sensitivity list you have specified the negative edge of reset (negedge reset), meaning that the module is meant to react when reset goes low. However, the conditional statement
+
+  if (!reset == 0) begin
+
+is interpreted as applying the logical NOT to reset (which then is compared to 0) rather than directly comparing reset to 0. Due to operator precedence, it is evaluated as if ((!reset) == 0). This ends up inverting the intended meaning—in effect, the condition becomes true when reset is high rather than low. The synthesis (and simulation) tools flag this because the reset operand in the condition does not match the polarity used in the event control (negedge reset). In other words, you’re checking the reset value in a manner that is inconsistent with expecting an active-low reset.
+
+The fix is to modify the condition so that it directly checks for the active-low reset (for example, by comparing reset to 0 or by simply using the logical NOT on reset without an additional comparison). This realignment ensures that the design’s intended behavior for the asynchronous reset is correctly implemented according to the event control specification.

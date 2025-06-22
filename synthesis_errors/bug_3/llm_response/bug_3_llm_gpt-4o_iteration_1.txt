@@ -1,0 +1,11 @@
+The error you are encountering is due to an attempt to assign a value ('0') to an input port within the architecture of a VHDL entity. In VHDL, ports specified as "in" (input) cannot be driven or assigned values internally within the architecture of the design. They are meant to receive values from external sources, such as signals from other modules or a testbench.
+
+Here is what went wrong and why:
+
+1. **Direction Misuse**: The port `input1` is declared as an input (`in STD_LOGIC`), which means it should only receive data from outside the entity. Trying to update an input port inside the architecture is not allowed because it contradicts the design intent by trying to drive the signal from within the module.
+
+2. **VHDL Restrictions**: The synthesis and simulation tools enforce this rule, resulting in the reported error. The tools recognize that assigning a value to an input port within the architecture violates VHDL semantics.
+
+To resolve this issue, ensure that the assignment is performed on an "internal signal" or if the behavior intended is to provide default values or other logic, consider redesigning how inputs are handled. Typically, input ports should be driven by external signals from the test bench or connecting modules in a full design.
+
+Understanding the context deeply (like providing a default behavior, using an internal signal, or a separate testbench assignment) is key, but fundamentally, avoid trying to drive input ports directly from within the architecture.

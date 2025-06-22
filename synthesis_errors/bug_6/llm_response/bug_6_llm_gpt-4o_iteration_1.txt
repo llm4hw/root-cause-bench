@@ -1,0 +1,13 @@
+The error message you encountered is due to the incorrect declaration of a `variable` in the architecture declarative region of your VHDL code, which is outside of a process or a subprogram. In VHDL, variables are intended to be used within processes or subprograms (such as functions or procedures) and not declared at the architecture level unless they are marked as `shared`.
+
+Here's the key issue:
+
+- **Variable Declaration Location:** You have declared `variable1` in the architecture declarative region, similar to how you declare `signal1`. However, unlike signals, variables can't be declared at the architecture level unless they are specified as `shared`. The language rule requires that variables be local to a process or subprogram, except when declared as `shared`, which would make them accessible across multiple processes but with additional considerations for synchronization.
+
+- **Proper Use of Variables:** Variables, when used correctly within a process, act as local storage that gets updated immediately within the simulation cycle. They are typically declared and updated inside a process to hold temporary values.
+
+To fix this issue, you should move the declaration of `variable1` inside the process itself, either at the beginning of the process block or before the first usage:
+
+Instead of being declared at the architecture level, `variable1` should be defined at the beginning of your process to limit its scope to where it is used. By moving the declaration inside the process, the error related to its scope will be resolved.
+
+Make sure to review your design intentions, as this approach will satisfy the syntactical requirement and will enforce the correct scoping rules for variables in VHDL.

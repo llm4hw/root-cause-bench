@@ -1,0 +1,12 @@
+The error originates from the way the carry‐signals are wired between the four 1‑bit adders. In a properly chained 4‑bit adder, the carry output from the lower significant bit must feed the carry input of the next higher bit. In your code the wires that connect the individual adder modules are “misordered.” That is, the wrong carry wire is used for each bit’s carry input:
+
+• The first full adder produces a carry (w_carry1) that should go to the second adder, but the second adder is instead receiving w_carry3.  
+• Similarly, the third full adder is receiving w_carry1 instead of the carry output from the second adder, and so on.
+
+This misconnection causes the adders to use the incorrect carry values when calculating each bit’s sum, which explains why a test case such as 3 + 5 (which should yield 8, or “01000”) ends up producing an unexpected result (“10010”).
+
+Because the testbench compares the expected addition result ({carry, sum}) with the actual one, the misrouted carries cause the overall 5‑bit result to be wrong.
+
+The fix is to reassign the carry wires so that the first adder’s carry feeds the second adder, the second’s feeds the third, and the third’s feeds the fourth. In this way, every full adder gets the proper previous carry signal. (Do not confuse which wire is connected to which adder; the key is to have a sequential chain from the least significant to the most significant bit.)
+
+By correcting the chaining of the carry wires between the 1‑bit adders, the simulation will produce the correct addition result.

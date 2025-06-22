@@ -1,0 +1,163 @@
+Based on the error message and analysis of the code, the bug is in the test bench's Test Case 6 implementation. Here's the breakdown:
+
+**Bug Explanation:**
+1. **Incorrect Condition in Test Case 6:**
+   - The test bench expects `outResult > 3'b110` (binary 6) when both `pedControl` and `longTimeHold` are active
+   - The design specification shows that in the Pedestrian (`Ped`) state with `longTimeHold=1`, the output should be `3'b101` (binary 5), not a value greater than 6
+
+2. **State Transition Issue:**
+   - When Test Case 6 executes, the design is in the `Red` state (from previous Test Case 5)
+   - With `pedControl` still active (set in Test Case 2) and `longTimeHold` now set to 1:
+     - Next state becomes `Ped` (due to pedestrian request)
+     - Output becomes `3'b101` (as specified in design)
+   - The test incorrectly expects a value >6 when it should expect exactly `3'b101`
+
+**Fix:**
+Modify Test Case 6 in the test bench to check for the correct output value:
+
+```verilog
+// Test Case 6: Pedestrian signal triggered with longTimeHold
+longTimeHold = 1;
+#10;
+if (outResult !== 3'b101) begin  // Correct expected value
+    $display("ERROR: Test Case 6 failed. outResult = %b (Expected: 101)", outResult);
+    $fatal;
+end
+```
+
+**Additional Test Bench Issues:**
+1. **Test Case 2 also has incorrect expectations:**
+   - Should expect `3'b110` (not `3'b101`) when in `Ped` state without `longTimeHold`
+   - Current implementation has conflicting condition and error message
+
+2. **Test Case 2 Correction Needed:**
+```verilog
+// Test Case 2: Pedestrian signal triggered without longTimeHold
+pedControl = 1;
+#10;
+if (outResult !== 3'b110) begin  // Fix expected value
+    $display("ERROR: Test Case 2 failed. outResult = %b (Expected: 110)", outResult);
+    $fatal;
+end
+```
+
+**Why This Matters:**
+- The design correctly implements the specification:
+  ```verilog
+  Ped: if(longTimeHold) outResult = 3'b101;
+  ```
+- The test bench errors were due to:
+  1. Misunderstanding the design's output encoding
+  2. Using range checks (`> 110`) instead of exact value checks
+  3. Inconsistent error messages (Test Case 2 mentioned `101` but checked for `110`)
+
+After making these corrections, all test cases should pass as the design functionality matches the specified behavior for all states and input combinations.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: Section 6.3: Automated Result Checking
+6.3.1
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 6.2
+Test bench for a sequential logic circuit
+6.1.2 Printing Results to the Simulator Transcript
+In the past test bench examples, the input and output values are observed using either the
+waveform or listing tool within the simulator tool. It is also useful to print the values of the simulation to
+a transcript window to track the simulation as each statement is processed. Messages can be printed...
+
+- source_documents\Quick Start Guide to Verilog.pdf: “PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then
+print
+either...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.4
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.4. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.3
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.3. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...

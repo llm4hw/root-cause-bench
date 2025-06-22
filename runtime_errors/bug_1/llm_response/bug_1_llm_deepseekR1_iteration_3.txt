@@ -1,0 +1,7 @@
+The bug is caused by incorrect logical operations in the assignments for `p1y` and `p2y`. 
+
+For `p1y`, the code uses a bitwise AND (`&`) between two 3-bit vectors `{p1a, p1b, p1c}` and `{p1d, p1e, p1f}`. This results in a 3-bit output, which is then truncated to 1 bit (retaining only the least significant bit). However, the intended behavior requires `p1y` to be `1` when **either** all of `{p1a, p1b, p1c}` are `1` **or** all of `{p1d, p1e, p1f}` are `1`. The current logic only produces `1` if **both** groups have matching `1` bits in all positions, which is not the desired functionality.
+
+Similarly, for `p2y`, the code incorrectly combines two reduction-AND operations (for `{p2a, p2b}` and `{p2c, p2d}`) using an AND instead of an OR. This forces `p2y` to be `1` only if **all four inputs** are `1`, rather than when **either** pair `{p2a, p2b}` **or** `{p2c, p2d}` are both `1`.
+
+The fix involves replacing the bitwise AND between the groups with logical OR operations after performing reduction-AND on each group. This ensures `p1y` and `p2y` activate when either of their respective input groups are fully asserted.

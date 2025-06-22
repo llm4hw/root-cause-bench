@@ -1,0 +1,27 @@
+The error occurs because the signal `data` is declared as a `wire` but is being assigned inside a procedural `always` block. Here's why this is invalid:
+
+1. **Wire vs Reg Rules**:
+   - `wire` types represent physical connections and can only be driven by continuous assignments (`assign` statements) or module ports
+   - Procedural blocks (`always`/`initial`) can only assign to variables declared as `reg` (or similar register-like types)
+
+2. **Specific Issue**:
+   - Line `data <= 1'b0;` attempts a procedural assignment to `data`, which is declared as `wire` (line `wire data;`)
+   - The `always` block treats `data` as a storage element (flip-flop) that needs to hold state between clock cycles, but `wire` cannot store values
+
+3. **Underlying Problem**:
+   - The code implies `data` should be a register that:
+     * Resets to 0
+     * Toggles its value each clock cycle
+     * Maintains state between cycles
+   - These characteristics require a `reg` declaration, not a `wire`
+
+4. **Additional Timing Issue**:
+   - The assignment `out1 <= data;` uses the pre-update value of `data` due to non-blocking assignment semantics
+   - This makes `out1` delayed by one clock cycle compared to the new `data` value
+
+**Fix Approach**:
+1. Change `data` from `wire` to `reg` to allow procedural assignments
+2. Re-evaluate the relationship between `data` and `out1` if they need to update simultaneously
+3. Consider initializing both signals in the reset condition for consistent behavior
+
+The core issue is the type mismatch between the declared net type (`wire`) and its usage as a state-holding element in procedural code.

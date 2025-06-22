@@ -1,0 +1,5 @@
+The bug is due to incorrect feedback connections between the inverters in the ring oscillator. The error arises because the assignment `assign lut_ins = {lut_outs[10], lut_outs[9:0]};` connects the inputs of inverters 1 to 10 to the *reverse* of the prior inverter's outputs, breaking the chain. 
+
+A ring oscillator requires each inverter's input to connect to the **output of the previous inverter** (e.g., inverter 1's input should come from inverter 0's output). However, the code erroneously connects inverter 1's input to inverter 9's output, inverter 2's input to inverter 8's output, etc., preventing oscillation. The feedback loop is not closed properly. 
+
+To fix this, the feedback wiring must form a contiguous chain where each inverter's input is driven by the prior inverter's output, with the last inverter feeding back to the first. This requires adjusting the assignment to correctly order the connections.

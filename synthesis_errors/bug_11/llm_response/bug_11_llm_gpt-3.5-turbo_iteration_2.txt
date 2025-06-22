@@ -1,0 +1,7 @@
+The bug in the provided code is occurring because the case statement does not cover all possible values of the "sel" input signal. In this case, the error message specifically points out that the choice `32'b00000000000000000000000000000011` is missing in the case statement.
+
+The "sel" input port is defined as a std_logic_vector with 2 bits (`std_logic_vector(1 downto 0)`), and the case statement is being evaluated based on this input. However, the case statement only covers `when "00"`, `when "01"`, and `when "10"`. It lacks a case for the value `11`, which is 2'b11 in binary.
+
+To fix this bug, you should add a `when "11"` branch to the case statement to cover all possible values of the 2-bit input signal. This will ensure that the case statement handles all possible values and avoids missing choices during synthesis or simulation.
+
+Adding the missing case will prevent the error message reported during simulation and ensure that the design behaves as intended for all possible input combinations.

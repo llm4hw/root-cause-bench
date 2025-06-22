@@ -1,0 +1,5 @@
+The issue is that the sequential logic for updating the state uses a sensitivity list that only includes the rising edge of the reset signal rather than the clock. As a result, after the reset is deasserted, no rising‐edge events occur on the always block, so the state (and other outputs) are never updated with the new input value. This is why the simulation output remains at state 0 instead of showing the expected value (3 in Test 1).
+
+In other words, the bug occurs because the intended clock-driven behavior is missing—the always block never uses the clock edge to process the input and transition the state. The fix is to modify the sensitivity list to include the clock (along with the reset) so that on each rising clock edge (or when reset is asserted) the block evaluates the conditions and updates the state, output, and valid signals.
+
+This explains why the test bench fails: without the clock edge in the sensitivity list, the state remains at its initial value (S0) and the expected transitions never occur.

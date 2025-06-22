@@ -1,0 +1,20 @@
+The issue here lies in the way the final carry output (`o_carry`) is computed in the `full_half_add_1bit` module. In this design, there are two half adders:
+
+1. The first half adder (`h1`) takes inputs `i_a` and `i_b` and generates an intermediate sum `w_sum1` and an intermediate carry `w_carry1`.
+
+2. The second half adder (`h2`) takes the sum from the first half adder (`w_sum1`) and the carry-in (`i_cin`) and generates the final sum `o_sum` and another intermediate carry `w_carry2`.
+
+Currently, the final carry output (`o_carry`) is computed as `w_carry1 & w_carry2`. This is incorrect for the operation of a full adder. A full adder requires considering both intermediate carry-outs to calculate the final carry as follows: 
+
+\[
+o\_carry = w\_carry1 \text{ OR } w\_carry2
+\]
+
+The specific failure in Test Case 3 occurs because for inputs `1 + 1 + 0`, the expected behavior in a full adder is:
+- The sum of the two inputs `1 + 1 = 0` with a carry (`w_carry1 = 1`).
+- Adding this result with `0 + 0 = 0` results in `w_carry2 = 0`.
+
+The correct final carry-out should be `1` to reflect `w_carry1 = 1` OR `w_carry2 = 0`, but the current implementation incorrectly ANDs `w_carry1` and `w_carry2` producing a final carry of `0`.
+
+To fix this issue:
+- The assignment for calculating `o_carry` should be changed to perform a logical OR (`|`) between `w_carry1` and `w_carry2`. This accurately reflects the carry logic of a full adder, which requires at least one of the carries to propagate to create the final carry output.

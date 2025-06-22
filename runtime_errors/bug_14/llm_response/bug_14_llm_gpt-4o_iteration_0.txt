@@ -1,0 +1,13 @@
+The main issue here stems from the always block that is used to handle the FSM's state transitions and output encoding. Let's go through it step by step:
+
+1. **Reset Control**:
+   The current sequential always block is triggered on the positive edge of the reset signal (`@(posedge reset)`). Typically, you would expect a sequential block in hardware to be triggered on a clock edge, especially if it's managing state transitions. Here, the state and outputs are updated only on the positive edge of the reset, rather than on each clock cycle. This means that, after the reset is released, the FSM does not respond to changes in `num_in` because it is not being clocked properly.
+
+2. **State Transitions**:
+   Since the state transitions are controlled by `reset` instead of `clk`, once the reset is deasserted, the FSM becomes static and doesn't progress with changes to `num_in`.
+
+3. **Solution**:
+    - The state transition logic should be placed inside an always block triggered by the clock signal (`@(posedge clk)`), with an asynchronous or synchronous reset logic included inside the block.
+    - This ensures that the state updates on every rising edge of the clock, and checks the `reset` condition to set the FSM to its starting state when necessary.
+
+By using the clock to drive the state changes instead of relying on `reset`, the FSM will correctly respond to input changes and progress through the states as expected. The bug occurs here because the FSM does not transition correctly under simulation, which results in the outputs and valid flags not updating as expected, as seen in the failed first test case.

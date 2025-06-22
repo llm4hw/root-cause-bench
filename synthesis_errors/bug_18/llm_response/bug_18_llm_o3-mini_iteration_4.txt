@@ -1,0 +1,7 @@
+The error indicates that in the instantiation of ChildModule, the code is trying to connect a signal to a port named "b". However, when you look at the definition of ChildModule, it only declares the ports "a" and "c". This mismatch results in the synthesis error because the named port "b" does not exist in ChildModule.
+
+In other words, the developer attempted to connect a port named "b" (by writing .b(in)) in the instance child_inst, but since there is no "b" defined in the ChildModule, the simulator/synthesizer cannot match it to any port.
+
+The fix here is to ensure that the ports used during instantiation exactly match the names in the module definition. Either you change the instantiation to use only the valid port names ("a" and "c") or update the module definition to include the missing port "b" if that is what was intended.
+
+This discrepancy is why the simulation (or synthesis) tool generates the error, pointing out the incorrect named connection.

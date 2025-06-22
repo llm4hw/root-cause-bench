@@ -1,0 +1,7 @@
+The bug in the code is occurring due to the usage of the bitwise AND operator '&' in the assignment of p1y and p2y in the top_module module. The intended behavior seems to be concatenating the inputs and then performing a bitwise AND operation, but the current implementation is not achieving that.
+
+In Verilog, the '&' operator is used for performing bitwise AND operations, not concatenation. So when the concatenation operation '{p1a, p1b, p1c}' and '{p1d, p1e, p1f}' is being combined with '&', it's actually performing the bitwise AND operation on each bit of the concatenated values individually, which is leading to incorrect results.
+
+To fix this issue, the concatenation operation should be performed first on the input signals and then the bitwise AND operation should be applied. You can use the '{}' concatenation operator to concatenate the signals and then apply the '&' operator to perform the bitwise AND operation. 
+
+Make this modification in the assignment of p1y and p2y in the top_module module, and the issue should be resolved.

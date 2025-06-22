@@ -1,0 +1,5 @@
+The bug in the code is that the binary number specified in the assignment `y = 2'b2;` is incorrect. In Verilog, a binary number can only have values of 0 or 1 for each bit, therefore `2` is an illegal character in a binary number.
+
+The error is occurring because the code is attempting to assign an invalid binary value to the `y` signal. Verilog only allows binary values of 0 or 1 for each bit, not 2 as in `2'b2`.
+
+To fix this bug, the binary number assigned to `y` in the `else` block needs to be corrected to a valid binary value i.e., `2'b10` or `2'b01` based on the desired functionality.

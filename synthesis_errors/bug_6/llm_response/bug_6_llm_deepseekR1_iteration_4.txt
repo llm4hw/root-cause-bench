@@ -1,0 +1,49 @@
+### Bug Explanation:
+The error occurs because the variable `variable1` is declared in the **architecture's declarative region** (between `architecture` and `begin`), which violates VHDL's scoping rules. 
+
+#### Why this is invalid:
+1. **Variables in architecture scope must be SHARED**:  
+   VHDL requires that variables declared outside processes or subprograms must be explicitly marked as `shared`. This is because such variables could potentially be accessed by multiple processes concurrently, requiring special handling.  
+   *Your code declares `variable1` without the `shared` keyword*.
+
+2. **Variables belong inside processes/subprograms**:  
+   Regular (non-shared) variables can **only** be declared:  
+   - Inside a `process` (before the `begin` of the process)  
+   - Inside a `function` or `procedure`  
+   *Your declaration is in the architecture body, which is illegal*.
+
+3. **Synthesis limitation**:  
+   Synthesis tools (like Xilinx Vivado) reject this construct because shared variables introduce non-deterministic behavior in hardware and are generally unsynthesizable.
+
+---
+
+### How to Fix:
+#### Option 1 (Recommended): Move the variable inside the process  
+Declare `variable1` **within the process** that uses it:  
+```vhdl
+process (clk, rst)
+    variable variable1 : STD_LOGIC := '0'; -- Declare INSIDE the process
+begin
+    ... 
+end process;
+```  
+This makes it a local process variable, aligning with VHDL rules.
+
+#### Option 2: Replace with a signal  
+If cross-process communication is needed, use a `signal` instead of a variable:  
+```vhdl
+signal signal1, variable1 : STD_LOGIC := '0'; -- Declare as signal
+```  
+Signals can be freely declared in the architecture region and assigned in processes with `<=`.
+
+#### Option 3 (Not Recommended): Use SHARED variable  
+If truly needed (rarely synthesizable), declare as:  
+```vhdl
+shared variable variable1 : STD_LOGIC := '0';
+```  
+*Note: Shared variables are discouraged in RTL design due to race conditions and tool support issues.*
+
+---
+
+### Root Cause Summary:  
+The variable `variable1` is illegally placed in the architecture declarative region without being `shared`. VHDL restricts variables to processes/subprograms unless explicitly declared as shared. The fix requires either relocating the variable or changing its declaration type.

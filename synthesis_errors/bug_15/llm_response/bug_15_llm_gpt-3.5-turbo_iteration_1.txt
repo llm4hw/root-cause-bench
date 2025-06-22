@@ -1,0 +1,3 @@
+The bug in the provided Verilog code is due to the fact that the 'data' signal is declared as a wire and later assigned values inside an always block. In Verilog, a wire type signal can't be assigned a value in a procedural block like an always block. Wires can only be assigned continuous assignments, not procedural assignments.
+
+To fix this bug, you should change the declaration of 'data' from wire to reg. Since 'data' is being assigned values in the always block, it needs to be declared as a reg type signal. This will allow you to assign values to 'data' within the always block without triggering the synthesis error.

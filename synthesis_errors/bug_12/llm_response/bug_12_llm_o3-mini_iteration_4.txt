@@ -1,0 +1,5 @@
+The error is caused by the way one of the signals is being initialized. In VHDL, a signal declared as a single-bit type (std_logic) must be initialized with a character literal (using single quotes), not a string literal (using double quotes). In your code, the signal “a” (of type std_logic) is given the value "0" with double quotes, which is only appropriate for multi-bit vectors. This mismatch of types is what the synthesis tool is complaining about.
+
+The error message points to the line with "end entity;" because that is where the tool finishes processing the entity; however, the underlying error is in the signal initialization.
+
+To address the problem, you need to change how the std_logic value is represented so that it matches the expected scalar literal rather than a string literal.

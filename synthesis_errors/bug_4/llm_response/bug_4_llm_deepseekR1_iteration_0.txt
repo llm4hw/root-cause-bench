@@ -1,0 +1,27 @@
+The bug is a **width mismatch** in the signal assignment. Here's why it occurs and how to fix it:
+
+### Root Cause:
+1. **Port Size Mismatch**  
+   - `input1` is declared as `std_logic_vector(2 downto 0)` (3 bits)  
+   - `output` is declared as `std_logic_vector(3 downto 0)` (4 bits)  
+
+2. **Direct Assignment Issue**  
+   The line `output <= input1;` attempts to assign a 3-bit signal to a 4-bit port without any bit-width adjustment. VHDL requires strict matching of vector sizes in direct assignments.
+
+### Why This Causes an Error:
+- Synthesis tools enforce strict type checking. Assigning a smaller vector to a larger one creates ambiguity about how to handle the extra bit(s) in the target signal.  
+- The tool cannot auto-expand or auto-resize vectors implicitly (unlike some simulation tools). Explicit bit manipulation is required.
+
+### How to Fix:
+**Modify the assignment to account for the size difference:**  
+1. **Zero-extension (most common):**  
+   Add a leading `'0'` to `input1` to match the 4-bit width (e.g., `output <= '0' & input1;`).  
+
+2. **Sign-extension (if signed data):**  
+   Replicate the MSB of `input1` (e.g., `output <= input1(2) & input1;`).  
+
+3. **Port Redefinition (if design allows):**  
+   Adjust either port's bit-width to match the other (e.g., change `output` to 3 bits or `input1` to 4 bits).
+
+### Key Insight:
+The fix must **explicitly define the value of all 4 bits** in `output`. The current assignment leaves the highest bit undefined, which violates synthesis rules.

@@ -1,0 +1,7 @@
+The bug in the code is that the signal `signal2` is used in the process without being declared anywhere in the entity or architecture of the module `top8`. This is why the error message `signal2 is not declared` is occurring.
+
+To fix this issue, you need to declare the signal `signal2` either in the list of signals in the architecture or in the entity declaration itself.
+
+In this case, you should declare `signal2` in the architecture like this: `signal signal2 : STD_LOGIC := '0';`
+
+After adding the declaration for `signal2`, the error message should be resolved, and the code should function correctly.

@@ -1,0 +1,8 @@
+The problem is that the intended "ring" is not actually being formed. The assignment that connects the inverter chain is written so that each inverter’s input is simply wired to its own output instead of making a proper shift through the array. In other words, the concatenation statement ends up with lut_ins being identical to lut_outs (each bit lined up with itself), so there is no chain of inversions. Therefore, the inverter that is supposed to feed from the last inverter back to the first never actually does so, and the oscillation never starts.
+
+This behavior is caused by a misunderstanding of how the bits are ordered in the concatenation. The intended behavior was to have the output of one inverter feed the input of the next (with the final output feeding back into the first inverter), which would set up a proper delay loop. In this case, the assignment should “rotate” the bits such that the last inverter’s output is connected to the first inverter’s input and so on. Because the wiring does not do that, no inversion chain is formed and the output remains static.
+
+To summarize:
+• The bug is that the feedback wiring is incorrect—the inversion chain is not properly “shifted” so that each inverter’s output is fed to the next inverter’s input.
+• It is occurring because the concatenation {lut_outs[10], lut_outs[9:0]} does not perform a rotation but rather copies each bit to the matching index.
+• The fix is to rewire the chain so that the final inverter’s output is connected to the first inverter’s input, and every other inverter receives input from the previous inverter. This proper “rotating” assignment would allow the delays to add up and the ring oscillator to toggle as expected.

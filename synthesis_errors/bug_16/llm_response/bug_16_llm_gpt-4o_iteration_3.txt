@@ -1,0 +1,20 @@
+The error you're encountering is related to the way the `out1` register is being assigned within the `always` block in the `top16` module. This specific error - "Cannot extract Asynchronous Set/Reset for register 'out1_reg'" - indicates a synthesis issue where the tool is unable to recognize the intended behavior of an asynchronous set or reset operation for the register `out1`.
+
+Here are the primary reasons for this issue:
+
+1. **Improper Blocking Assignment Use**: In the `always` block, the assignment `data = ~data;` and `out1 = data;` are performed using blocking assignments (`=`). Blocking assignments are evaluated in the exact order they are written, and they execute immediately in simulation. This can lead to synthesis and simulation mismatches, particularly when attempting to describe sequential logic.
+
+2. **Intended Sequential Logic Using Combinational Assignments**: The line `out1 = data;` attempts to make `out1` follow the value of `data` using a blocking assignment. This does not reflect proper sequential logic (e.g., capturing `data` on the clock edge or adjusting asynchronously).
+
+3. **Inconsistent Reset Handling**: `data` is being reset asynchronously with `rst`, but `out1` does not have explicit reset behavior. In its current form, `out1` copies `data` every time the block executes, but synthesis tools can't infer an asynchronous reset on `out1` because it doesn't atomically clear `out1` within the entire reset condition.
+
+The combination of blocking assignments and lack of clear asynchronous reset handling for `out1` is causing the synthesis tools to be unable to extract or recognize the intended behavior.
+
+**Explanation for Fix:**
+- Use non-blocking assignments (`<=`) consistently within the sequential `always` block. These are intended for describing registers or flip-flops:
+  - `data <= ~data;`
+  - `out1 <= data;`
+- Ensure that all assignments within a clocked process are synchronous where intended, using non-blocking assignments usually clears up simulation and synthesis issues.
+- To have a proper asynchronous reset, both `data` and `out1` should have explicit conditions when `rst` is high, clear both registers synchronously (if appropriate). 
+
+By adhering to these best practices, you can avoid synthesis issues and ensure that the RTL code simulates accurately and behaves correctly in hardware.

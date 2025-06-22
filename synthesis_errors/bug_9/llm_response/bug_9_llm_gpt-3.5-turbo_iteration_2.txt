@@ -1,0 +1,3 @@
+The error is occurring because of the line `temp_signal <= a and b;` in the architecture. In VHDL, you cannot perform logical operations directly between an `in` signal (like `a`) and an `out` signal (like `b`) as it implies trying to read from an `out` object, which is not allowed. 
+
+The bug can be fixed by changing the port declaration of signal `b` from `out` to `inout` or `buffer` in the entity declaration. This change would allow the signal `b` to be used as an output and as an input so that it can be READ and WRITTEN within the architecture. This will resolve the error and properly implement the intended logic operation.

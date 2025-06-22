@@ -1,0 +1,7 @@
+The root cause of the bug is that the addition operator (“+”) is not defined for the type of the signals used in the expression. In your code, a and b are declared as std_logic_vector, and although you have imported ieee.numeric_std, that library only supplies the overloaded “+” operator for numeric types like unsigned and signed—not for std_logic_vector. Because VHDL cannot find any matching definition of the operator for std_logic_vector, it generates the error.
+
+This issue occurs because VHDL’s type system is strict; operations like addition can only be applied to types that have an appropriate operator definition. Even though both std_logic_vector and numeric types represent digit-like signals, they are distinct types and VHDL does not implicitly convert between them.
+
+To resolve the error, you should perform an explicit conversion by converting your std_logic_vector signals to an appropriate numeric type (such as unsigned) before performing the addition. This conversion informs VHDL which addition operator to use, ensuring that the operator is applied to the correct type.
+
+Remember, the explanation above only describes the error’s cause and why it happens—you are not asking for a code fix in the answer.

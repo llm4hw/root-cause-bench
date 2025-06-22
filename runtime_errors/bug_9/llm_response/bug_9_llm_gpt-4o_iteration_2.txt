@@ -1,0 +1,17 @@
+The error message "ERROR: Morse for O not correct." indicates that there is an issue with generating the Morse code for the character 'O'. The Morse code for 'O' should be three consecutive dashes, represented by "---". Let's analyze why this might be happening in the provided code:
+
+1. **State Transition Issue**: When the `select` signal is set to `2'b01`, the state machine is intended to produce three dashes. This should ideally transition through the states `O_DASH1`, `O_DASH2`, and `O_DASH3`. However, the current code transitions only from `O_DASH1` straight back to `IDLE` without transitioning to `O_DASH2` and `O_DASH3`.
+
+2. **Counter Reset and State Transition**: In the `O_DASH1`, `O_DASH2`, and `O_DASH3` states, the transitions return immediately to `IDLE` after the counter reaches the `DASH` limit, indicating no intermediate transitions. This means after a single dash, it does not proceed to produce the next two dashes as it should for 'O'. The state does not properly move from `O_DASH1` to `O_DASH2`, then `O_DASH3`.
+
+3. **Logic Error in State Sequencing**: The issue arises because each `O_DASH` state transitions directly back to `IDLE` without allowing for the sequential structure required for producing the sequence "---". Each state should lead into the next until all three dashes are completed.
+
+**Root Cause of Bug**: The logic for transitioning between the states for generating the Morse code for 'O' is incorrect. The state machine doesn't progress through the sequence needed to output three dashes sequentially because all `O_DASH` states lead directly back to `IDLE` after executing once.
+
+**How It Can Be Fixed**: To correct this, the transition logic for the states `O_DASH1`, `O_DASH2`, and `O_DASH3` should be adjusted. Here is a conceptual explanation of the necessary adjustments:
+
+- **O_DASH1**: After the counter reaches the `DASH` limit, transition to `O_DASH2` instead of `IDLE`.
+- **O_DASH2**: After the counter reaches the `DASH` limit, transition to `O_DASH3` instead of `IDLE`.
+- **O_DASH3**: Once completed, then transition back to `IDLE`.
+
+The overall logic flow between these states needs to ensure that the state transitions are sequential to complete the three consecutive dash signals for 'O'. By structuring the state transitions to correctly sequence from one dash to the next, the error in generating the Morse code for 'O' will be resolved.

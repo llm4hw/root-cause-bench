@@ -1,0 +1,9 @@
+The error comes from trying to index directly into the result of a type conversion. In your code, the function that converts the counter into an unsigned (and then to a std_logic_vector) returns a temporary value. VHDL does not allow you to immediately index this temporary result—that is, you cannot apply an index operator to the result of a function call or type conversion.
+
+In other words, the expression:
+
+  std_logic_vector(to_unsigned(counter, 8))(7)
+
+first computes a temporary conversion to an 8‐bit std_logic_vector and then immediately tries to access bit 7 of that temporary value. The synthesis tool (and simulator) rejects this because it does not allow direct indexing of a conversion result.
+
+The fix is to perform the type conversion in a separate signal assignment (or a variable within a process) before indexing it. That way, you have a defined signal or variable you can index into. This split prevents the immediate indexing of a temporary result and resolves the error.

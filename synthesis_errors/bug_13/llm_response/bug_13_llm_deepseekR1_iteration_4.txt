@@ -1,0 +1,21 @@
+The bug is a **missing semicolon** at the end of the `assign` statement. Here's why:
+
+1. **Error Analysis**:  
+   The error `syntax error near endmodule` occurs because the Verilog parser expects a semicolon (`;`) after the `assign c = a & b` statement. When it doesn't find one, it continues scanning until it encounters `endmodule`, which is invalid in this context (as the assignment isn't properly terminated).
+
+2. **Why This Happens**:  
+   Verilog requires **every statement to end with a semicolon**. The `assign` is a continuous assignment statement, not a declaration. The parser sees:
+   ```verilog
+   assign c = a & b  // Missing semicolon
+   endmodule         // Unexpected keyword after incomplete statement
+   ```
+   Since `endmodule` isn’t valid after an unterminated assignment, the error points to `endmodule` as the location where the syntax breaks.
+
+3. **How to Fix**:  
+   Add a semicolon at the end of the assignment line:
+   ```verilog
+   assign c = a & b;  // Correctly terminated
+   ```
+   This will resolve the syntax error by properly closing the assignment statement before the `endmodule` keyword.
+
+**Note**: The error appears at `endmodule` because that’s where the parser definitively recognizes the incomplete statement, but the root cause is the missing semicolon in the preceding line.

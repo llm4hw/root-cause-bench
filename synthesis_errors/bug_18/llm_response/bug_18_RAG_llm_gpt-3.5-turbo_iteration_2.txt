@@ -1,0 +1,105 @@
+The bug in the provided code is that in the instantiation of the `ChildModule` within the `top18` module, there is an attempt to connect a port named `.b(in)`, but the actual `ChildModule` definition does not have a port named `b`. This leads to the error message indicating that the named port connection 'b' does not exist for instance 'child_inst' of module 'ChildModule'. The error line in the code is:
+
+```
+.b(in),
+```
+
+To fix this bug, you need to do one of the following corrections:
+1. Update the port connection in the instantiation of `ChildModule` to only include the ports that actually exist in `ChildModule`. In this case, remove the `.b(in),` line from the instantiation since `ChildModule` only has ports `a` and `c`.
+2. Modify `ChildModule` if it is necessary to have a port named `b` so that the port connection in the instantiation aligns with the module definition.
+
+By making one of these changes, you can resolve the error related to the named port connection issue.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: mistakes in the signal order. The syntax for positional port mapping is as follows:
+module_name : <instance_identifier> (signal1, signal2, etc.);
+Example 4.2 shows how to create the same structural Verilog model as in Example 4.1, but using
+positional port mapping instead.
+52
+•
+Chapter 4: Structural Design and Hierarchy...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Exercise Problems
+Section 4.1: Structural Design Constructs
+4.1.1
+How many times can a lower-level module be
+instantiated?
+4.1.2
+Which port mapping technique is more com-
+pact, explicit or positional?
+4.1.3
+Which port mapping technique is less prone to
+connection errors because the names of the
+lower-level ports are listed within the mapping?
+4.1.4
+Would it make sense to design a lower-level
+module to implement an AND gate in Verilog?
+4.1.5
+When would it makes more sense to build a...
+
+- source_documents\verilog_2001_ref_guide.pdf: 8
+   Verilog HDL Quick Reference Guide
+5.0
+Module Definitions
+Verilog HDL models are represented as modules.  
+(refer to the next page for the syntax of port declarations) 
+port_name can be either:
+• A simple name, which implicitly connects the port to an internal signal with
+the same name.
+• A name with an explicit internal connection, in the form of
+.port_name(signal), which connects the port to an internal signal with a...
+
+- source_documents\Quick Start Guide to Verilog.pdf: ¼ 8’h42;
+//-- A <¼ A + B
+parameter BRA
+¼ 8’h20;
+//-- Branch Always
+parameter BEQ
+¼ 8’h23;
+//-- Branch if Z¼1
+Now the program memory can be declared as an array type with initial values to deﬁne the program.
+The following Verilog shows how to declare the program memory and an example program to perform a
+load, store, and a branch always. This program will continually write x“AA” to port_out_00.
+160
+•
+Chapter 11: Computer System Design...
+
+- source_documents\Quick Start Guide to Verilog.pdf: begin
+if (!reset)
+port_out_00 <¼ 8’h00;
+else
+if ((address ¼¼ 8’hE0) && (write))
+port_out_00 <¼ data_in;
+end
+//-- port_out_01 (address E1)
+always @ (posedge clock or negedge reset)
+begin
+if (!reset)
+port_out_01 <¼ 8’h00;
+else
+if ((address ¼¼ 8’hE1) && (write))
+port_out_01 <¼ data_in;
+end
+:
+“the rest of the output port models go here. . .”
+:
+11.3.3.4 Implementation of Input Ports in Verilog
+The input ports do not contain storage but do require a mechanism to selectively route their...
+
+- source_documents\verilog_2001_ref_guide.pdf: 18
+   Verilog HDL Quick Reference Guide
+    
+    
+Module Instance Examples
+module reg4 (output wire [3:0] q,
+             input  wire [3:0] d,
+             input  wire       clk);
+  //port order connection, no connection to 2nd port position
+  dff u1 (q[0], , d[0], clk); 
+  //port name connection, qb not connected 
+  dff u2 (.clk(clk),.q(q[1]),.data(d[1]));
+  //explicit parameter redefinition 
+  dff u3 (q[2], ,d[2], clk); 
+  defparam u3.delay = 3.2; 
+  //in-line implicit parameter redefinition...

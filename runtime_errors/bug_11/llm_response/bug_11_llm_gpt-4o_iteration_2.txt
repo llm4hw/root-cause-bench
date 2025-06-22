@@ -1,0 +1,23 @@
+The error you're encountering is due to the FSM (finite state machine) module not handling invalid inputs correctly. Specifically, inputs outside the range '0' to '9' (valid decimal ranges for a 4-bit number) should not be marked as valid, and the output should not be incorrectly processed for these inputs.
+
+**Root Cause:**
+
+1. **Direct State Assignment:** In the FSM, the `state` is directly assigned to `num_in` without any checks to determine if `num_in` is a valid state (between `4'd0` and `4'd9`). As a result, any input, including invalid inputs (like `4'd10` and `4'd15`), will directly set the FSM state.
+
+2. **Validity Signal Mismanagement:** The `valid` signal in the current FSM design is always set to `1` as soon as the system is not in reset, regardless of whether `num_in` represents a valid state. This incorrect behavior leads to the testbench error.
+
+3. **Lack of Default Case Handling:** The FSM lacks a mechanism to handle or explicitly check for cases outside of the states `S0` to `S9`. Currently, only those pre-defined states are part of the case statement in the combinational block used for `output_data`. Therefore, unexpected behavior occurs with invalid states, as they fall outside the defined cases.
+
+**Why the Bug Occurs:**
+
+- Since there's no validation or filtering of `num_in` before assigning it to `state`, inputs like `4'd10` and above will be treated as valid states. This behavior leads to invalid output and validity signals since the FSM has not explicitly defined states beyond `S9`.
+
+**How It Can Be Fixed:**
+
+To address these issues, input validation logic should be introduced in the FSM's sequential block:
+
+- **Validate `num_in`:** Before assigning `num_in` directly to `state`, ensure it falls within the valid range (`4'd0` to `4'd9`). Only then should the state be assigned.
+
+- **Set Validity Properly:** Only set `valid` to `1` when `num_in` is in the valid range.
+
+By implementing checks for `num_in` to see if it is within the valid range and adjusting the `valid` signal and state assignment accordingly, this error should be resolved.

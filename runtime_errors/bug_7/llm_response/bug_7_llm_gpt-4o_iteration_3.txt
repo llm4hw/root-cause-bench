@@ -1,0 +1,29 @@
+The error message from the testbench `ERROR: Expected Red (00), but got 11` indicates that the state machine in the `top_module` is not producing the expected sequence of states as defined in the testbench.
+
+Let's break down the problem:
+
+1. **Initial Conditions:**
+   - The testbench resets the state machine by setting `resetn = 0`. This forces the state machine to start in the "Red" state, mapped to `state = 00`, since the `always @(posedge clk)` block assigns the value `Red` to `state` when `resetn` is low.
+
+2. **State Transitions:**
+   - According to the state transition logic in `top_module`, the case statement handles the following transitions:
+     - From `Red` to `Ped`
+     - From `Ped` to `Red`
+     - From `Green` to `Yellow`
+     - From `Yellow` to `Red`
+
+3. **Testbench Expectations:**
+   - The testbench expects the following sequence: `Red` (00) -> `Ped` (11) -> `Green` (01) -> `Yellow` (10) -> `Red` (00)
+
+4. **Identifying the Bug:**
+   - The state transitions in your module do not correctly handle transitions to the `Green` and `Yellow` states. Specifically, after `Ped`, the next state according to your case statement is `Red` again, not `Green`.
+
+5. **Testbench Expectations vs. Actual Implemented Design:**
+   - The testbench expects the sequence to include `Green` and `Yellow`, but these states are not reachable in the current state transition logic.
+
+The root cause of the error is that the state machine logic in `top_module` does not match the sequence of states expected by the testbench. Specifically, the state transition from `Ped` should go to `Green` instead of cycling back to `Red`.
+
+**Explanation for Fix:**
+- To align the design with the testbench expectations, the state transition logic should be modified such that after the `Ped` state, it transitions to the `Green` state, and then from `Green` to `Yellow`. Adjustments should be made in the state transition case statement to achieve this sequence: Red -> Ped -> Green -> Yellow -> Red.
+
+By fixing the state transitions to align with these expectations, the simulation should then pass all test cases without any fatal errors.

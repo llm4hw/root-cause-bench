@@ -1,0 +1,11 @@
+The bug occurs because the state machine for generating the Morse code 'O' (---) does not correctly sequence the three dashes with appropriate spacing between them. 
+
+**Root Cause:**
+- The states `O_DASH1`, `O_DASH2`, and `O_DASH3` all transition back to `IDLE` immediately after completing their dash (DASH duration), without progressing to the next dash state or inserting inter-dash spacing.
+- As a result, only the first dash (`O_DASH1`) is transmitted, followed by an immediate return to `IDLE`. The state machine does not advance through `O_DASH2` or `O_DASH3`, leading to a single dash instead of three.
+
+**Why This Causes the Error:**
+- The testbench checks if `morse_out` is low after 150 time units, expecting all three dashes to have completed. However, only one dash is generated (which takes longer than the testbench's wait time), leaving `morse_out` still high. This triggers the error.
+
+**Required Fix:**
+- Modify the state transitions for `O_DASH1`, `O_DASH2`, and `O_DASH3` to sequence through all three dashes, inserting `SPACE_STATE` between them (similar to how `A_DOT` transitions to `A_DASH` via `SPACE_STATE`). This ensures proper spacing and progression through all three dashes.

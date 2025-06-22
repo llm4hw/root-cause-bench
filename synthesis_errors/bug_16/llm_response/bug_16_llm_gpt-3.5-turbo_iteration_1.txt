@@ -1,0 +1,7 @@
+The error message indicates an issue with extracting the asynchronous set/reset for the register `out1_reg` in module `top16`. The error occurs at the line `out1 = data;` within the code.
+
+The bug in the code is that the output `out1` is declared as a reg type instead of a wire type, but it is being assigned in a procedural block (`always` block). When a register is driven by a behavioral (procedural) block, it cannot have both blocking and non-blocking assignments to it. In this case, the line `out1 = data;` is a blocking assignment, which conflicts with the fact that `out1` is declared as a reg type output.
+
+To fix this bug, you should change the declaration of the output `out1` to a wire type instead of a reg type. Since the output `out1` is being driven directly in the procedural block, it should be declared as a wire. This change should resolve the error related to extracting asynchronous set/reset for the register.
+
+Additionally, you can remove the commented out `assign out1 = data;` line since the assignment is already being done in the `always` block.

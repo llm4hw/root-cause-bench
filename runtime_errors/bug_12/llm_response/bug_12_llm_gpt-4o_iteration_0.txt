@@ -1,0 +1,15 @@
+The issue arises from a mismatch between what the testbench expects and what the `faulty_comparator` module is programmed to do. Let's break down the problem:
+
+1. **Testbench Expectations**: The testbench expects that the `result` should be `1` whenever `a == b`. Specifically, the test cases are written with this expectation in mind:
+   - In Test Case 1, `a` is set to `9` (or `4'b1001`) and `b` to `9`. The expectation is `result = 1` because `a == b`.
+   - In Test Case 3, both `a` and `b` are set to the maximum value `15` (or `4'b1111`), and the expectation is again `result = 1` because `a == b`.
+
+2. **Module Logic**: However, the `faulty_comparator` module determines the `result` based on the hardcoded condition `(a == 5'b10101)`. This is a problematic condition for two reasons:
+   - The condition `5'b10101` represents a 5-bit binary number equivalent to decimal `21`. Since `a` is a 4-bit input, it can never equate to this 5-bit number. The condition `a == 5'b10101` is therefore never true because `a` can only represent decimal values from `0` to `15` (i.e., `4'b0000` to `4'b1111`).
+   - The module ignores the `b` input entirely. Therefore, the module doesn't fulfill the intention of comparing `a` and `b`.
+
+3. **Why is the Error Occurring?**: The testbench checks fail because the module output, `result`, is always `0` (as the condition in the `always` block is never met), leading to errors during the assertions in the testbench. When `a == b`, the testbench expects `result = 1`, but the module does not provide this due to the incorrect logical condition.
+
+4. **Underlying Problem**: The underlying issue is that the module's logic is comparing `a` to an incorrectly sized constant (`5'b10101`), which is incompatible with the width of `a`. Additionally, the module does not consider the relationship between `a` and `b`.
+
+To fix the issue, ensure that the `faulty_comparator` evaluates `result` based on the condition `a == b`. You should compare `a` directly to `b` within the module, aligning the logic with what the testbench expects.

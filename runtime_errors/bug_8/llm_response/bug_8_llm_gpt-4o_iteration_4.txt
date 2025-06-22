@@ -1,0 +1,30 @@
+The error message "pedControl 2 - ERROR: Expected Green (01), but got 11" indicates that the test bench expected the traffic light to transition to the Green state, represented as `2'b01`, but instead it transitioned to the Pedestrian state, represented as `2'b11`.
+
+Here's why this issue is occurring:
+
+1. **State Transition Logic in the Main Module:**
+   In the provided Verilog code, the state transition logic is defined using a case statement. When the current state is `Ped`, the code specifies:
+   ```verilog
+   Ped: next = Ped;
+   ```
+   This means that once the system enters the Pedestrian state, it will remain there indefinitely until something else intervenes (like a reset). The test bench is setting `pedControl` to 1, which correctly initiates a transition from `Red` to the `Ped` state. However, once in the Pedestrian state, the system indefinitely stays in that state due to the logic described above.
+
+2. **Test Bench Logic:**
+   The test bench expects that after the Pedestrian state is activated (when `pedControl` is set to 1), the system should return to the Green state. It checks this transition with the following lines:
+   ```verilog
+   pedControl = 1;
+   #10;
+   if (outResult !== 2'b11) begin
+       $display("pedControl 1 - ERROR: Expected Ped (11), but got %b", outResult);
+       $fatal;
+   end
+
+   #10;
+   if (outResult !== 2'b01) begin
+       $display("pedControl 2 - ERROR: Expected Green (01), but got %b", outResult);
+       $fatal;
+   end
+   ```
+   The test bench is expecting a transition from Ped to Green, but the logic in the module captures the state in Ped indefinitely due to the line `Ped: next = Ped;`.
+
+To fix this, the state transition logic should allow a transition from the Pedestrian state to another state. A common approach would be to have the pedestrian state transition to the Green state under certain conditions (e.g., after some clock cycles, or when `pedControl` is deactivated). You might need to introduce additional logic or a timer/counter to manage the transition out of the pedestrian state.

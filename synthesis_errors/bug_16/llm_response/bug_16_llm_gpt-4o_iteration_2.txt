@@ -1,0 +1,19 @@
+The error you are encountering indicates an issue with the synthesis tool's ability to extract an asynchronous set/reset condition for the `out1_reg` register in your Verilog module, `top16`. Let's break down why this error is happening:
+
+1. **Blocking vs Non-Blocking Assignments:**
+   - The code uses a mixture of blocking (`=`) and non-blocking (`<=`) assignments within the same always block. Specifically, the `data` signal is updated using a non-blocking assignment (`<=`) in the case of reset, but it uses a blocking assignment (`=`) otherwise. The `out1` output is also being assigned with a blocking assignment (`=`) to `data` within the same sequential block.
+
+2. **Synthesis Expectations:**
+   - Synthesis tools expect consistency in the use of blocking and non-blocking assignments particularly when modeling clocked sequential logic. Non-blocking assignments (`<=`) are intended for sequential logic to avoid race conditions and ensure that all updates occur simultaneously at the end of the always block execution, which reads more naturally as clock-driven updates like those found in flip-flops.
+   - The use of a blocking assignment (`=`) for `out1` is problematic because it makes the `out1` update depend on the sequence within the always block, potentially before or during partial execution, which isn’t typical behavior for a flip-flop update operation.
+
+3. **Error Context:**
+   - The error message highlights an issue when attempting to implement the asynchronous set/reset functionality due to the conflicting use of blocking and non-blocking assignments. This confusion makes it challenging for synthesis tools to properly map the output behavior, especially under asynchronous conditions.
+
+**Fix Explanation:**
+To resolve this issue, ensure that all signals intended to be treated as registers (flip-flops) and updated on the clock edge are manipulated exclusively using non-blocking assignments (`<=`). This aligns with the expected hardware behavior and avoids race conditions:
+
+- Convert the blocking assignment for `out1` to a non-blocking assignment (`out1 <= data;`). This makes the intent clear to the synthesis tool that `out1` should follow the sequential update logic akin to a register output.
+- Ensure consistency across the design when manipulating signals within a clocked block to maintain predictable and synthesizable logic behavior. 
+
+Consistency in signal assignment style within clocked blocks will facilitate easier synthesis and align with intended RTL modeling for hardware design.

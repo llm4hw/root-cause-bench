@@ -1,0 +1,11 @@
+The bug causing the "Morse for O not correct" error occurs because the state machine handling the letter 'O' (---) does not properly sequence through its three dashes and lacks inter-dash spacing. Here's why:
+
+1. **Missing State Transitions for 'O'**:
+   - When generating 'O', the state machine transitions to `O_DASH1` but immediately returns to `IDLE` after the first dash completes. It never enters `O_DASH2` or `O_DASH3`, resulting in only one dash being transmitted instead of three.
+
+2. **Incorrect Space Handling**:
+   - The `SPACE_STATE` logic is designed to handle spaces after symbols (e.g., between the dot and dash in 'A'). However:
+     - It checks `if (state == A_DOT)` while in `SPACE_STATE`, which is never true (the current state is `SPACE_STATE`). This prevents proper transitions for 'O'.
+     - No mechanism exists to track the state preceding `SPACE_STATE`, so spaces between 'O' dashes are not inserted, and subsequent dashes are not triggered.
+
+**Result**: The 'O' sequence terminates after the first dash with no spacing, failing to generate the required three dashes. The test detects this incomplete output and reports the error. Fixing this requires updating the state transitions for 'O' to iterate through all three dashes and correctly manage inter-dash spaces.

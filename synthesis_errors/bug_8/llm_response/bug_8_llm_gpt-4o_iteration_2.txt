@@ -1,0 +1,10 @@
+The error message indicates that there is an attempt to assign a value to a signal named `signal2`, but `signal2` is not declared anywhere within the architecture of the VHDL module. This results in a synthesis error because VHDL requires that all signals used within a design must be explicitly declared before they can be referenced or assigned a value.
+
+Let's break down why this error is occurring:
+
+1. **Signal Declaration**: VHDL requires all signals that are used within a process to be declared beforehand. The architecture in the provided code only declares one signal, `signal1`, but does not declare `signal2`.
+2. **Undefined Reference**: When the process attempts to assign a value to `signal2` on a reset (`rst = '1'`), the compiler cannot find a declaration for `signal2`, resulting in the error message.
+
+To resolve this issue, you need to declare the signal `signal2` just like `signal1` is declared. This declaration should occur in the declarative part of the architecture before being used in the process. 
+
+To summarize, the root cause of the error is the reference to an undeclared signal `signal2`. By declaring `signal2` in the architecture where it is intended to be used, this error would be resolved, allowing the synthesis to proceed without encountering an issue related to undeclared signals.

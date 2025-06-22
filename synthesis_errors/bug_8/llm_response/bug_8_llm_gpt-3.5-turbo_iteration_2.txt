@@ -1,0 +1,7 @@
+The bug in the provided code is that the signal `signal2` is being assigned a value without being declared in the entity or architecture of the design. This is causing the error message stating that `signal2` is not declared.
+
+To fix this issue, you need to declare `signal2` in the architecture of `top8` entity. You can add it as a signal in the declaration section along with `signal1`.
+
+After declaring `signal2` in the architecture, the assignment to `signal2` inside the process block can be done correctly without causing any errors during simulation.
+
+Make sure to add the necessary signal declaration in the architecture section of the code to resolve this bug.

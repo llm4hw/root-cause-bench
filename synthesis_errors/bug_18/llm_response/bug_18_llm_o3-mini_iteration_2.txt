@@ -1,0 +1,10 @@
+The error message indicates that the instantiated module (ChildModule) is receiving a connection for a port named "b" that doesn’t exist in its port declaration. In ChildModule, only "a" (an input) and "c" (an output) are declared, but in the top-level module (top18), the instantiation of ChildModule attempts to connect something to a port ".b", which the module has no knowledge of.
+
+This mismatch is causing the synthesizer or simulation tool to flag an error because it does not know how to map ".b(in)" to any declared port in ChildModule.
+
+To summarize:
+• The bug is that the instantiation of ChildModule in top18 includes a named port connection (.b(in)) even though ChildModule does not have a port named "b".
+• It is occurring because the port list in the module declaration of ChildModule only includes ports "a" and "c".
+• The fix involves aligning the port connections with the port declarations. This could be done by removing the connection for "b" in the instantiation (if not needed) or by adding the appropriate port into the ChildModule's port list, ensuring that the instance’s port mapping matches the module's interface.
+
+This explains why the error is generated and points to the root cause of the fault.

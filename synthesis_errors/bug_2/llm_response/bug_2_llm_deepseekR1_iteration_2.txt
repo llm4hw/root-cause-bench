@@ -1,0 +1,23 @@
+The error occurs because the `+` operator is being applied directly to `std_logic_vector` operands without proper type conversion. Here's why:
+
+1. **Type Mismatch**: The `std_logic_vector` type from `IEEE.STD_LOGIC_1164` does not inherently support arithmetic operations. The `ieee.numeric_std` package provides arithmetic operators, but only for `unsigned`/`signed` types.
+
+2. **Operator Overload Issue**: The line `c <= a + b;` attempts to use `+` with two `std_logic_vector` operands. The `numeric_std` package does not define a `+` operator for:
+   - `std_logic_vector + std_logic_vector`
+   - `std_logic_vector + integer`
+   - Any combination involving raw `std_logic_vector`
+
+3. **Synthesis Failure**: During synthesis, the tool finds no matching operator definition for `std_logic_vector` operands, resulting in the "0 definitions of operator '+' match" error.
+
+**Fix Approach**:
+Convert the inputs to a numeric type (`unsigned` or `signed`) before addition, then convert the result back to `std_logic_vector`:
+```vhdl
+c <= std_logic_vector(unsigned(a) + unsigned(b));
+```
+**Key Considerations**:
+- Choose `unsigned` for modulo arithmetic (0-15) or `signed` for two's complement (-8 to 7)
+- The conversion handles overflow by truncating to 4 bits (since output is 4-bit)
+- The operation will now use the `+` operator defined in `numeric_std` for `unsigned` types
+
+**Why This Works**:
+The conversion explicitly tells the compiler which operator overload to use (the one for `unsigned` types), resolving the ambiguity in the original code.

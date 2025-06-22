@@ -1,0 +1,23 @@
+The error message indicates that the signal `signal2` is not declared in the VHDL file `top8.vhd` at line 46. The assignment `signal2 <= '0';` attempts to set the value of `signal2`, but since `signal2` has not been declared within the architecture's declarative region, the VHDL compiler cannot recognize it, leading to the synthesis error.
+
+Here's why the issue is occurring:
+
+1. **Missing Declaration**: In VHDL, before you can use a signal within an architecture, it must be declared in the declarative part of that architecture. In this case, `signal2` is being used in the process, but it hasn't been declared anywhere within the architecture.
+
+2. **Incorrect Code Segment**: The line causing the error is:
+   ```vhdl
+   signal2 <= '0';
+   ```
+   Without a declaration for `signal2`, this line becomes invalid, thus causing the error message that `signal2` is not declared.
+
+3. **VHDL Strictness**: VHDL is a strongly typed language, which means that every signal must be explicitly declared with its type before being used, to ensure proper synthesis and simulation behavior.
+
+To fix this error:
+
+- **Declare signal2**: You need to declare `signal2` in the architecture before it is used in the process. This is done by adding a declaration statement in the declarative part of the architecture (before the `begin` keyword). The declaration should look something like this:
+  ```vhdl
+  signal signal2 : STD_LOGIC;
+  ```
+  Remember, VHDL requires every signal or variable used within its code to be declared beforehand to ensure that the tool synthesizes and simulates it correctly.
+
+Once `signal2` is declared, the VHDL compiler will recognize it, and you should no longer receive the "not declared" error.

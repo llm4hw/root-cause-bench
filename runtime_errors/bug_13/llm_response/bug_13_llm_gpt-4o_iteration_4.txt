@@ -1,0 +1,37 @@
+The error message shows a mismatch between the expected and actual outputs of a 4-bit full adder simulation. The key details here are:
+
+1. Inputs given were: `a = 3` (`0011`), `b = 5` (`0101`), `cin = 0`.
+2. Expected output was `01000`, which corresponds to `8` in decimal.
+3. The actual output was `10010`, which corresponds to `18` in decimal.
+
+Now, let's delve into the logic to find out why this discrepancy occurs:
+
+### Explanation of the Bug
+
+The full adder is implemented in four stages using 1-bit full adders (`full_half_add_1bit`). The issue lies in how the carry inputs are chained from one stage to another:
+
+- **Stage 1: `fa1`** uses `i_cin` as the initial carry input, which is correct.
+
+- **Stage 2: `fa2`** expects to use the carry-out from `fa1` as its carry-in, but it instead uses `w_carry3`, which causes an incorrect propagation of the carry signal.
+
+- **Stage 3: `fa3`** uses the carry-out from `fa1` as its carry-in, which is not the expected behavior for a ripple-carry adder. It should use the carry-out from `fa2`.
+
+- **Stage 4: `fa4`** also uses the carry-out from `fa2` as its carry-in, but then incorrectly has its carry-out (`w_carry3`) linked as input to `fa2`.
+
+Effectively, there's a looping and miswiring issue with the carries:
+
+- **Correct chaining should** be: `fa1` → `fa2` → `fa3` → `fa4`.
+
+### Root Cause
+
+The current connection makes `w_carry3` erroneously loop back as input to an earlier stage, distorting the sequence of carry propagation. As a result, stages are not properly aligned to their respective carry-chain order causing an incorrect sum and carry-out.
+
+### Address to the Issue
+
+Although I am not providing a solution in code as per your request, the fix involves:
+
+1. Correct 'carry-in' inputs for `fa2`, `fa3`, and `fa4` to make sure the carry is properly propagated forward, i.e., `fa2` gets the carry-out from `fa1`, `fa3` gets the carry-out from `fa2`, and `fa4` gets the carry-out from `fa3`.
+
+2. The `o_carry` should properly represent the carry-out from the most significant bit, which is `fa4` in this implementation, to indicate overflow or carry beyond the 4-bit result.
+
+By connecting each stage correctly in a cascading manner and ensuring the flow of carry signals aligns with intended logic, the expected and actual outputs should match during simulation.

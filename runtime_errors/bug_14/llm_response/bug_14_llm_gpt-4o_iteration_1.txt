@@ -1,0 +1,15 @@
+The error you're encountering is due to the incorrect use of edge sensitivity for the reset signal in the FSM's sequential logic. Let's break down why the issue occurs and how you can understand the problem:
+
+1. **Problem Identification:**
+   - In the FSM code, the conditional block for resetting the state is written as `always @(posedge reset)`, which triggers on the positive edge of the reset signal.
+   - However, it also includes an `if (reset)` condition inside the `always` block. But because the block is only triggered on the positive edge of the reset, the `else` part (which includes the main FSM logic) never executes if reset is already high when clk rises, thus skipping the main state transition logic driven by the clock signal.
+   - This effectively prevents your FSM from ever moving away from the reset state when the reset signal is released. On the next clock cycle, it does not evaluate the `else` logic, leading to outputs that remain unchanged and reflecting default values when reset was asserted.
+
+2. **Root Cause:**
+   - The block should be sensitive to the clock (`clk`), and the reset should be checked within it to ensure state transitions occur on every clock edge following an active reset. Instead, by using `@(posedge reset)`, you inadvertently limited the block to only perform actions when reset edges positively, completely ignoring clk for state transition.
+
+3. **The Correct Approach:**
+   - The sequential block should use `@(posedge clk or posedge reset)`, checking if the `reset` is active inside the block. This allows the state machine to reset whenever `reset` is high and perform state transitions based on `num_in` input whenever `clk` edges positively after reset has been released.
+   - Moving this logic ensures that the state, `output_data`, and `valid` signals are updated on every clock cycle if reset is not active, allowing state transitions to occur as intended.
+
+By following this understanding, you can see that ensuring the block is always responsive to clk-driven logic allows the FSM to perform its role as intended with the correct conditions and signal evaluation, thus allowing your testbench to pass the first test case where the state transition is expected to occur after deasserting reset.

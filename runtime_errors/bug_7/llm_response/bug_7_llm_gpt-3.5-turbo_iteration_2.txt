@@ -1,0 +1,5 @@
+The bug in the provided code is that the `states` signal is being compared using non-blocking assignments (`!==`) in the testbench. Non-blocking assignments in Verilog introduce a delay in the assignment of values, causing the comparison to be incorrect at the time it is checked.
+
+This bug is occurring because the testbench is trying to check the `states` signal immediately after the clock edge, without considering the delay introduced by non-blocking assignments.
+
+To fix this issue, the testbench should use blocking assignments (`==`) instead of non-blocking assignments when comparing the `states` signal to the expected values. This will ensure that the comparison is made correctly without any delays affecting the result.

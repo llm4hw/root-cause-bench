@@ -1,0 +1,5 @@
+The bug is that the sequential logic for updating the FSM state is triggered only on the positive edge of the reset signal instead of the clock. In your always block, you used “always @(posedge reset)” instead of having the clock (and, optionally, asynchronous reset) in the sensitivity list. This means that after the initial reset edge, changes to num_in (and other signals) never trigger an update of state, output_data, or valid. As a result, when the test bench changes num_in to 3, the state remains at its reset value (zero), which causes the test to fail.
+
+This issue occurs because the intended sequential logic (which should update on the rising edge of the clock) is not being triggered by the clock events. The FSM never processes the new values because it is waiting for a new rising edge on the reset signal, which does not occur during normal operation.
+
+The fix is to modify the sensitivity list of the always block so that it is triggered by the clock (and possibly an asynchronous reset). This will ensure that the FSM state and outputs update correctly based on the changes in num_in during the simulation.

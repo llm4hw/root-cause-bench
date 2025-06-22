@@ -1,0 +1,11 @@
+The error message indicates that a variable has been declared outside any process or subprogram without being marked as "shared." In VHDL, a variable that is declared at the architecture level (i.e., outside any process or subprogram) must be declared with the "shared" keyword. This is because such a variable would be accessible by multiple processes concurrently, and the language requires that shared variables be explicitly marked to handle concurrent access correctly.
+
+In your code, the variable declaration is placed in the architecture section instead of inside the process block. This is why the synthesis tool complains with the error "variable outside of subprogram or process must be 'shared'."
+
+To address this issue, you have two general approaches:
+1. If you meant for this variable to be used within a single process, declare it locally inside the process.
+2. If you need it at the architecture scope for use by multiple processes, declare it as a shared variable.
+
+Keep in mind that shared variables have specific semantics regarding concurrent access and are handled differently than signals or locally declared variables within a process. The error is occurring because the tool expects any variable defined outside a process to use the "shared" keyword, and your code doesn't satisfy that requirement.
+
+Thus, the root cause is the variable declaration's location. The fix involves relocating the variable declaration inside the process where it’s used, or modifying it to a shared variable if that’s truly what you need.

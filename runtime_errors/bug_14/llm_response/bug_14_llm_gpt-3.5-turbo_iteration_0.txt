@@ -1,0 +1,5 @@
+The bug in the code is occurring because the always block sensitivity list in the `fsm_mealy_0_to_9` module's second always block is incorrect. The always block that is sensitive to `state` is not functional because it is not correctly updating the `output_data` when `state` changes. This issue causes the subsequent tests in the testbench to fail.
+
+To fix this bug, you should update the sensitivity list in the second always block to include both `state` and `enableAscii` signals. By including `enableAscii` in the sensitivity list, the `output_data` will be correctly updated based on whether ASCII output is enabled or not.
+
+After fixing the sensitivity list, re-simulate the code and the testbench to verify that the error message no longer occurs, and the tests pass successfully.

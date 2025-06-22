@@ -1,0 +1,5 @@
+The problem is not with the simulator but with the internal logic of the module. In the sequential process, the valid signal is simply driven high (set to 1) every time there is a clock edge (unless the module is being reset). There is no check to determine whether the 4‑bit input (num_in) falls within the valid range (0 to 9). As a result, when the test bench applies values like 10 or 15, the module still sets valid to 1, causing the test bench to print the error message "ERROR: Invalid input should not be valid."
+
+The root cause is that the module’s logic assumes all inputs are valid without any range checking. In a proper design, there should be a conditional that sets valid to 0 when num_in exceeds the maximum allowed value (9), and perhaps also drives output_data to 0 in such cases. Essentially, the bug is that there is no mechanism to detect and handle input values that are outside the range 0–9.
+
+Because the module always assigns valid = 1 regardless of num_in’s value, the test bench detects inputs outside the valid range and raises an error.

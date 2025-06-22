@@ -1,0 +1,8 @@
+The issue is that the state machine for the letter O isn’t progressing through all three dashes. When the select input is set to indicate O, the design always enters the first O state (O_DASH1) and then, after counting up to the DASH duration, immediately resets to the idle state. This means that only one dash is ever output, and the subsequent states (O_DASH2 and O_DASH3) are never reached. The test bench expects the output to have gone high and then returned low (because the full message “---” should be completed within the expected time) but instead the timing of the output remains high longer than anticipated. 
+
+In summary, the bug occurs because:
+• The state machine for O does not properly chain through O_DASH1, then O_DASH2 and O_DASH3.
+• Upon reaching the end of the first dash, the design immediately goes to IDLE rather than sequencing through the remaining dashes.
+• This incomplete signaling results in an unexpected signal timing when the test bench checks the output, triggering the error message.
+
+To fix it, the state transitions for the letter O should be reworked so that after finishing O_DASH1, the state machine transitions to O_DASH2 (and then to O_DASH3) with corresponding counter resets in between, similar to how the letter S is handled with its multiple dot states. This correct sequencing would ensure that all three dashes are output and that by the end of the expected period, the output is low—as the test bench expects.

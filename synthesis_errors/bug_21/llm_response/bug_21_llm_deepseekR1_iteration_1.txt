@@ -1,0 +1,15 @@
+The error occurs due to a mismatch between the edge sensitivity of the `reset` signal in the event control and the condition checking in the `if` statement. Here's the breakdown:
+
+1. **Edge Sensitivity Mismatch**:  
+   The `always` block triggers on `negedge reset` (line: `always @(posedge clk or negedge reset)`), indicating an **active-low** asynchronous reset (resets when `reset=0`).
+
+2. **Incorrect Reset Condition**:  
+   The condition `if (!reset == 0)` is equivalent to `if (reset == 1)`. This checks for **`reset=1` (inactive high)**, which directly contradicts the `negedge reset` event.  
+   - When `reset=0` (active), `!reset=1`, so `1 == 0` evaluates to `false` → *skips reset logic*.  
+   - When `reset=1` (inactive), `!reset=0`, so `0 == 0` evaluates to `true` → *executes reset logic incorrectly*.
+
+3. **Synthesis Error Cause**:  
+   The synthesis tool expects the condition to match the edge-triggered behavior. Here, `negedge reset` implies reset is active when low (`0`), but the condition triggers reset logic when `reset=1` instead. This logical inversion prevents proper asynchronous reset inference.
+
+**Fix Direction**:  
+Change the condition to check for the **active-low state** of `reset` (e.g., `if (!reset)` or `if (reset == 0)`). This aligns the reset condition with the `negedge reset` event, ensuring the reset logic activates when `reset=0`. Do not change the edge sensitivity unless the reset polarity is intentionally active-high.

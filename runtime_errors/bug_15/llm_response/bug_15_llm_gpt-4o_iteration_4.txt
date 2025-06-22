@@ -1,0 +1,22 @@
+The error message "ERROR: Ring oscillator output (OUT) never toggled. Likely feedback wiring issue." indicates that the output of the ring oscillator did not toggle, which implies that the ring oscillator did not oscillate as expected during the simulation. This can occur due to a feedback wiring issue within the oscillator's loop.
+
+Here is a detailed explanation of the issue:
+
+1. **Understanding the Ring Oscillator**: A ring oscillator is typically constructed using an odd number of inverters connected in a loop, which allows for continuous oscillation. In this design, you have 11 inverters in a loop. The outputs of these inverters are connected to form a feedback chain, which continuously inverts a signal, causing it to oscillate.
+
+2. **Feedback Loop Wiring**: In your code, the feedback loop is established by connecting `lut_outs[10]` to the first input `lut_ins[0]` through the `assign` statement: `assign lut_ins = {lut_outs[10], lut_outs[9:0]};`. This assignment is intended to forward the inverted output of the last inverter back to the input of the first inverter.
+
+3. **Testbench Initialization**: In the testbench, you initially force `uut.lut_ins[0]` (the first inverter input) to `1'b1`, and then release it after 20 time units. This is done to start the oscillation by providing an initial condition.
+
+4. **Oscillation Issue**: The key to why the oscillator never toggles lies in the initialization and feedback establishment. Since ring oscillators require an initial imbalance to start oscillating, your initial condition (forcing the input to '1') could potentially work. However, for oscillation to be sustained, the feedback loop must properly propagate changes to the inputs after the force is released.
+
+5. **Potential Issues**:
+   - **No Initial Imbalance**: The initial state of `lut_outs` might resolve into a stable state when the force is released. The error message "never toggled" implies that after the release, the feedback loop might have settled to a stable state that does not change. The initial force might need to be complemented by ensuring the inverters' initial condition is in an imbalance state.
+   
+   - **Inverters Do Not Propagate Changes**: Another potential issue is if the delay model of inverters does not propagate changes due to either zero-delay oscillation or blockage in the loop after the initial force.
+
+6. **Resolution Strategy**:
+   - **Ensure Initial State**: Ensure that the ring oscillator's initial state creates an imbalance. You could initialize some of the `lut_outs` to known values to ensure the feedback can start oscillating.
+   - **Check Feedback Flow**: Verify that the assignment correctly configures the feedback path. Given that the forced value is removed, ensure the changes to `lut_outs` at start can propagate without stabilization.
+
+In conclusion, to resolve this, ensure that upon initialization, the inverters have an initial signal state that can lead to oscillation and there is no stable resolution in the feedback loop. Make sure the inverters don't start with completely balanced conditions and verify the feedback chain propagates changes correctly.

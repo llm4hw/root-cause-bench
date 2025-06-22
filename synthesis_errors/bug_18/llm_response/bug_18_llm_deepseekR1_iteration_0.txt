@@ -1,0 +1,22 @@
+The error occurs because the instantiation of `ChildModule` in the `top18` module attempts to connect a signal to a port named `b`, but `ChildModule` does not have a port with that name. Here's why:
+
+1. **Module Definition Mismatch**:
+   - `ChildModule` is defined with only two ports: input `a` and output `c`.
+   - During instantiation (`child_inst`), a connection is made to `.b(in)`, referencing a non-existent port `b`.
+
+2. **Synthesis Tool Detection**:
+   - The synthesis tool (Synth 8-448 error) detects that the named port connection `b` does not exist in the target module (`ChildModule`).
+   - The error specifically points to line 39 in `top18.v` where the invalid connection `.b(in)` is made.
+
+3. **Root Cause**:
+   - The instantiation references ports that don't match the module's actual interface. `ChildModule` has no `b` port, so the connection is invalid.
+   - This violates Verilog's module instantiation rules, which require all named connections to match the ports defined in the module.
+
+**How to Fix**:
+- **Remove the invalid port connection**: Delete the line `.b(in)` from the instantiation since `ChildModule` has no `b` port.
+- **Re-evaluate design intent**: Determine whether:
+  - `ChildModule` should be modified to include a `b` port (if missing by mistake), or
+  - The signal `in` should be connected to the existing `a` port instead of `clk` (if `clk` was erroneously connected to `a`).
+- **Ensure port alignment**: Verify all connections in `child_inst` match the ports declared in `ChildModule` (`a` and `c` only).
+
+**Note**: The current connection `.a(clk)` uses the clock signal as a data input to `ChildModule`, which may be unintended. The fix should align the connections with the actual module interface and design requirements.

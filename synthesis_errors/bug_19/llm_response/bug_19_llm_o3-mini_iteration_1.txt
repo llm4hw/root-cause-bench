@@ -1,0 +1,5 @@
+The problem comes from the literal "2'b2". In Verilog, when using a binary number literal (specified by a width, an apostrophe, a base indicator, and then the number), only the digits 0 and 1 are allowed. Using the digit '2' in a binary number is illegal. This error message is generated because the synthesizer (or simulation tool) encounters an illegal character when parsing the literal.
+
+The root cause is that the literal is meant to represent an intended value for a 2-bit signal, but the syntax is incorrect. In binary, if you intend to represent the decimal number 2, you should use a combination of only binary digits (0 and 1).
+
+To fix this issue, you would need to change the literal so that it uses proper binary digits that correspond to the intended value.

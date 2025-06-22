@@ -1,0 +1,5 @@
+The error occurs because your case statement for the input value 1 appears twice with conflicting assignments. When x equals 1, the simulator finds the first matching entry (which assigns 0 to f) and never reaches the second entry (which assigns 1), so f remains 0 instead of the expected 1.
+
+This bug is occurring because duplicate case labels are not processed independently; the first matching case takes precedence. Therefore, for input 1, the assignment to f = 0 is used, conflicting with the testbench's expectation.
+
+To fix the bug, remove or merge the duplicate entries for the same input value so that x = 1 only maps to the intended output.

@@ -1,0 +1,16 @@
+The error message "ERROR: Morse for O not correct" from the test bench suggests that the Morse code for the letter "O" (which is "---" or three dashes) is not being generated correctly. The systematic exploration of the RTL code reveals why this is happening.
+
+### Root Cause:
+1. **State Sequencing Problem for 'O'**: In the testbench, after selecting 'O' and resetting the module, the expectation is that the module should generate three dashes. According to the Verilog RTL code, the states for generating three dashes for "O" are `O_DASH1`, `O_DASH2`, and `O_DASH3`. However, if any `DASH` period is not followed by the correct transition, the sequence won't be processed correctly.
+
+2. **Immediate Reset to IDLE**: Let's analyze the sequence expected for "O":
+   - When the state is `O_DASH1`, the counter is incremented to the value of `DASH`. Instead of transitioning to the next part of "O" (dash 2), the state is incorrectly reset to `IDLE`.
+   - This reset occurs because, in the `O_DASH1`, `O_DASH2`, and `O_DASH3` states, after a single `DASH` is completed, the code directly assigns `state <= IDLE;`. Therefore, it completes a single dash and moves to the idle state, failing to complete the remaining two dashes required for "O".
+
+### Explanation of the Incorrect Logic:
+- The `always` block's case for `O_DASH1`, `O_DASH2`, and `O_DASH3` does not properly transition from one dash to the next. Instead of moving to the next respective state (e.g., `O_DASH1` -> `O_DASH2`), it always defaults back to `IDLE` after completing a single period defined by the `DASH` length. This is unintended as the logic for transitioning between the states of `O_DASH1`, `O_DASH2`, and `O_DASH3` is missing.
+
+### How the Bug Can Be Fixed:
+To solve this issue, you should ensure that once one `DASH` is completed in `O_DASH1` and `O_DASH2`, the state machine should transition to the next respective states (`O_DASH2` and `O_DASH3` respectively) instead of returning to `IDLE`. After completing `O_DASH3`, it should then transition to `IDLE`.
+
+This requires updating the logic in the `always` block for these states, which involves adding state transition logic between `O_DASH1`, `O_DASH2`, and `O_DASH3`. By ensuring these transitions, the entire sequence for "O" will be correctly generated in the simulation.

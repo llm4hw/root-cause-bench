@@ -1,0 +1,8 @@
+The bug in the provided code is due to a type mismatch between `std_logic` and a string literal in the line where the `c` signal is initialized. In VHDL, a `std_logic_vector` should be initialized with values like `('0', '0', '0', '0')` instead of using a string literal like `"0000"`.
+
+This error is occurring because VHDL does not allow direct assignment of string literals to `std_logic_vector` signals without proper conversion or initialization syntax.
+
+To fix this bug, you should initialize the `c` signal as follows:
+`signal c : std_logic_vector(3 downto 0) := (others => '0');`
+
+This will correctly initialize the `c` signal as a `std_logic_vector` with all '0' values, resolving the type mismatch error.

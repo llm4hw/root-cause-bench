@@ -1,0 +1,10 @@
+The error stems from how the register for out1 is being inferred. In your always block you use an asynchronous reset for data but then assign out1 with a blocking assignment outside the reset branch. This creates an inconsistency for the tool when it tries to extract the asynchronous reset logic for out1.
+
+Here’s what’s happening:
+• The always block is sensitive to both the clock and the asynchronous reset. In the reset condition (if rst is true), only data is explicitly set, whereas out1 never gets an explicit reset value.
+• Additionally, you mix nonblocking assignment (for data in the reset branch) with a blocking assignment (for out1 after the else branch). When creating registers with asynchronous resets, the expectation is that the register’s behavior in both the reset and non-reset portions is defined consistently—in this case by using nonblocking assignments.
+• Because out1 isn’t directly assigned a reset value and is assigned with a different assignment type than data, the synthesis tool cannot correctly extract an asynchronous set/reset for out1. It treats out1 as if it should have an asynchronous reset since it is in a block sensitive to posedge rst, but finds that the reset condition does not properly drive out1.
+
+In summary, the bug is occurring because out1 is being assigned using a blocking assignment without a proper reset condition, so the synthesis tool fails to create the expected asynchronous reset for that register.
+
+To resolve this, you would need to ensure that all registers in the block use consistent assignment styles (nonblocking assignments) and that every register which is expected to have an asynchronous reset is explicitly assigned a reset value.

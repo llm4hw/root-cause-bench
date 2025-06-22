@@ -1,0 +1,12 @@
+The bug arises from two primary issues in the FSM design:
+
+1. **Unconditionally Setting `valid` to 1**:  
+   In the sequential logic block, `valid` is set to `1` whenever `reset` is not active, regardless of whether `num_in` is in the valid range (0-9). This causes the `valid` signal to remain high even for invalid inputs (like 10 or 15), violating the requirement that `valid` should only be asserted for valid inputs.
+
+2. **Unhandled States in Combinational Logic**:  
+   The combinational block for `output_data` uses `case` statements that only cover states `S0`-`S9`. When an invalid `num_in` (e.g., 10) is applied, `state` becomes an undefined value (4'd10). Since there is no `default` case, `output_data` retains its previous value instead of resetting to `0` for invalid states. This leads to incorrect outputs when invalid inputs are applied.
+
+**Fix Strategy**:  
+- Modify the sequential block to conditionally set `valid` to `1` only when `num_in` is within 0-9.  
+- Add `default` cases in the combinational block to force `output_data` to `0` when `state` is invalid.  
+- Ensure the FSM does not transition to undefined states for invalid inputs.

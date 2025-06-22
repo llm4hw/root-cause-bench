@@ -1,0 +1,5 @@
+The problem is that the valid flag is always being set to 1 in your sequential block, regardless of the value of the input. In other words, the module never actually checks if the input number is between 0 and 9. When the test bench applies values like 10 or 15, it expects valid to be deasserted (set to 0), but your module simply assigns state = num_in and valid = 1 without any boundary checking. This is why the test bench produces the error message "ERROR: Invalid input should not be valid."
+
+The bug occurs because there is no logic in your state update process that distinguishes between valid inputs (0–9) and invalid ones. Essentially, as soon as the reset is cleared, valid becomes 1 regardless of the actual value of num_in.
+
+To resolve the issue, you would need to incorporate a check on num_in (or state after assignment) to determine whether the input truly falls within the valid range. If it does, valid should be set to 1 and the appropriate output should be generated; if not, valid should be set to 0 and the output_data should be reset as expected.

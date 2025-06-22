@@ -1,0 +1,17 @@
+The issue arises due to a fundamental misunderstanding between what the testbench expects from the `faulty_comparator` module and what the module is actually programmed to do.
+
+1. **Expected Behavior (from Testbench):**
+   - The testbench is designed with the expectation that the module will output `result = 1` when the 4-bit inputs `a` and `b` are equal (`a == b`). Specifically, it has test cases where it sets `a` and `b` to the same values, anticipating a `result` of 1.
+
+2. **Actual Behavior (from `faulty_comparator` Module):**
+   - The `faulty_comparator` module currently checks if the 4-bit input `a` is equal to a 5-bit binary constant (`5'b10101` which is equivalent to decimal 21), and sets the `result` to 1 only in that case. Since `a` and `b` are 4-bit numbers, their maximum value is 15 (`4'b1111` in binary), hence `a` can never be 21. Consequently, the `result` will always be 0 for any valid 4-bit input, unless `a` is manipulated from a wider-bit source erroneously outside of the intended bit range.
+
+3. **Why the Bug Occurs:**
+   - The bug occurs because the condition in the `faulty_comparator` is never true with legitimate 4-bit inputs. The testbench expects the module to check whether `a` and `b` are equal, but the module instead checks if `a` is equal to an out-of-range value. As a result, test cases that expect `result` to be 1 where `a` equals `b` will fail, because the comparator doesn't implement this logic.
+
+4. **Explanation of the Issue and How to Recognize It:**
+   - Checking a 4-bit input against a 5-bit number will never produce a valid comparison due to the size and value mismatch.
+   - Test cases expecting logical equivalence (like `a == b`) to generate a result of 1 will never pass under the current module's conditions.
+
+5. **Resolution:**
+   - To resolve the issue, the module should be designed to output `result = 1` when `a` is equal to `b`. The module's logic should be adapted to check the equality between inputs `a` and `b`, rather than comparing `a` against the hard-coded constant `5'b10101`. However, it is important to keep in mind that making corrections requires adjusting the logic of the module to align with the intended functionality specified by the testbench. This involves modifying the `if` condition in the comparator to `if (a == b)` rather than the current faulty comparison.

@@ -1,0 +1,16 @@
+The bug occurs because the signal `data` is being used in the assignment `out1 <= data;` but has not been declared anywhere in the module. In Verilog, all signals must be explicitly declared before use. Here's why:
+
+1. **Missing Declaration**: The module `top14` only declares two signals: `clk` (input) and `out1` (output). The signal `data` referenced in the always block has no declaration—it's not a port, register, wire, or parameter.
+
+2. **Scope Issue**: The synthesizer looks for `data` in the module's scope (including ports, internal registers, and wires) and fails to find it. This violates Verilog's variable declaration rules.
+
+3. **Possible Causes**:
+   - If `data` should be an **input** to the module, it must be added to the port list (e.g., `input wire data`).
+   - If `data` is an **internal signal**, it must be declared as a `reg` or `wire` inside the module (e.g., `reg data;`).
+   - The signal might be **misspelled** or **missing entirely** from the design intent.
+
+**Fix Direction**:  
+Declare `data` appropriately based on its intended role:
+- Add `data` to the module's input ports if it's an external signal, or  
+- Declare it as an internal register (`reg data;`) if it's generated within the module.  
+Additionally, ensure `data` is assigned a value if it's an internal signal (not shown in the current code).

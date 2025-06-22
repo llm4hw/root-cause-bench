@@ -1,0 +1,23 @@
+The error you're encountering, "Cannot extract Asynchronous Set/Reset for register 'out1_reg' in module 'top16'," is related to the use and handling of blocking assignments in your always block. This issue typically arises when the synthesis tool cannot map the logic to a reliable flip-flop with an asynchronous reset capability because of the way assignments are structured in the code.
+
+### Issue Explanation:
+
+1. **Blocking vs. Non-blocking Assignments:**
+   - In the Verilog code provided, there is a mix of non-blocking (`<=`) and blocking (`=`) assignments within the same always block. Specifically, `data <= 1'b0;` uses a non-blocking assignment on reset, while `data = ~data;` and `out1 = data;` use blocking assignments.
+   - Blocking assignments (`=`) are executed immediately, whereas non-blocking assignments (`<=`) are scheduled to occur at the end of the current time step. This means that the value of `data` during the execution of `out1 = data;` could be inconsistent or unexpected because of the immediate update caused by the blocking assignment.
+
+2. **Asynchronous Reset Handling:**
+   - The error message suggests that the synthesis tool is unable to infer a proper asynchronous reset for the `out1` register. This could be due to the fact that since `out1` is assigned using a blocking assignment `out1 = data`, it doesn't have a clear reset behavior that can be extracted by the synthesis tool.
+
+### Root Cause:
+
+The inconsistency in assignment types within the always block coupled with the tool's inability to deduce a valid async reset signal for `out1` leads to this error. The immediate update of `out1` using a blocking assignment does not give room for the reset behavior to be properly synthesized, especially in a scenario where asynchronous control is expected.
+
+### How the Bug Could Be Addressed:
+
+Without providing the direct code fix, an effective way to address such a problem involves:
+
+- Ensuring consistency in assignment types within the always block to prevent unexpected behavior and synthesis errors. Using consistent non-blocking assignments (`<=`) for all signal updates in always blocks dealing with sequential logic is a standard practice.
+- Consider incorporating the reset condition directly into the sequential logic update (non-blocking manner), ensuring that all dependent signals like `out1` are updated correctly in relation to a positive clock edge or reset condition.
+
+By ensuring that the sequential logic follows these principles, the synthesizer will correctly deduce the register requirements, including any asynchronous reset functionality, without encountering extraction issues.

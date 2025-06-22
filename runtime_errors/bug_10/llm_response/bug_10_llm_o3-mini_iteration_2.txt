@@ -1,0 +1,7 @@
+The issue lies in how values get assigned inside the synchronous always block. In the code, the assignments within the “if (shift_en)” block are made using blocking assignments (the "=" operator). This means that when the clock edge occurs, the first assignment immediately updates the lowest bit of the register, and that updated value is then used in the immediate subsequent assignments for the following bits. As a result, all bits end up taking the new value in a single clock tick rather than correctly shifting the previous register state.
+
+Because the shift operation is intended to move the prior stored data one bit over across clock cycles, using blocking assignments causes the new serial input to propagate through all the bits instantaneously—hence, when the test bench expected 0001 after a 1 input, it got 1111 instead.
+
+In synchronous sequential logic, using nonblocking assignments ("<=") is recommended so that all the updates occur in parallel after the clock edge, preserving the correct shifting behavior.
+
+This explains the root cause of the bug, why it leads to the incorrect simulation output, and hints at how it should be fixed (i.e., by using nonblocking assignments instead of blocking ones).

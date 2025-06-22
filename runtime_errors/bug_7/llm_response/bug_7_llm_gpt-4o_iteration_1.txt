@@ -1,0 +1,20 @@
+The issue you are encountering during the simulation stems from a discrepancy between the expected state transition sequence in your testbench and the state transition logic defined in your Verilog module, `top_module`.
+
+In your Verilog module, you have defined the following state transitions:
+
+1. Red (00) transitions to Ped (11)
+2. Ped (11) transitions to Red (00)
+3. Green (01) transitions to Yellow (10)
+4. Yellow (10) transitions to Red (00)
+
+However, according to your testbench, the expected sequence of states is: Red (00) -> Ped (11) -> Green (01) -> Yellow (10) -> Red (00).
+
+The problem here is that there is no transition to `Green (01)` from `Ped (11)` in your state transition logic. Instead, `Ped (11)` transitions back to `Red (00)`, which directly conflicts with the testbench expectation where the next state should be `Green (01)`.
+
+This discrepancy is leading to the observed error, as the actual state transitions in the module do not match the sequence expected by the testbench.
+
+To resolve this issue, you need to align the state transition logic in your Verilog module with the expected state sequence of the testbench:
+
+- You would need to modify the module's logic to include a transition from `Ped (11)` to `Green (01)` if that is the intended sequence.
+  
+By doing so, you can ensure the module's behavior is consistent with the testbench's requirements, eliminating the mismatch and subsequent errors during simulation.

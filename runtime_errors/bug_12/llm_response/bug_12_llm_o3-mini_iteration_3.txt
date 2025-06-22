@@ -1,0 +1,7 @@
+The bug is that the module’s comparison is checking whether input “a” equals a fixed 5‐bit constant rather than comparing “a” and “b” as intended. In the code, the condition "if (a == 5'b10101)" always checks if “a” is equal to the 5-bit binary value "10101" (which is 21 in decimal). Since “a” is a 4‑bit signal (ranging only from 0 to 15), this condition will never be true. This causes the module to set the output “result” to 0 even when the testbench expects it to be 1 (for instance, when a equals b).
+
+Additionally, the constant literal used has a width of 5 bits, which does not match the 4‐bit width of "a". While this may not directly cause the simulation error, it indicates that the intended functionality (comparing two equal 4‑bit numbers) is not implemented.
+
+The reason the bug is occurring is because there’s a mismatch between the expected functionality—where result should be 1 when “a” equals “b”—and what the code actually performs—an irrelevant comparison with a constant value. The testbench error message is generated when it sees that “result” is not 1 even though “a” and “b” are equal in the test case.
+
+To resolve the issue, the comparator logic in the always block should compare “a” and “b” rather than comparing “a” to 5'b10101, ensuring that the output “result” reflects whether or not the two 4‑bit inputs are equal.

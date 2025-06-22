@@ -1,0 +1,101 @@
+The error occurs because the signal `signal2` is referenced in the code but has not been declared. In VHDL, all signals must be explicitly declared before they can be used.
+
+### Root Cause:
+1. **Missing Declaration**:  
+   The architecture declares `signal1` but does not declare `signal2`:
+   ```vhdl
+   signal signal1 : STD_LOGIC := '0';  -- Only signal1 is declared
+   ```
+   When `signal2` is assigned (`signal2 <= '0';`), the tool throws an error because `signal2` does not exist.
+
+2. **Typo/Semantic Error**:  
+   The assignment to `signal2` in the reset clause (`if rst = '1' then`) is likely a typo. Given the context, the reset should initialize `signal1` (the only signal driving the output `out1`).
+
+### Fix:
+Replace the assignment to `signal2` with `signal1` in the reset clause:
+
+```vhdl
+if rst = '1' then
+    signal1 <= '0';  -- Corrected: Assign to declared signal1
+elsif rising_edge(clk) then
+    signal1 <= not signal1;
+end if;
+```
+
+### Corrected Code:
+```vhdl
+architecture Behavioral of top8 is
+    signal signal1 : STD_LOGIC := '0';  -- Only signal1 is needed
+begin
+    process (clk, rst)
+    begin
+        if rst = '1' then
+            signal1 <= '0';  -- Fixed assignment
+        elsif rising_edge(clk) then
+            signal1 <= not signal1;
+        end if;
+    end process;
+    out1 <= signal1; 
+end Behavioral;
+```
+
+### Why This Works:
+- `signal1` is properly declared and used consistently throughout the design.
+- The reset correctly initializes `signal1` to `'0'`, ensuring predictable behavior.
+- The output `out1` directly follows `signal1`, which now toggles correctly on clock edges when not in reset.
+
+### Key Takeaway:
+Always ensure all signals/variables are declared before use. This error typically arises from typos or incomplete refactoring of code. Most HDL tools will explicitly flag undeclared identifiers like this during compilation/synthesis.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 2.1
+Declaring Verilog module ports
+2.2.3 Signal Declarations
+A signal that is used for internal connections within a system is declared within the module before its
+ﬁrst use. Each signal must be declared by listing its type followed by a user-deﬁned name. Signal names
+of like type can be declared on the same line separated with a comma. All of the legal data types
+described above can be used for signals; however, only types net, reg, and integer will synthesize...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 18
+2.2.3 Signal Declarations .....................................................................................
+19
+2.2.4 Parameter Declarations ..............................................................................
+20
+2.2.5 Compiler Directives .....................................................................................
+20
+3: MODELING CONCURRENT FUNCTIONALITY IN VERILOG .............................
+23...
+
+- source_documents\Quick Start Guide to Verilog.pdf: sensitive block. In this syntax, only rising edge transitions on signal1 or falling edge transitions on signal2
+will cause the block to trigger.
+always @ (posedge signal1, negedge signal2)
+begin
+signal_assignment_1
+signal_assignment_2
+:
+end
+5.1 Procedural Assignment
+•
+67...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Fig. 2.2
+Verilog signals and systems
+20
+•
+Chapter 2: Verilog Constructs...

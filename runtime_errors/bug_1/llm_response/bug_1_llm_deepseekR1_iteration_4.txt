@@ -1,0 +1,13 @@
+The bug arises from incorrect use of bitwise AND operations instead of reduction AND followed by logical OR for `p1y`. 
+
+**Root Cause:**  
+The code for `p1y` uses `assign p1y = {p1a, p1b, p1c} & {p1d, p1e, p1f};`, which performs a **bitwise AND** between two 3-bit vectors. This results in a 3-bit output, and since `p1y` is a single bit, only the least significant bit (LSB) of this result is used. In Test Case 1, this leads to `p1y = 0` instead of the expected `1`. 
+
+**Intended Logic:**  
+`p1y` should be `1` when **either** all of `{p1a, p1b, p1c}` are `1` **OR** all of `{p1d, p1e, p1f}` are `1`. The current code incorrectly checks for bitwise alignment between the two groups (e.g., `p1a & p1d`, `p1b & p1e`, etc.), not the logical OR of two independent AND conditions. 
+
+**Fix Direction:**  
+Replace the bitwise AND with a **reduction AND** on each 3-bit group separately, then apply a **logical OR** between the two results. This ensures `p1y` is `1` if either group is fully asserted. The same issue may exist for `p2y` if its logic requires ANDing reduced terms instead of bitwise operations. 
+
+**Example Correction (Conceptual):**  
+Use reduction operators to compute the AND of each group first (e.g., `&{p1a, p1b, p1c}` gives `p1a & p1b & p1c`), then combine these results with the appropriate logical operation (OR for `p1y`, AND for `p2y`).

@@ -1,0 +1,13 @@
+The error is coming from a mismatch between the state‐transition sequence defined in the RTL and the sequence that the test bench expects. In your RTL you’ve defined the “next state” logic so that when the current state is Red then next becomes Ped, and when the state is Ped then next becomes Red. In other words, after reset the FSM goes:
+
+  Reset → Red → (next = Ped) → Ped
+
+while the test bench expects the machine to stay in Red for one check and then proceed to a Ped state before eventually transitioning to Green, Yellow, and finally back to Red.
+
+Because the RTL moves immediately from Red to Ped, when the test bench checks for Red (00) it finds Ped (11) instead. This discrepancy in the state transition order is the root cause of the bug.
+
+The error message “Expected Red (00), but got 11” is generated when the test bench’s timing (its delay and checking schedule) does not match the actual progression of states from your design.
+
+Finally, note that the issue arises from an incorrect specification (or interpretation) of the intended state sequence in the combinational block. Rather than holding in or cycling through the expected four states (Red → Ped → Green → Yellow → Red), the code’s state transitions do not match the test bench’s expectations.
+
+To fix this, you would need to compare the intended state transition sequence with the one coded in your RTL and adjust the next-state assignments accordingly so that the simulation matches the test bench’s expected order.

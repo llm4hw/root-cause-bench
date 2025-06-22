@@ -1,0 +1,11 @@
+The bug in the code is caused by not covering all possible values of the input signal `sel` in the case statement. The error message indicates that the choice 32'b00000000000000000000000000000011 is missing in the case statement.
+
+The issue is occurring because the input signal `sel` is defined as a `std_logic_vector` of size 2 (2 bits), but the case statement only covers three out of the four possible combinations of these 2 bits. This means that when the value `"11"` is passed to `sel`, there is no case statement to handle it, resulting in the error message during simulation.
+
+To fix this bug, you need to add a fourth case in the case statement to cover the input signal value `"11"` (binary 2'b11) as follows:
+```
+when "11" =>
+    out1 <= '1';
+```
+
+By adding this line to the case statement, all possible input signal values will be covered, and the bug causing the missing choice error will be resolved.

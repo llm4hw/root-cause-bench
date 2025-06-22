@@ -1,0 +1,29 @@
+The bug in this code is related to the misinterpretation in the full adder module instantiation. The input ports `i_a`, `i_b`, and `i_cin` are incorrect in the instantiation of the full adder module `uut`. In the `tb_full_half_add_1bit` module, the inputs are defined as `reg`, which means they need to be driven using nonblocking assignments within the `initial` block.
+
+Currently, the connections to the inputs `i_a` and `i_b` are `3'b` binary values directly; however, these need to use the `reg` values defined in the `reg` declaration of `tb_full_half_add_1bit`.
+
+To fix this bug, modify the connections to the `i_a` and `i_b` inputs in the `tb_full_half_add_1bit` testbench to use the `reg` values `i_a` and `i_b` as follows:
+
+{ $monitor("Time = %0t, i_a = %b, i_b = %b, i_cin = %b, o_sum = %b, o_carry = %b", $time, i_a, i_b, i_cin, o_sum, o_carry);
+    
+#10;
+
+    // Test Case 1: 0 + 0 + 0 => Sum: 0, Carry: 0
+    i_a = 1'b0; i_b = 1'b0; i_cin = 1'b0;
+    #10;
+
+    // Test Case 2: 1 + 0 + 0 => Sum: 1, Carry: 0
+    i_a = 1'b1; i_b = 1'b0; i_cin = 1'b0;
+    #10;
+
+    // Test Case 3: 1 + 1 + 0 => Sum: 0, Carry: 1
+    i_a = 1'b1; i_b = 1'b1; i_cin = 1'b0;
+    #10;
+
+    // Test Case 4: 1 + 1 + 1 => Sum: 1, Carry: 1
+    i_a = 1'b1; i_b = 1'b1; i_cin = 1'b1;
+    #10;
+
+}   
+
+By making this change, the testbench will correctly drive the module inputs using `reg` assignments, ensuring that the inputs are properly applied to the module under test.

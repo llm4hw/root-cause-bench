@@ -1,0 +1,104 @@
+The bug in the code is that the expected result calculation in the check task is incorrect. The line `expected = a_t + b_t + cin_t;` is not taking into consideration that this is a binary addition operation. 
+
+To fix this bug, you need to update the expected result calculation to perform binary addition correctly. Here is how you can update the check task:
+
+```verilog
+task check(input [3:0] a_t, input [3:0] b_t, input cin_t);
+    reg [4:0] expected;
+    reg [3:0] a_bin, b_bin;
+    begin
+        a = a_t; b = b_t; cin = cin_t;
+        a_bin = {1'b0, a_t};
+        b_bin = {1'b0, b_t};
+        #10;
+        expected = a_bin + b_bin + cin_t;
+        if ({cout, sum} !== expected[4:1])
+            $fatal("ERROR: a=%d, b=%d, cin=%b ----- Expected %b, got %b", a, b, cin, expected, {cout, sum});
+    end
+endtask
+```
+This change ensures that binary addition is performed correctly when calculating the expected result for comparison. Update the task as shown, and that should fix the bug.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: EXAMPLE 4.5 DESIGN OF A HALF ADDER ............................................................. ............................................................. 56
+EXAMPLE 4.6 DESIGN OF A FULL ADDER ............................................................. ............................................................. 57
+EXAMPLE 4.7 DESIGN OF A FULL ADDER OUT OF HALF ADDERS .............................................. ............................................. 58...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 11.3.4
+Add the functionality to the computer model
+from 11.3.3 the ability to perform the addition
+instruction ADD_AB. Test your addition instruc-
+tion by simulating the following program. The
+ﬁrst addition instruction will perform x“FE” +
+x“01”
+¼
+x“FF”
+and
+assert
+the
+negative
+(N) ﬂag. The second addition instruction will
+perform x“01” + x“FF” ¼ x“00” and assert the
+carry (C) and zero (Z) ﬂags. The third addition
+instruction will perform x“7F” + x“7F” ¼ x“FE”...
+
+- source_documents\Quick Start Guide to Verilog.pdf: parallel to each other; thus, the delay through the half adder is due to only one level of logic.
+Example 4.5
+Design of a half adder
+4.2.2 Full Adders
+A full adder is a circuit that still produces a sum and carry out, but considers three inputs in the
+computations (A, B, and Cin). Example 4.6 shows the design of a full adder using the classical design
+56
+•
+Chapter 4: Structural Design and Hierarchy...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 4.9
+Structural model of a full adder using two half adders
+Example 4.10 shows the structural model of a 4-bit ripple carry adder in Verilog. The RCA is created
+by instantiating four full adders. Notice that a logic 1’b0 can be directly inserted into the port map of the
+ﬁrst full adder to model the behavior of C0 ¼ 0.
+60
+•
+Chapter 4: Structural Design and Hierarchy...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The ability to implement the carry out logic using the expression Cout ¼ AB + (A  B)Cin allows us to
+implement a full adder with two half adders and the addition of a single OR gate. Example 4.7 shows this
+approach. In this new conﬁguration, the sum is produced in two levels of logic while the carry out is
+produced in three levels of logic.
+Example 4.7
+Design of a full adder out of half adders
+4.2.3 Ripple Carry Adder (RCA)...
+
+- source_documents\Quick Start Guide to Verilog.pdf: always @ (A, B, ALU_Sel)
+begin
+case (ALU_Sel)
+3’b000
+: begin //-- Addition
+//-- Sum and Carry Flag
+{NZVC[0], Result} ¼ A + B;
+//-- Negative Flag
+NZVC[3] ¼ Result[7];
+//-- Zero Flag
+if (Result ¼¼ 0)
+NZVC[2] ¼ 1;
+else
+NZVC[2] ¼ 0;
+//-- Two’s Comp Overflow Flag
+if ( ((A[7]¼¼0) && (B[7]¼¼0) && (Result[7] ¼¼ 1)) ||
+((A[7]¼¼1) && (B[7]¼¼1) && (Result[7] ¼¼ 0)) )
+NZVC[1] ¼ 1;
+else
+NZVC[1] ¼ 0;
+end
+:
+//-- other ALU operations go here...
+:
+default
+: begin
+Result ¼ 8’hXX;
+NZVC
+¼ 4’hX;
+end
+endcase
+end...

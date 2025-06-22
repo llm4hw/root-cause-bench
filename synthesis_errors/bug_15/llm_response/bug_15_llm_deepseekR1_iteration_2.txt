@@ -1,0 +1,22 @@
+The bug occurs because **`data` is declared as a `wire` but is procedurally assigned inside an `always` block**. Here's why:
+
+1. **`wire` vs. `reg` Rules**:
+   - `wire` types represent physical connections and can only be driven by continuous assignments (e.g., `assign` statements) or module ports. They **cannot** be assigned values inside procedural blocks like `always`.
+   - `reg` types store state and can be assigned procedurally (e.g., inside `always` blocks).
+
+2. **The Violation**:
+   - In the `always` block (line 33), `data` is assigned using non-blocking assignment (`<=`):
+     ```verilog
+     data <= 1'b0; // Reset assignment
+     data <= ~data; // Toggle assignment
+     ```
+   - Since `data` is declared as `wire` (line 23: `wire data;`), these procedural assignments are illegal.
+
+3. **Synthesis Error**:
+   - The synthesizer throws error `[Synth 8-2576]` because it detects a procedural assignment to a non-register (`wire`).
+
+### Fix Required:
+**Declare `data` as `reg` instead of `wire`**. This allows it to hold state and be updated procedurally in the `always` block. The rest of the logic (toggling `data` and assigning `out1`) is valid once `data` is properly declared as a register.
+
+### Additional Note:
+The assignment `out1 <= data;` uses the *previous* value of `data` due to non-blocking assignment semantics. If the intent is for `out1` to reflect the *new* toggled value of `data`, adjust the assignment order or logic (though this is unrelated to the current error).

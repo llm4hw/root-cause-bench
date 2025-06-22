@@ -1,0 +1,22 @@
+The error occurs due to a mismatch between the reset edge in the sensitivity list and the reset condition in the logic. Here's the breakdown:
+
+1. **Sensitivity List Issue**:  
+   The `always` block uses `@(posedge clk or negedge reset)`, indicating:
+   - **Asynchronous reset** triggered on the *falling edge* of `reset` (active-low reset)
+   - Reset should be **active** when `reset=0`
+
+2. **Conditional Logic Bug**:  
+   The condition `if (!reset == 0)` is logically equivalent to `if (reset == 1)` because:
+   - `!reset` inverts `reset` (1 when `reset=0`, 0 when `reset=1`)
+   - `(!reset == 0)` is only true when `reset=1`  
+   This incorrectly treats **reset as active-high** (active when `reset=1`).
+
+3. **Mismatch Consequence**:  
+   The sensitivity list expects reset to be active-low (triggered by `negedge reset`), but the condition activates logic when `reset=1` (high). This violates synthesis rules for asynchronous resets, causing the tool to flag the edge/condition mismatch.
+
+**Fix Direction**:  
+Modify the reset condition to match the active-low behavior implied by `negedge reset`. The condition should check for `reset=0` (active state) instead of `reset=1`. Use either:  
+- `if (!reset)`  
+- `if (reset == 0)`  
+
+This ensures the reset logic activates during the falling edge event as expected. The logic inside the `if` block (led assignment) may also need review to match intended reset behavior.

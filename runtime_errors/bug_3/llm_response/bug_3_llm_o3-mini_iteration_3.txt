@@ -1,0 +1,7 @@
+The bug is in the way the final carry output is computed in the full adder module. In the module, the two half adders are used correctly to generate an intermediate sum and two carry signals. However, the final carry is assigned using a logical AND of the two half adder carry outputs rather than the proper logic operation for a full adder.
+
+A full adder generates a carry whenever either of the two half adders produces a carry. When you use an AND operation, if only one half adder produces a carry (which happens in some cases, such as when the sum of the two bits is less than 2 but one half adder's internal operation generates a carry), the AND will yield 0. This is exactly why, for the test case with inputs 1 + 1 + 0, you see o_carry = 0 even though the expected result is 1, because one half adder provides a carry while the other does not.
+
+Essentially, the bug occurs because of an incorrect binary operation for combining the carry outputs. The proper behavior should account for a carry if either condition is true, which calls for using an OR operation. The problem is not with the half adder modules themselves, but rather with that final assignment in the full adder module.
+
+To fix this issue, the final carry should be computed by logically combining the two carry outputs in a way that reflects that a carry occurs if either of them is high.

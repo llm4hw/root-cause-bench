@@ -1,0 +1,19 @@
+The error occurs because a procedural assignment (inside an `always` block) is being applied to a `wire` type signal (`data`). Here's why this is invalid and how to resolve it:
+
+1. **Core Issue**:
+   - `data` is declared as a `wire` (net type) but is being assigned using non-blocking assignment (`<=`) inside a procedural `always` block.
+   - In Verilog, wires can only be driven by continuous assignments (using `assign` statements) or module ports. Procedural blocks (like `always`) require **variable** data types (`reg`, `integer`, etc.).
+
+2. **Why the Error Happens**:
+   - The `always` block attempts to treat `data` as a flip-flop by assigning it on clock edges (`posedge clk`/`rst`), but `wire` types cannot store state between assignments. Only `reg`-like variables can model sequential logic.
+
+3. **Logical Consequences**:
+   - Since `data` is a wire, it has no memory. The assignment `data <= ~data` would create combinational feedback (inferred latch) if permitted, but synthesis tools explicitly forbid procedural assignments to wires.
+
+4. **Fix Required**:
+   - Change the declaration of `data` from `wire` to `reg`. This allows it to be:
+     - Assigned procedurally
+     - Store values between clock cycles
+     - Correctly model the intended flip-flop behavior
+
+**Important Note**: The assignment `out1 <= data` in the same block uses the *old* value of `data` due to non-blocking assignment semantics. This may cause unexpected behavior since `out1` will lag behind `data` by one cycle. Consider whether this matches design intent after fixing the primary error.

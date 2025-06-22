@@ -1,0 +1,31 @@
+### Root Cause Analysis
+The bug occurs because the current logic finds the **absolute minimum** value among all inputs (a, b, c, d) instead of implementing the required behavior:  
+*Assign the **first value** in the order `b → c → d` that is smaller than `a` to `min`. If none are smaller, `min = a`.*
+
+### Why the Bug Happens
+1. **Incorrect Update Logic**:  
+   The code initializes `min = a`, then unconditionally checks all inputs (`b`, `c`, `d`) in sequence. Each `if` statement independently updates `min` if a smaller value is found.  
+   This allows subsequent inputs to override `min` even after a qualifying value (smaller than `a`) has been found.
+
+2. **Test Case 3 Failure Analysis**:  
+   - Inputs: `a = 10`, `b = 15`, `c = 8`, `d = 7`  
+   - Current behavior:  
+     - `min` is set to `a` (10)  
+     - `min > b` (10 > 15) → **false** → `min` remains 10  
+     - `min > c` (10 > 8) → **true** → `min` updates to 8  
+     - `min > d` (8 > 7) → **true** → `min` updates to 7 (final value)  
+   - Expected behavior:  
+     `c = 8` is the **first value smaller than `a`** in the order `b→c→d` (since `b=15` fails). The check should stop at `c`, ignoring `d`.
+
+### Required Fix
+Replace the independent `if` statements with a **priority chain** using `else if` to ensure:  
+1. Inputs are checked **strictly in order** (`b` → `c` → `d`).  
+2. The first value smaller than `a` (or the current `min`) is assigned to `min`, and **subsequent inputs are skipped**.  
+
+### Why This Fix Works
+The `else if` structure ensures sequential evaluation:  
+- If `b < min` (where `min = a` initially), assign `min = b` and **skip** checking `c`/`d`.  
+- If `b` fails but `c < min`, assign `min = c` and **skip** `d`.  
+- If all fail, `min` remains `a`.  
+
+This matches the specification of "first smaller value in order" without searching for the global minimum.

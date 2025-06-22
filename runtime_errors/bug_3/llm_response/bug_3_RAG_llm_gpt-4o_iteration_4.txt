@@ -1,0 +1,101 @@
+The error in your code arises from the incorrect implementation of the `o_carry` output. The issue is primarily with how you are calculating the `o_carry` in the `full_half_add_1bit` module. The logic for determining the `carry` in a full adder using two half adders should consider both intermediate carries obtained from each of the half adders.
+
+Currently, the implementation for `o_carry` is:
+```verilog
+assign o_carry = w_carry1 & w_carry2;
+```
+
+This is incorrect because in a full adder constructed from two half adders, the carry out should be computed as:
+```verilog
+assign o_carry = w_carry1 | w_carry2;
+```
+
+### Explanation:
+- In a full adder design using two half adders, you have:
+  - `w_carry1` which is the carry from the first half adder: when both `i_a` and `i_b` are high (`1`).
+  - `w_carry2` which is the carry from the second half adder, taking `w_sum1` (the sum from the first half adder) and `i_cin` as inputs.
+
+The overall carry output `o_carry` should be a logical OR of `w_carry1` and `w_carry2` because if there is a carry from either half adder, then the full adder needs to account for it.
+
+### Correct Implementation:
+Change the line that calculates `o_carry` to:
+```verilog
+assign o_carry = w_carry1 | w_carry2;
+```
+
+With this correction, your full adder should produce the correct carry output for the provided test cases. This fix should resolve the issue for Test Case 3, in which you expected a carry-out of `1`.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: EXAMPLE 4.5 DESIGN OF A HALF ADDER ............................................................. ............................................................. 56
+EXAMPLE 4.6 DESIGN OF A FULL ADDER ............................................................. ............................................................. 57
+EXAMPLE 4.7 DESIGN OF A FULL ADDER OUT OF HALF ADDERS .............................................. ............................................. 58...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: is called a half adder instead of a full adder is because it does not accommodate a carry in during the
+computation, thus it does not provide all of the necessary functionality required for a positional adder.
+Example 4.5 shows the design of a half adder. Notice that two combinational logic circuits are required in
+order to produce the sum (the XOR gate) and the carry out (the AND gate). These two gates are in...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 11.3.4
+Add the functionality to the computer model
+from 11.3.3 the ability to perform the addition
+instruction ADD_AB. Test your addition instruc-
+tion by simulating the following program. The
+ﬁrst addition instruction will perform x“FE” +
+x“01”
+¼
+x“FF”
+and
+assert
+the
+negative
+(N) ﬂag. The second addition instruction will
+perform x“01” + x“FF” ¼ x“00” and assert the
+carry (C) and zero (Z) ﬂags. The third addition
+instruction will perform x“7F” + x“7F” ¼ x“FE”...
+
+- source_documents\Quick Start Guide to Verilog.pdf: always @ (A, B, ALU_Sel)
+begin
+case (ALU_Sel)
+3’b000
+: begin //-- Addition
+//-- Sum and Carry Flag
+{NZVC[0], Result} ¼ A + B;
+//-- Negative Flag
+NZVC[3] ¼ Result[7];
+//-- Zero Flag
+if (Result ¼¼ 0)
+NZVC[2] ¼ 1;
+else
+NZVC[2] ¼ 0;
+//-- Two’s Comp Overflow Flag
+if ( ((A[7]¼¼0) && (B[7]¼¼0) && (Result[7] ¼¼ 1)) ||
+((A[7]¼¼1) && (B[7]¼¼1) && (Result[7] ¼¼ 0)) )
+NZVC[1] ¼ 1;
+else
+NZVC[1] ¼ 0;
+end
+:
+//-- other ALU operations go here...
+:
+default
+: begin
+Result ¼ 8’hXX;
+NZVC
+¼ 4’hX;
+end
+endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 6.2
+Test bench for a sequential logic circuit
+6.1.2 Printing Results to the Simulator Transcript
+In the past test bench examples, the input and output values are observed using either the
+waveform or listing tool within the simulator tool. It is also useful to print the values of the simulation to
+a transcript window to track the simulation as each statement is processed. Messages can be printed...

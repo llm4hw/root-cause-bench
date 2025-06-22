@@ -1,0 +1,7 @@
+The bug in the provided code is due to the presence of both a `wait for` statement within the process and a sensitivity list in the process statement. In VHDL, a process cannot have both a `wait` statement and a sensitivity list.
+
+The error message "process cannot have both a wait statement and a sensitivity list" occurs because the process in the code contains both a sensitivity list `(clk)` and a `wait for 10 ns;` statement within its body.
+
+To fix this issue, you need to decide whether the process should be sensitive to the clock signal `clk` or if it should rely on the `wait for` statement for timing control. If the process is intended to be clocked, you should remove the `wait for 10 ns;` statement. If timing control is based on the `wait for` statement, then the sensitivity list `(clk)` should be removed from the process statement. 
+
+You should make sure that the process is properly synchronized with the clock signal if it is intended to be clocked. Otherwise, if timing control is based on the `wait for` statement for simulation purposes, remove the sensitivity list from the process.

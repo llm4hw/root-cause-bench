@@ -1,0 +1,10 @@
+The error occurs because the synthesis tool detects an infinite—or at least unbounded—combinational loop in your always block. In your code, you have a while loop whose condition depends on the signal "flag," which is initialized to true and never gets modified inside the loop. This causes the loop to potentially iterate indefinitely. In synthesis, the tool gives up after a set number of iterations (here, 65,536) because it cannot fully unroll or compute the combinational behavior, hence the error.
+
+Because you have a non-terminating loop in a combinational always block, the simulation (and synthesis) doesn't know when to stop evaluating the block. The test bench detects this runaway evaluation, which is why you see the error message.
+
+The fix is to change the design so that the process terminates appropriately. Typically, this involves converting the combinational block that uses an infinite "while" loop into a sequential block driven by a clock edge (or using a properly managed state machine) so that the logic can settle and the loop is not unbounded in a single simulation timestep.
+
+In summary: 
+• The bug is an infinite combinational while loop.
+• It occurs because the loop condition is based on a flag that never changes, leading the synthesis tool to exceed its iteration limit.
+• To resolve the issue, the design logic must be restructured so that the looping behavior is controlled (for example, using clocked sequential logic or a state machine) ensuring the process eventually terminates in each simulation cycle.

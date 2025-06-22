@@ -1,0 +1,7 @@
+The bug in this code results from the assignment statement in the `top_module` where `q` is assigned to `a & 0`. 
+
+In Verilog, `&` is a bitwise AND operator that performs a bitwise AND operation between each bit of `a` and the corresponding bit of `0`. Since the second operand is a constant `0`, this operation will always result in `0`. 
+
+Thus, regardless of the values of `a` and `b` in the testbench, `q` is always assigned to `0`. This is why Test Case 4 fails, as it expects `q` to be `1` when both `a` and `b` are `1`.
+
+To fix this bug, the assignment should be updated to correctly capture the logic you want to express based on inputs `a` and `b. This correction will ensure that the value of `q` is computed correctly based on the input values of `a` and `b`.

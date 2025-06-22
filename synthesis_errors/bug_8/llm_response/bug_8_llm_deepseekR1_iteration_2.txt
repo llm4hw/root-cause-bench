@@ -1,0 +1,32 @@
+The error occurs because the signal `signal2` is referenced in the reset logic but has **not been declared** in the architecture. Here's the breakdown:
+
+1. **Root Cause**:  
+   The architecture `Behavioral` only declares one signal:  
+   ```vhdl
+   signal signal1 : STD_LOGIC := '0';
+   ```  
+   However, the process attempts to assign to `signal2` during reset:  
+   ```vhdl
+   if rst = '1' then
+        signal2 <= '0';  -- ERROR HERE
+   ```  
+   Since `signal2` is not declared anywhere in the architecture (or entity), the synthesizer fails to recognize it.
+
+2. **Likely Intent**:  
+   Based on the design:  
+   - `signal1` is used in the clock-driven logic (`signal1 <= not signal1`)  
+   - `out1` is directly driven by `signal1`  
+   This suggests the reset logic was meant to initialize `signal1` (not a non-existent `signal2`).
+
+3. **Why This Happened**:  
+   A typo or copy-paste error likely caused `signal1` to be written as `signal2` in the reset branch. VHDL requires all signals to be explicitly declared before use.
+
+---
+
+**Fix Required**:  
+Replace `signal2` with the correctly declared signal `signal1` in the reset assignment:  
+```vhdl
+if rst = '1' then
+    signal1 <= '0';  -- CORRECTED
+```  
+This will synchronize the reset logic with the existing signal declaration and clocked logic.

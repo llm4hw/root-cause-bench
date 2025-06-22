@@ -1,0 +1,24 @@
+The bug occurs because the `+` operator is not directly defined for `std_logic_vector` types in the VHDL standard libraries being used. Here's a breakdown:
+
+1. **Missing Operator Definition**:
+   - The code uses `std_logic_vector` types for inputs `a` and `b`.
+   - The `ieee.numeric_std` package provides `+` operators only for `unsigned` and `signed` types, not raw `std_logic_vector`.
+
+2. **Type Mismatch**:
+   - When attempting `a + b`, the compiler looks for a `+` operator compatible with `std_logic_vector` operands.
+   - Since no such operator exists in `numeric_std` or `std_logic_1164`, the synthesis tool reports "0 definitions of operator '+' match".
+
+3. **Simulation vs Synthesis Discrepancy**:
+   - Some simulators automatically load non-standard packages (like `std_logic_unsigned`), which *do* define `+` for `std_logic_vector`.
+   - Synthesis tools strictly adhere to explicit dependencies and won't infer missing operators.
+
+**Fix Approach**:
+- Explicitly convert `a` and `b` to numeric types (`unsigned` or `signed`) before addition using `numeric_std` functions.
+- Convert the result back to `std_logic_vector` for assignment to `c`.
+- Example conversion:  
+  `c <= std_logic_vector(unsigned(a) + unsigned(b));`
+
+**Critical Note**:  
+The output `c` is 4 bits, but adding two 4-bit values may produce a 5-bit result. The conversion must handle potential overflow by either:
+- Resizing the result to match `c`'s width, or
+- Accepting implicit truncation (which discards the carry bit).

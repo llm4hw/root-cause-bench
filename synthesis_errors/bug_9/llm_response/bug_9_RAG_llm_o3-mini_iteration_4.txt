@@ -1,0 +1,104 @@
+The error occurs because the design tries to read the value from port b even though b is declared as an output port. In VHDL, an output port is intended for driving a signal out of the entity, not for being read (unless it is declared as BUFFER or INOUT). Here, the expression
+
+  temp_signal <= a and b;
+
+attempts to use the value of b in a logical AND operation. Since b is declared as an out signal, the simulator rejects the read, throwing the error:
+
+  "cannot read from 'out' object b; use 'buffer' or 'inout'".
+
+To fix the issue, you have two main options:
+
+1. Change the port mode of b from OUT to BUFFER (if synthesis and simulation allow buffers in your flow), so that the port can be read within the architecture.
+
+  For example:
+    b : buffer std_logic;
+
+2. Alternatively, if the intention is not to actually read the value of b (or if the design logic is mistaken), you should modify the code so that you use the correct signals. For example, if the operation should use a different input or an internal signal instead of b, adjust the expression accordingly. You might create an internal signal, assign it with the correct source, and then drive port b from that internal signal.
+
+Choose the option that fits your design intent. The error is raised because the VHDL standard does not allow reading an out port unless declared differently, and changing the declaration or design will resolve the simulation error.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\verilog_2001_ref_guide.pdf: 10
+   Verilog HDL Quick Reference Guide
+   
+  
+Port Declaration Examples
+Notes
+input a,b,sel; 
+three scalar (1-bit) ports
+input signed [15:0] a, b; 
+two 16-bit ports that pass 2’s 
+complement values, little 
+endian convention
+output signed [31:0] result;
+32-bit port; values passed 
+through the port are in 2’s 
+complement form
+output reg signed [32:1] sum; 32-bit port; the internal 
+signal connected to the port 
+is a signed reg data type
+inout [0:15] data_bus; 
+big endian convention...
+
+- source_documents\Quick Start Guide to Verilog.pdf: ¼ 8’h42;
+//-- A <¼ A + B
+parameter BRA
+¼ 8’h20;
+//-- Branch Always
+parameter BEQ
+¼ 8’h23;
+//-- Branch if Z¼1
+Now the program memory can be declared as an array type with initial values to deﬁne the program.
+The following Verilog shows how to declare the program memory and an example program to perform a
+load, store, and a branch always. This program will continually write x“AA” to port_out_00.
+160
+•
+Chapter 11: Computer System Design...
+
+- source_documents\verilog_2001_ref_guide.pdf: `ifdef RTL 
+    wire  y = a & b; 
+`else 
+    and #1 (y,a,b); 
+`endif 
+`include “file_name” 
+File inclusion. The contents of another Verilog HDL source file is inserted
+where the `include directive appears.
+`celldefine 
+`endcelldefine 
+Flags the Verilog source code between the two directives as a cell.  Some
+tools, such as a delay calculator for an ASIC, need to distinguish between a
+module that represents an ASIC cell and other modules in the design.
+`default_nettype net_data_type...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 6.1.3
+Can a test bench be simulated?
+6.1.4
+Can a test bench be synthesized?
+6.1.5
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should use a pro-
+cedural
+block
+and
+individual
+signal
+assignments for each pattern. Your test bench
+should change the input pattern every 10 ns.
+Fig. 6.1...
+
+- source_documents\verilog_fsm.pdf: is assigned the and of A and B. A very common bug is to introduce an incomplete sensitivity list. See
+Program 14 for two examples of incomplete sensitivity lists.
+In Program 14, the ﬁrst example produces an and gate that only updates its output C when A changes.
+If B changes, but A does not change, C does not change because the always@(A) block isn’t executed.
+8...

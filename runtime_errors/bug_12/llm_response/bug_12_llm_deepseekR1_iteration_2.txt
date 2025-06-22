@@ -1,0 +1,9 @@
+The bug is in the comparator logic of the faulty_comparator module. The root cause is a **bit-width mismatch** and **incorrect comparison condition**:
+
+1. **Bit-width mismatch**: The code checks `a == 5'b10101` (5-bit value 21), but `a` is a 4-bit input (max value 15). This comparison can never be true, making `result` always 0 except during undefined behavior.
+
+2. **Missing actual comparison**: The module was meant to compare inputs `a` and `b`, but instead compares `a` against an unreachable fixed value. The testbench error occurs because the design doesn't implement `a == b` comparison at all.
+
+3. **Unused input `b`**: The `b` input is completely ignored in the implementation, breaking the fundamental requirement of a comparator.
+
+The code needs to be modified to compare the two inputs `a` and `b` instead of checking against a fixed 5-bit value, while ensuring proper bit-width matching for all signals.

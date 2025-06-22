@@ -1,0 +1,7 @@
+The bug in the provided code is related to the declaration and usage of a variable (`variable1`) inside the architecture. In VHDL, when declaring a variable outside a process, it must be declared as 'shared' to indicate that it will be accessed by multiple processes. 
+
+The error message `ERROR: [Synth 8-2858] variable outside of subprogram or process must be 'shared'` indicates that the variable `variable1` needs to be declared with the keyword 'shared' since it is being used outside the process.
+
+To fix this issue, you should declare the variable `variable1` as `shared variable variable1 : STD_LOGIC := '0';` before the architecture begin block. By making this change, the variable will now be properly shared among processes.
+
+After making this modification, you can check the simulation to verify that the error no longer occurs.

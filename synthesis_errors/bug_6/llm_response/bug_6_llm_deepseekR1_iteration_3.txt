@@ -1,0 +1,21 @@
+The bug occurs because a variable (`variable1`) is declared in the architecture body (outside any process or subprogram) without being declared as `shared`. Here's why this is invalid and how to fix it:
+
+1. **VHDL Variable Scope Rules**:
+   - Variables in VHDL can **only be declared inside processes, functions, or procedures**.
+   - Declaring a variable directly in an architecture body is illegal unless explicitly marked as `shared` (and even then, shared variables require special handling).
+
+2. **Why the Error Occurs**:
+   - Line `variable variable1 : STD_LOGIC := '0';` violates VHDL's scoping rules because:
+     - It's not inside a process/subprogram
+     - It's not declared as `shared`
+   - The synthesis tool correctly flags this as illegal (error Synth 8-2858).
+
+3. **Incorrect Usage in Process**:
+   - The process tries to access `variable1` as if it were in scope, but the variable's placement makes it inaccessible under VHDL rules.
+   - Signals (like `signal1`) can be declared in architecture bodies, but variables cannot.
+
+**How to Fix**:
+- **Option 1 (Recommended)**: Move the variable declaration **inside the process** where it's used. Variables should always be local to processes/subprograms.
+- **Option 2 (Advanced)**: If cross-process sharing is absolutely required (rarely needed), declare it as a `shared variable` - but this introduces non-determinism risks and requires protected types for safe use.
+
+**Key Insight**: Variables are temporary storage for sequential code (inside processes), while signals are for inter-process communication. The fix requires restructuring the declaration to comply with VHDL's scoping hierarchy.

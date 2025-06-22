@@ -1,0 +1,21 @@
+The error occurs because a `std_logic` signal is being incorrectly initialized with a string literal. Here's the breakdown:
+
+1. **Problematic Line**:
+   ```vhdl
+   signal a : std_logic := "0";
+   ```
+   - `a` is declared as `std_logic` (single-bit type)
+   - `"0"` is a string literal (multi-character sequence enclosed in double quotes)
+
+2. **Type Mismatch**:
+   - `std_logic` requires a **single-character literal** (e.g., `'0'`)
+   - String literals like `"0"` are for multi-bit types like `std_logic_vector`
+
+3. **Why the Error Points to `end entity`**:
+   Synthesis tools often report errors at later lines (like `end entity`) when they finish processing the entire declaration block and detect inconsistencies in earlier definitions.
+
+4. **Secondary Issue**:
+   The signal `c` uses correct initialization (`"0000"` is valid for `std_logic_vector(3 downto 0)`), highlighting that the problem is isolated to the `std_logic` assignment.
+
+**Fix Required**:
+Replace the double-quoted string `"0"` with a single-quoted character `'0'` for the `std_logic` signal initialization. The tool expects a character literal for single-bit types.

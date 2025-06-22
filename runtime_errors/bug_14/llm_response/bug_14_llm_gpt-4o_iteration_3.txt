@@ -1,0 +1,12 @@
+The problem appears to be related to when the `state`, `output_data`, and `valid` signals are being updated in the design.
+
+1. **Synchronization with Clock**: The main issue is that the state transitions and output updates are primarily controlled by a `posedge reset` block, which should not be the main driver for state transitions in an FSM. FSM logic should typically be synchronized with the clock to ensure correct timing and state transitions.
+
+2. **Reset Logic**: The code uses `posedge reset` to initiate the FSM's state, but in typical design, this block should respond to `posedge clk` and have conditional logic for reset within it. The current structure doesn't allow proper synchronization with the clock edge but only with the reset edge, which may lead to unwanted behavior and timing issues since the FSM's state transitions and output logic are independent of the clock signal.
+
+3. **Missing Clock in State Transition**: For the FSM to function correctly and transition states predictably, the state transition logic should be inside an always block sensitive to the clock (`posedge clk`). This ensures that any change in `num_in` or `reset` will trigger the state transition at the next clock edge, maintaining the intended timing of a synchronous design.
+
+In summary, the issue arises because the FSM logic isn't properly synchronized with the clock signal, leading to unexpected behavior when `num_in` changes. To resolve this issue:
+
+- The state transition logic should be shifted to occur under an always block sensitive to `posedge clk`, incorporating `reset` as part of that always block's condition.
+- This approach will ensure that both the state and output signals are updated synchronously with the clock, maintaining coherence with the synchronous design paradigm used in digital circuits.

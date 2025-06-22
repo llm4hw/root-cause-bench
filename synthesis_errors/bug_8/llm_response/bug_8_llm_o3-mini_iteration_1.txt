@@ -1,0 +1,5 @@
+The error is being issued because the process refers to a signal named signal2 that has never been declared in the architecture. In this design, only signal1 is declared, yet signal2 is being assigned a value during the reset condition. This happens because the test bench encounters an assignment to a nonexistent signal, which is why the synthesis tool flags it as an error.
+
+The source of the bug is likely a typo or copy‐paste mistake. If the intention was to reset signal1, then the wrong signal name has been used. Alternatively, if an additional signal (signal2) was meant to be used in the design, then it has simply not been declared in the architecture.
+
+To fix the issue, the code must be modified so that the referenced signal either exists (by declaring it in the architecture) or the correct signal name is used.

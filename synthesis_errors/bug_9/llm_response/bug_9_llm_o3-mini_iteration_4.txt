@@ -1,0 +1,3 @@
+The problem here is that the entity's port b is declared as an output. In VHDL, ports declared with the mode "out" are intended to only be assigned values, not read from. However, the code is trying to use b as a signal in the expression "a and b" (i.e., reading its value), which is not allowed for an output port.
+
+This error occurs because the synthesis tool is enforcing the VHDL language rules that an "out" port cannot be read. To resolve the issue, the port b would need to be declared such that its value can be read (for example, by declaring it as a "buffer" or "inout" port) or by redesigning the architecture so that b is not used as an input in the logic expression.

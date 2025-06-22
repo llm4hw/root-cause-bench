@@ -1,0 +1,5 @@
+The problem is that the case statement contains two entries for the input value 1 (4'h1). When the simulator encounters the duplicate, it only uses the first occurrence, so when x equals 1, f is assigned 0 instead of the expected value of 1. This conflict is causing the test bench to report an error (Test Case 1 failed).
+
+The duplicate case label means that your case statement is ambiguous for x = 1; the simulator doesn't merge the two definitions. Instead, it only applies the first match it sees (f = 0), which conflicts with the expected behavior (f should be 1). 
+
+To resolve the issue, you need to remove or correct the duplicate entry so that each possible input value has exactly one unique case label with the intended assignment for f.

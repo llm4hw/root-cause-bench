@@ -1,0 +1,26 @@
+The provided Verilog code and testbench are designed to simulate a simple ring oscillator. The ring oscillator should generate a toggling signal by passing the signal through a series of inverters, creating feedback. However, the error indicates that the output (`OUT`) never toggled, suggesting there's a problem with the feedback loop of the ring oscillator.
+
+### Reason for the Issue:
+
+1. **Feedback Wiring Problem**:
+   - The error message "ERROR: Ring oscillator output (OUT) never toggled. Likely feedback wiring issue" strongly suggests that there is an issue with how the feedback loop is configured in the oscillator. 
+
+2. **Feedback Initialization**:
+   - For the ring oscillator to start oscillating, it typically requires an odd number of inverting stages and an initial seed condition to kick-start the oscillation. If the initial condition is not set properly, or if the configuration is not appropriate, the ring oscillator will remain in a stable (non-toggling) state.
+
+3. **Configuration in the Code**:
+   - The inverters are created using a `generate` block, forming a loop with 11 inverters. However, the line `assign lut_ins = {lut_outs[10], lut_outs[9:0]};` forms a continuous assignment that effectively connects the output `lut_outs[10]` back to the input `lut_ins[0]`.
+   - The initial forcing of `lut_ins[0]` to `1` in the testbench is an attempt to set an initial condition. However, once this force is released after a mere 20 time units, unless there's initial imbalance or your inverters are odd and the feedback is correct, the loop might stabilize in a non-oscillating state.
+
+4. **Potential initialization failure**:
+   - The code might fail to start oscillating if the initial conditions do not create the necessary imbalance needed to start the feedback loop, especially if any minor imbalance does not propagate due to being counteracted by the even number of inversions correctly forming the feedback loop.
+
+### Explanation of How to Fix the Issue:
+
+- **Introduce or Confirm Initial Imbalance**: Ensure the starting conditions are correctly set such that the system has some initial "noise" or imbalance that starts the oscillation. This may involve forcing the feedback loop to start in a certain state or confirming that uninitialized states achieve this.
+  
+- **Feedback Loop Verification**: Verify the logic connections to ensure there is a proper feedback path through an odd number of inverters for initiating oscillation automatically as expected. 
+
+- **Check and Ensure Stability**: Test the sea if the unlocking counter strategy for enough time to allow the oscillation to begin or initially seed the oscillator output `lut_outs` vector with a condition that causes initial state change to take root and drive oscillation.
+
+Once these potential areas have been addressed, the ring oscillator should toggle as expected during simulation.

@@ -1,0 +1,16 @@
+The error occurs due to a **missing semicolon** in the reset branch of the synchronous process. Here's why:
+
+1. **Syntax Violation**:  
+   In the line `data_out <= (others => '0')`, the assignment lacks a terminating semicolon (`;`). VHDL requires every sequential statement inside a process to end with a semicolon.
+
+2. **Parser Confusion**:  
+   The VHDL parser expects a semicolon after the assignment under the `if rst='1'` branch. When it encounters `elsif` immediately after `'0')` without a semicolon, it interprets this as invalid syntax since `elsif` isn't a valid continuation of an assignment statement.
+
+3. **Error Location**:  
+   The error is reported at the `elsif` keyword (line 47) because that's where the parser realizes the syntax is broken. The actual root cause is the missing semicolon in the preceding line.
+
+**Fix:**  
+Add a semicolon after `(others => '0')` in the reset branch to terminate the assignment statement correctly. The reset condition should be:  
+`data_out <= (others => '0');`  
+
+This ensures the `if`/`elsif` structure is properly formatted and satisfies VHDL's sequential statement syntax rules.

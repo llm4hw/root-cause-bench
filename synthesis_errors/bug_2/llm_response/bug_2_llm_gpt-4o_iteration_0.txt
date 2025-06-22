@@ -1,0 +1,13 @@
+The error message you are encountering is related to the use of the "+" operator with the `std_logic_vector` type in VHDL. In VHDL, the "+" operator is not directly defined for the `std_logic_vector` type. The `std_logic_vector` type is an array of `std_logic` elements, which are not inherently numerical values. Therefore, the compiler or synthesis tool does not know how to handle the addition operation for these bit arrays directly.
+
+The root cause of the issue is the use of `std_logic_vector` for arithmetic operations without casting or interpreting it as a numerical type. The `numeric_std` package provides functions to convert `std_logic_vector` types to numerical types such as `unsigned` or `signed` which do have a defined "+" operator.
+
+To resolve this issue, you need to explicitly convert `std_logic_vector` to either `unsigned` or `signed` before performing the addition. The `numeric_std` package, which you have already included in your code, provides these conversion functions. After the addition, you will also need to convert the result back to `std_logic_vector` to assign it to `c`.
+
+Here's a summarized explanation of the fix without providing code:
+1. Convert both `a` and `b` from `std_logic_vector` to `unsigned`.
+2. Perform the addition using the "+" operator defined for `unsigned`.
+3. Convert the result from `unsigned` back to `std_logic_vector`.
+4. Assign this result to the output `c`.
+
+By following this conversion process, the root cause of the issue will be addressed, and the addition operation will be correctly interpreted and executed by the synthesizer/simulation tool.

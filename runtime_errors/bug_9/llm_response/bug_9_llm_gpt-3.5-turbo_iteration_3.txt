@@ -1,0 +1,7 @@
+The error message "ERROR: Morse for O not correct." is occurring in the testbench when testing the 'O' character. The bug in the code lies in the state transitions related to the 'O' character. 
+
+In the original code, the state transitions for the 'O' character (O_DASH1, O_DASH2, O_DASH3) did not correctly handle transitioning from one state to the next in order to generate the correct Morse code sequence '---' for the 'O' character.
+
+To fix this bug, the state transitions for the 'O' character need to be adjusted to progress from one state to the next as the DASH symbol is being generated. This adjustment ensures that the correct sequence of DASH symbols ('---') is generated for the 'O' character.
+
+By modifying the state transitions and counter increments appropriately, the issue can be resolved, and the Morse code for the 'O' character will be generated correctly as intended.

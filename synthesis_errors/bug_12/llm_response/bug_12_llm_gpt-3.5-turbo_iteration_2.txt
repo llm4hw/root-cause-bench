@@ -1,0 +1,3 @@
+The error message indicates a type mismatch between `std_logic` and a string literal in line 41 of the VHDL code. Specifically, the issue occurs because the signal `a` is being initialized with a string literal `"0"`, which is not compatible with the `std_logic` type. 
+
+To fix this bug, you can replace the initialization value of signal `a` from `"0"` to `'0'` to match the `std_logic` type. This change ensures that the signal `a` is initialized with a single bit value of type `std_logic`, resolving the type mismatch error during simulation.

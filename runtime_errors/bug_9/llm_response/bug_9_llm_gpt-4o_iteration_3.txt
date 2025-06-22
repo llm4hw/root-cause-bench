@@ -1,0 +1,20 @@
+The error message "ERROR: Morse for O not correct" arises from the test bench when the Morse code for the letter 'O' is being tested. You can see that the test bench expects the module to emit three consecutive dashes (---) for the letter 'O', symbolized by the `select` input `2'b01`.
+
+Let's examine why the expected behavior is not happening in the state machine code:
+
+1. **State Transition Logic for 'O'**:
+   - Upon selection of `2'b01`, the state machine transitions to `O_DASH1`.
+   - In the `O_DASH1`, `O_DASH2`, and `O_DASH3` states, the module should hold the output high (`morse_out` = 1) for the duration of `DASH`, then transition to `O_DASH2`, `O_DASH3`, and finally back to `IDLE`.
+
+2. **Bug in the Code**:
+   - The code states that once a `DASH` duration is complete in any of these states, the state transitions directly back to `IDLE` instead of progressing through `O_DASH2` and `O_DASH3`.
+   - This direct transition back to `IDLE` occurs because there is no logic to advance from `O_DASH1` to `O_DASH2` or from `O_DASH2` to `O_DASH3`.
+
+3. **Why the Error Occurs**:
+   - Since the state machine resets to `IDLE` after the first `DASH`, the Morse output doesn't produce the continuous three dashes needed for letter 'O'. Hence, the test bench doesn't find the correct Morse output for the letter and prints the error message.
+
+4. **Explanation of Fix**:
+   - To correct this, you would include additional transitions that correctly move from `O_DASH1` to `O_DASH2`, from `O_DASH2` to `O_DASH3`, and then finally to `IDLE`.
+   - The transitions should only occur after a `DASH` duration has completed in each state, similar to how the dots are handled for the letter 'S'. This means after completing the count for `DASH` in `O_DASH1`, transition should be to `O_DASH2`. Similarly, complete the count for `DASH` in `O_DASH2` and transition to `O_DASH3`. After completing the count for `DASH` in `O_DASH3`, then finally transition back to `IDLE`.
+
+By adjusting the state transitions to correctly handle the sequence for the three dashes, the module will then produce the desired output for 'O', addressing the error observed in the test bench.

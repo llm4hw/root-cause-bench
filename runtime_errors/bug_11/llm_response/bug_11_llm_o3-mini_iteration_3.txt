@@ -1,0 +1,5 @@
+The problem is that the state machine (FSM) never checks that the input number is actually within 0–9. In the sequential logic block, regardless of what num_in is, the state is simply set to num_in and the valid flag is always set to 1. This means that even when num_in is 10 or 15 (which are outside the desired range), the FSM still marks the output as valid. The testbench expects valid to be 0 for invalid inputs and output_data to be 0—so it finds an error because the logic doesn’t reject out‐of-range inputs.
+
+In other words, the bug occurs because there is no validation of num_in to determine if it is within the allowed range. The logic needs to include a condition to check if the input is less than 10. Without this check, the FSM always treats any 4-bit number as valid, leading to an error during simulation when the testbench detects that an “invalid” input (like 10 or 15) is marked as valid.
+
+The fix would involve adding a condition to the design that explicitly sets valid to 0 and output_data to 0 when num_in represents a number outside the 0–9 range.

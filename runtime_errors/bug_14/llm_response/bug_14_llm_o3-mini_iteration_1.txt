@@ -1,0 +1,7 @@
+The problem is that the sequential logic uses the wrong sensitivity list. The always block that updates state, output_data, and valid is triggered on the rising edge of the reset signal rather than the clock. This means the intended state updates occur only when reset transitions are detected and not on the clock’s rising edge as expected. As a result, after reset is deasserted, the logic is not triggered by the clock, so even when you change num_in to 3, the state and output_data remain at their last values (0 in this case), causing the testbench to observe a mismatch.
+
+In other words, because the block is sensitive only to posedge reset, after the initial reset pulse the circuit’s internal state never updates on clock events, leading to the outputs always being zero and valid never being set correctly.
+
+Fixing the bug would require modifying the sensitivity list so that the logic is triggered on either the clock edge (to update the state regularly) or the reset edge (to initialize things). This ensures that after reset deassertion, the sequential block will process input changes and update state and outputs appropriately.
+
+Thus, the root cause is the incorrect sensitivity list in the sequential block, and the fix is to use a sensitivity list that includes the clock (with the reset as an asynchronous signal if needed) so that state transitions occur properly in response to the clock rather than only on reset.

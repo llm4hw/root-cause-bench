@@ -1,0 +1,25 @@
+The error occurs due to a type mismatch in the signal initialization within the VHDL architecture. Here's the breakdown:
+
+1. **Problem Location**:  
+   The issue is in the signal declaration:  
+   `signal a : std_logic := "0";`  
+   The error message points to line 41 (`end entity;`) because the compiler's error reporting sometimes flags the end of the entity declaration when it detects an unresolved type conflict earlier in the code.
+
+2. **Core Issue**:  
+   - `std_logic` is a **single-bit** type (scalar)  
+   - `"0"` is a **string literal** (array type, length=1)  
+   VHDL requires strict type matching: scalar types like `std_logic` must be assigned character literals (`' '`), not string literals (`" "`).
+
+3. **Why the Error Occurs**:  
+   The compiler expects a character literal (`'0'`) for `std_logic` initialization but finds a string literal (`"0"`). This type mismatch violates VHDL's strong typing rules, causing the synthesis error.
+
+4. **Secondary Issue**:  
+   The signal `c` uses correct initialization (`"0000"` matches the `std_logic_vector` type), confirming that the problem is isolated to scalar (`std_logic`) assignments.
+
+5. **Root Cause**:  
+   VHDL distinguishes between:  
+   - Character literals (single quotes) for scalar types like `std_logic`  
+   - String literals (double quotes) for array types like `std_logic_vector`  
+
+**Fix Required**:  
+Replace the string literal `"0"` with a character literal `'0'` in the initialization of signal `a`. No other changes are needed. The testbench error will resolve once the scalar type receives the correct literal format.

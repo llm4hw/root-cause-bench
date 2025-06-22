@@ -1,0 +1,19 @@
+The bug arises due to the logic in the `always` block within the `top_module`. The requirement is to assign the first value that is smaller than `a` to `min`, checking in the order of `b`, `c`, `d`, and if none are smaller, then `min` should remain as `a`. The logic implemented in the `always` block, however, searches for the minimum value among `a`, `b`, `c`, and `d`, which is not precisely aligned with the specified requirement of assigning the first smaller value than `a` in the order `b`, `c`, `d`.
+
+For Test Case 3, you are seeing the error because:
+- Inputs are `a = 10`, `b = 15`, `c = 8`, `d = 7`.
+- According to current implementation: 
+  - It sets `min = a` (which is `10`).
+  - Then, it checks `b (15)`, but since `b` is not less than `10`, `min` remains `10`.
+  - It checks `c (8)`, finds that `8 < 10`, and assigns `c` to `min`, updating `min` to `8`.
+  - It checks `d (7)`, finds that `7 < 8`, and updates `min` to `7`.
+
+The logic adheres to finding the minimum value among inputs, but the requirement specifies that if any of `b`, `c`, or `d` is smaller than `a`, then assign the first such smaller value observed in order (starting from `b`).
+
+To fix it, the logic should:
+- Start by setting `min` to `a`.
+- Check `b` first: if `b < a`, assign `min = b` and exit further checks.
+- If `b` isn't smaller, check `c`: if `c < a`, assign `min = c` and exit any further checks.
+- If both `b` and `c` are not smaller, only then check `d`: if `d < a`, assign `min = d`.
+
+The issue is occurring because the condition checks for each value should terminate upon finding the first smaller-than-`a` value in the sequence, but currently, it determines the overall minimum among all values instead.

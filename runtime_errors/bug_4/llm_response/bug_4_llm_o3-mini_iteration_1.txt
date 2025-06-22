@@ -1,0 +1,5 @@
+The problem is that you have a duplicate case label for the value corresponding to 1. In your case statement you list 4'h1 twice with different assignments (first setting f to 0 and later to 1). When the input is 1, the simulator will match the first occurrence (assigning f the value 0), so even if you intended it to be 1 later, that second branch is never reached. Consequently, the test bench finds f equal to 0 when it expects 1.
+
+This bug occurs because duplicate case labels create ambiguity, and the synthesizer or simulator picks the first matching case, leading to the incorrect output. 
+
+To fix the issue, you would need to remove the duplicate label or merge the cases so that each input value is only specified once with the correct assignment.

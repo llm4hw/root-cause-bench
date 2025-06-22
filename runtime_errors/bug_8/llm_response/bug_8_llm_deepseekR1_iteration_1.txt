@@ -1,0 +1,10 @@
+The bug occurs because the state machine gets stuck in the `Ped` state indefinitely. 
+
+**Root Cause:**  
+In the combinational `always` block that determines the next state, when the current state is `Ped`, the code unconditionally assigns `next = Ped`. This creates a loop where once the `Ped` state is entered, the state never transitions out, even though the testbench expects it to move to `Green` after one cycle. 
+
+**Explanation:**  
+The `Ped` state's next state logic is missing a transition condition. The test case expects that after entering `Ped` (when `pedControl` is active), the state should proceed to `Green` on the next clock edge. However, the current code holds `Ped` indefinitely because `next` is hardcoded to `Ped` in that state. This causes the `outResult` to remain `11` (Ped) instead of transitioning to `01` (Green), leading to the test failure.
+
+**Fix Direction:**  
+Modify the next state logic for the `Ped` state to transition to `Green` (or another appropriate state) instead of looping back to itself. This ensures the state machine progresses correctly after the pedestrian control signal is handled.

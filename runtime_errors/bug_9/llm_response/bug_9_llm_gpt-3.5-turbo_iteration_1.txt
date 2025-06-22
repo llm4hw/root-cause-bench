@@ -1,0 +1,5 @@
+The bug in the code is in the section related to generating the Morse code for the letter 'O'. In the state machine logic within the module, for the letter 'O', the code transitions through three states (O_DASH1, O_DASH2, O_DASH3) to represent the three dashes in Morse code for 'O'. However, the bug occurs because the logic for transitioning between these three states is missing.
+
+This bug causes the output to be incorrect as the state machine gets stuck in O_DASH1 and does not properly shift to the subsequent states to complete the Morse code for the letter 'O'.
+
+To fix this bug, you need to update the logic within the module code to properly transition the states while generating the Morse code for the letter 'O' (transition from O_DASH1 to O_DASH2 and then to O_DASH3). By adding the appropriate logic for transitioning between these states, the Morse code for 'O' can be generated correctly in the testbench simulation.

@@ -1,0 +1,5 @@
+The error arises because the code is trying to use the signal associated with an output port (b) as if it were an input by reading from it in the expression (a and b). In VHDL, ports declared with the mode "out" are designed for driving data out of the entity and are not intended to be read within the architecture; they do not provide a readable value.
+
+Since the line "temp_signal <= a and b;" attempts to read from both a (an input, which is fine) and b, VHDL flags an error for b. Essentially, the bug is that the design is trying to use an output-only signal as an input.
+
+To fix this issue, one must either change the mode of b to one which allows reading (such as "buffer" or "inout") so that its value can be used on the right-hand side of an assignment, or restructure the design so that b is not being used as an input. This reclassification of b’s port mode or a redesign ensures that only signals intended for input are being read within expressions.

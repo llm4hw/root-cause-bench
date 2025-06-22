@@ -1,0 +1,19 @@
+The error occurs because a **variable declaration is placed in the architecture's declarative region** (outside any process or subprogram), which violates VHDL rules. Here's why:
+
+1. **VHDL Variable Scope Rules**:
+   - Variables can **only be declared inside processes, functions, or procedures**.
+   - Declaring a variable directly in an architecture (like `variable variable1 : STD_LOGIC`) is illegal unless explicitly marked as `shared` (which requires special handling).
+
+2. **The Specific Issue**:
+   - `variable1` is declared at the architecture level (line 42: `variable variable1 : STD_LOGIC := '0';`).
+   - This is syntactically invalid because variables in this region must be declared as `shared variable`, but even that is discouraged for typical RTL design.
+
+3. **Why This Causes an Error**:
+   - Variables represent **temporary storage within a single process/subprogram execution**. Architecture-level declarations are meant for **signals** (global interconnect) or constants, not variables.
+   - The synthesis tool correctly flags this as a violation of VHDL's scoping rules.
+
+4. **How to Fix**:
+   - **Move the variable declaration inside the process** where it's used (after `process(clk, rst)` and before `begin`).
+   - Alternatively, if the intent is to have a register that persists between processes, **replace the variable with a signal** (since signals *can* be declared in the architecture region).
+
+**Note**: The unused `variable1` (it's assigned but never read) suggests it might be redundant, but the core issue is its illegal placement. Fixing the declaration location resolves the error.

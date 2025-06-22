@@ -1,0 +1,7 @@
+The bug in the provided code is in the way the test bench checks for the expected result after the pedControl signal is set. 
+
+The error message "pedControl 2 - ERROR: Expected Green (01), but got 11" indicates that the test bench expected the outResult to be 2'b01 (Green) but it was actually 2'b11 (Ped). 
+
+This error occurs because the test bench is trying to check for multiple conditions sequentially without waiting for the output to stabilize in each case. When the pedControl signal is set to 1, the output transition from Red to Ped is expected. However, since the next immediate check expects Green without considering the Ped state transition, the output comparison fails.
+
+To fix this bug, you can add some additional delay between setting the pedControl signal and checking for the expected outResult. This delay will allow the output to stabilize in the Ped state before the test bench attempts to check for the expected Green state. By including delays between state changes and output checks, you can ensure that the outputs are properly synchronized with the state transitions.

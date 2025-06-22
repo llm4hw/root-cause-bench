@@ -1,0 +1,7 @@
+The bug in the provided code is in the comparison condition within the `always @(*)` block of the `faulty_comparator` module. 
+
+The issue is that the comparison `if (a == 5'b10101)` is checking for `a` to be equal to binary `10101`, which is decimal 21, instead of decimal 9. This incorrect comparison is causing the `result` to be set to 1 when `a` is decimal 9, leading to the error message during simulation.
+
+To fix this bug, you need to adjust the comparison condition in the `always @(*)` block to `if (a == 4'd9)` to correctly compare `a` with decimal 9.
+
+After fixing this comparison, the simulation should run without any errors, and the test cases should pass as expected.

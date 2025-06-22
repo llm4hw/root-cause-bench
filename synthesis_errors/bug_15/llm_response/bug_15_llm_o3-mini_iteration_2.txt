@@ -1,0 +1,5 @@
+The error message indicates that there's a procedural assignment (using "<=" inside an always block) being made to a signal declared as a wire. In Verilog, only variables declared as a register (reg) can be assigned values in procedural blocks. In your code, the signal "data" is declared as a wire, but you are using it in an always block with blocking assignments. This mismatch causes the synthesis error.
+
+The issue is occurring because the design tools expect signals assigned within always blocks to be declared with a type that supports storage elements and procedural assignments (typically reg). When a wire is used in this context, it violates the Verilog semantics and leads to the reported error.
+
+To fix the bug, the signal "data" should be declared as a reg rather than as a wire. This ensures that the tool recognizes it as a storage element that can be assigned values procedurally.

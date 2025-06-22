@@ -1,0 +1,19 @@
+The bug is caused by an incorrect carry chain in the 4-bit full adder module. 
+
+**Why it's happening:**
+- The carry signals between the 1-bit full adder instances are not connected in a proper ripple configuration. Specifically:
+  - The second adder (fa2) incorrectly uses the carry-out from the fourth adder (fa4) as its carry-in, creating a circular dependency.
+  - The third adder (fa3) takes its carry-in from the first adder (fa1) instead of the second adder's carry-out.
+  - The final carry output (o_carry) is taken from the third adder (fa3) instead of the fourth adder (fa4).
+
+**Root Cause:**
+The carry propagation path is not sequential. In a ripple-carry adder, the carry must flow from the least significant bit (LSB) to the most significant bit (MSB). The current wiring creates a loop between stages and skips critical dependencies, leading to incorrect sum/carry calculations.
+
+**Fix Required:**
+Reconnect the carry signals to follow LSB-to-MSB order:
+1. fa1's carry-out → fa2's carry-in
+2. fa2's carry-out → fa3's carry-in
+3. fa3's carry-out → fa4's carry-in
+4. Set the final output carry (o_carry) to come from fa4's carry-out instead of fa3's. 
+
+This ensures proper ripple propagation of the carry through all four bits.

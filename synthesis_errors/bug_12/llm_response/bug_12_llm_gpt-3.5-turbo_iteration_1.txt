@@ -1,0 +1,5 @@
+The bug in this code is that the signal `a` is defined as a `std_logic` type, but it is initialized using a string literal `"0"`. In VHDL, `std_logic` and `std_logic_vector` types cannot be directly assigned string literals; they should be assigned single bits or vectors of bits.
+
+The error occurs because the initialization value `"0"` is treated as a string literal rather than a bit value for the `std_logic` type signal `a`.
+
+To fix this bug, you should initialize the signal `a` using a single bit value like `'0'` instead of a string literal. This will match the type of `std_logic` and resolve the mismatch issue.

@@ -1,0 +1,5 @@
+The error is occurring because the synthesis tool cannot find an overloaded "+" operator that accepts two std_logic_vector types. In VHDL, arithmetic operations like addition are not inherently defined for std_logic_vector. Instead, arithmetic operators are provided for numerical types such as unsigned or signed (as defined in the numeric_std library).
+
+This bug happens because the code attempts to perform an addition on std_logic_vectors directly without converting them to a numeric type that supports the "+" operator. The numeric_std package only defines addition for unsigned or signed types, so the synthesizer doesn’t know how to add two std_logic_vectors.
+
+The fix involves ensuring that the operands of the "+" operator are of a type for which arithmetic is defined (for example, converting the std_logic_vectors to unsigned). This change tells the synthesizer exactly which type’s addition operation to use, thereby resolving the ambiguity.

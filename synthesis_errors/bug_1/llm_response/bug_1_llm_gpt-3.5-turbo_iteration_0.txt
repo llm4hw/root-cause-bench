@@ -1,0 +1,11 @@
+The bug in the code is that the `elsif` statement on line 23 is missing a terminating semicolon after assigning the reset value for `data_out`. This causes a syntax error near the `elsif` keyword.
+
+The error occurs because the VHDL syntax expects each statement within a process to be terminated with a semicolon, and the compiler cannot recognize the `elsif` keyword as a separate branch without the semicolon. 
+
+To fix this issue, the missing semicolon should be added at the end of the line assigning the reset value to `data_out`:
+
+```vhdl
+data_out <= (others => '0');
+```
+
+By adding the semicolon, the VHDL compiler will correctly interpret the two branches of the `if` statement in the process block, resolving the syntax error.

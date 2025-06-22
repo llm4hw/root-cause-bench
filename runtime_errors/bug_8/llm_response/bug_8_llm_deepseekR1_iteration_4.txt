@@ -1,0 +1,9 @@
+The bug occurs because the state machine gets stuck in the `Ped` state indefinitely. 
+
+**Root Cause Analysis:**
+
+In the combinational block determining `next` state, the `Ped` state unconditionally sets `next = Ped` without any transition condition. When the testbench activates `pedControl` while in `Red`, the state transitions to `Ped`. However, once in `Ped`, the design never exits this state because `next` is hardcoded to `Ped`. The testbench expects the state to transition to `Green` after one cycle in `Ped`, but the code lacks this transition.
+
+**Fix Explanation:**
+
+The `Ped` state's `next` logic must be updated to transition to the next appropriate state (e.g., `Green`) after one cycle. The `Ped` state should not loop to itself unconditionally. This ensures the state machine progresses to `Green` as expected by the testbench.

@@ -1,0 +1,7 @@
+The bug in the provided code is in the testbench snippet where the expected states are being checked. The issue occurs because the `states` signal in the testbench is being compared incorrectly using the '!==', which is a strict inequality operator. This operator is not suitable for comparing multi-bit signals like states.
+
+To fix this bug:
+- Change the strict inequality operators '!== 2'bXX' in the testbench to '!=' because '!== 2'bXX' is not a valid syntax and is not comparing the states correctly. 
+Doing this will fix the comparison and allow the expected values to be checked correctly against the states signal.
+
+After applying this fix, re-run the simulation to ensure that the expected states are now being properly compared, and make sure the test cases execute correctly.

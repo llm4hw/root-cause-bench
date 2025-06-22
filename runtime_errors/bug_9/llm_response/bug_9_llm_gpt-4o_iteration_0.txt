@@ -1,0 +1,17 @@
+The error message "ERROR: Morse for O not correct" indicates that the testbench encountered an issue during the simulation of the Morse code for the letter 'O', which is represented as "---" in Morse code. Let's analyze why this might be occurring based on the provided Verilog code.
+
+### Problem Explanation:
+The Morse code for 'O' requires three consecutive DASH sequences. In the `morse_code` module, states `O_DASH1`, `O_DASH2`, and `O_DASH3` are used for these sequences. However, there is no mechanism in the code to transition from `O_DASH1` to `O_DASH2`, and from `O_DASH2` to `O_DASH3`. The logic within the `O_DASH1`, `O_DASH2`, and `O_DASH3` states does not change the state to move to the next DASH.
+
+### Why the Bug Occurs:
+- In each of the states `O_DASH1`, `O_DASH2`, and `O_DASH3`, after the counter reaches the DASH length, the state directly moves to `IDLE` rather than transitioning to the next DASH state until all three DASH sequences are completed.
+- As a result, the module only outputs one DASH instead of completing the full sequence of three DASHes required to represent the letter 'O'.
+
+### Explanation of a Potential Fix:
+To properly output the Morse code for 'O', it’s necessary to ensure the state transitions correctly through `O_DASH1`, `O_DASH2`, to `O_DASH3`. Here’s a conceptual explanation of how this could be fixed (without code changes as per your request):
+
+1. Modify the state transition logic in `O_DASH1` to move to `O_DASH2` after completing the first DASH.
+2. In `O_DASH2`, transition to `O_DASH3` once the second DASH is completed.
+3. Ensure that `O_DASH3` transitions to `IDLE` or to a SPACE state after completing the third DASH, depending on whether a space is required between letters.
+
+By making these state transitions, the module will correctly represent the Morse code pattern for 'O' as "---".

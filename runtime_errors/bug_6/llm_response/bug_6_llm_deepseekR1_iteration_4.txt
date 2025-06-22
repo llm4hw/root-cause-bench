@@ -1,0 +1,22 @@
+The error in Test Case 6 occurs due to two interrelated issues in the design and test bench:
+
+1. **State Machine Transition Flaw (Design)**:
+   The Ped state (`Ped=3`) unconditionally transitions to Green on every clock edge, regardless of the `longTimeHold` input. The next state logic for the Ped state is hardcoded as `next = Green;`, which prevents the state from being held when `longTimeHold=1`. This violates the requirement for extended pedestrian signaling.
+
+2. **Incorrect Test Expectation (Test Bench)**:
+   Test Case 6 expects `outResult > 3'b110` (decimal >6), but the design only produces `3'b101` (5) or `3'b110` (6) in the Ped state. The output logic for `state==Ped` with `longTimeHold=1` is explicitly defined as `3'b101`, which is less than 6. The test bench's inequality check (`> 110`) is mathematically impossible given the design's output encoding.
+
+**Why Test Case 6 Fails**:
+- When `longTimeHold=1` is set (Test Case 6), the design enters the Ped state and outputs `101` (5) as specified.
+- The state machine immediately transitions to Green on the next clock edge due to the unconditional `next=Green` assignment.
+- The test bench checks after 10 time units (at a clock edge) and catches either:
+  - `101` if checked before the state transition completes (Ped state), or
+  - `011`/`010` (Green state) after transition.
+- Both values (`101`=5 and `011`=3) are ≤6 (`110`), triggering the failure.
+
+**Fix Requirements**:
+1. **Design**: Modify the Ped state transition logic to depend on `longTimeHold`:
+   - Remain in Ped state when `longTimeHold=1`
+   - Transition to Green when `longTimeHold=0`
+   
+2. **Test Bench**: Correct Test Case 6 to expect `3'b101` (Ped state with `longTimeHold=1`) and use equality check instead of `>` comparison. The current expectation of `>110` is fundamentally incompatible with the design's output range.

@@ -1,0 +1,129 @@
+### Bug Analysis
+The error occurs due to a **bit-width mismatch** in the assignment `output <= input1;`:
+- `input1` is declared as `std_logic_vector(2 downto 0)` (3 bits)
+- `output` is declared as `std_logic_vector(3 downto 0)` (4 bits)
+
+VHDL requires strict matching of bit widths in assignments. Here, you're trying to assign a 3-bit vector to a 4-bit vector, which violates this rule.
+
+---
+
+### Fix
+**Option 1 (Recommended): Zero-extend the input**  
+Modify the assignment to pad the MSB with a `'0'`:
+```vhdl
+output <= '0' & input1;  -- MSB=0, LSB=input1
+```
+This creates a 4-bit output:  
+- `output(3) = '0'`  
+- `output(2 downto 0) = input1`
+
+**Option 2: Resize the ports**  
+If design requirements allow, change the port declarations to match widths:
+```vhdl
+entity top4 is
+    Port ( input1 : in  std_logic_vector(3 downto 0);  -- 4-bit input
+           output : out STD_LOGIC_VECTOR(3 downto 0)); -- 4-bit output
+```
+
+---
+
+### Corrected Code
+```vhdl
+architecture Behavioral of top4 is
+begin
+    output <= '0' & input1;  -- Fixed assignment
+end Behavioral;
+```
+
+### Why This Fix Works
+- Concatenation (`'0' & input1`) explicitly creates a 4-bit value by adding a leading zero to the 3-bit input.
+- All bits in the 4-bit `output` are now properly assigned, resolving the width mismatch.
+
+> ⚠️ **Note**: If sign-extension is needed (e.g., for signed arithmetic), use `output <= input1(input1'high) & input1;` instead. However, for simple bit matching, zero-extension is safer.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 4.2.11
+Design a Verilog model to implement the
+behavior described by the 4-input truth table
+shown in Fig. 4.7. Use a structural design
+approach based on gate-level primitives. This
+is considered structural because you will need
+to instantiate the gate-level primitives just like a
+traditional subsystem; however, you don’t need
+to create the gate-level modules as they are
+already built into the Verilog standard. You will
+need to determine a logic expression for the...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Exercise Problems
+Section 4.1: Structural Design Constructs
+4.1.1
+How many times can a lower-level module be
+instantiated?
+4.1.2
+Which port mapping technique is more com-
+pact, explicit or positional?
+4.1.3
+Which port mapping technique is less prone to
+connection errors because the names of the
+lower-level ports are listed within the mapping?
+4.1.4
+Would it make sense to design a lower-level
+module to implement an AND gate in Verilog?
+4.1.5
+When would it makes more sense to build a...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 3.4.3
+Design a Verilog model to implement the
+behavior described by the 3-input truth table
+shown in Fig. 3.3. Use continuous assignment
+with conditional operators and give the entire
+logic operation a delay of 3 ns. Declare your
+module and ports to match the block diagram
+provided. Use the type wire for your ports.
+3.4.4
+Design a Verilog model to implement the
+behavior described by the 4-input minterm list
+shown in Fig. 3.4. Use continuous assignment
+with conditional operators and give rising...
+
+- source_documents\verilog_fsm.pdf: Notice that each input and output
+is declared twice in the code.
+This is important so that inputs and outputs can be assigned
+parameterizable widths (in this example, ‘Width’ is used as an example parameter).
+Program 5 Module instantiation.
+1 Register #(
+.Width( ...))
+2
+SentReg (. Clock( ...) , // Input
+port
+3
+.Reset( ...) , // Input
+port
+4
+.Set(
+...) , // Input
+port
+5
+.Enable (...) , // Input
+port
+6
+.In(
+...) , // Input
+port
+7
+.Out(
+...)); // OUTPUT
+port
+Program 6 Module declaration.
+1 module...
+
+- source_documents\Quick Start Guide to Verilog.pdf: EXAMPLE 8.6 SERIAL BIT SEQUENCE DETECTOR IN VERILOG—DESIGN DESCRIPTION AND PORT DEFINITION ............................... 119
+EXAMPLE 8.7 SERIAL BIT SEQUENCE DETECTOR IN VERILOG—FULL MODEL .................................... .................................... 120
+EXAMPLE 8.8 SERIAL BIT SEQUENCE DETECTOR IN VERILOG—SIMULATION WAVEFORM ............................. ............................ 121...

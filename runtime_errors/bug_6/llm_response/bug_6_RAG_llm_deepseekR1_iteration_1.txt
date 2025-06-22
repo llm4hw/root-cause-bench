@@ -1,0 +1,193 @@
+### Bug Analysis
+The error occurs in **Test Case 6** of the test bench due to two issues:
+1. **Incorrect state transition logic** in the design's combinational block (`always@(state or pedControl`)
+2. **Mistimed signal application** in the test bench for `longTimeHold`
+
+### Root Causes
+1. **State Transition Logic Flaw**:
+   - In the `Ped` state, the design transitions unconditionally to `Green` (`Ped: next = Green;`). 
+   - This prevents the design from staying in the `Ped` state when `longTimeHold=1` is applied. The state immediately transitions to `Green` on the next clock edge, making it impossible to observe the `Ped` state output with `longTimeHold=1`.
+
+2. **Test Bench Timing Issue**:
+   - In Test Case 6, `longTimeHold=1` is applied *after* the system has entered the `Red` state (from Test Case 5). 
+   - The `#10` delay only allows one clock edge to occur, which transitions the state from `Red` → `Ped` → `Green` before checking the output. Thus, the output is from the `Green` state (`011`), not the `Ped` state.
+
+### Fixes Required
+#### 1. Design Fix: Modify State Transition Logic
+Update the `Ped` state transition to remain in `Ped` when `longTimeHold=1`:
+```verilog
+always@(state or pedControl or longTimeHold) begin // Add longTimeHold to sensitivity list
+  case (state)
+    Red: if (pedControl) next = Ped;
+         else next = Green;
+    Ped: if (longTimeHold) next = Ped; // Stay in Ped if longTimeHold=1
+         else next = Green;            // Otherwise proceed to Green
+    Green: next = Yellow;
+    Yellow: next = Red;
+    default: next = 2'bxx;
+  endcase
+end
+```
+
+#### 2. Test Bench Fix: Adjust Signal Timing
+Apply `longTimeHold=1` **before** the clock edge that triggers the `Ped` state:
+```verilog
+// Test Case 6: Pedestrian signal triggered with longTimeHold
+longTimeHold = 1; // Apply BEFORE waiting
+#10;
+if (outResult !== 3'b101) begin // Check for Ped state output
+  $display("ERROR: Test Case 6 failed. outResult = %b (Expected: 101)", outResult);
+  $fatal;
+end
+```
+
+### Explanation of Fixes
+1. **Design Fix**:
+   - The `Ped` state now checks `longTimeHold` to decide whether to stay (`Ped`) or transition (`Green`).
+   - Added `longTimeHold` to the sensitivity list to ensure immediate updates.
+
+2. **Test Bench Fix**:
+   - Setting `longTimeHold=1` **before** the `#10` delay ensures:
+     - At the next clock edge (after reset), the design enters `Ped` state.
+     - The output comb block generates `3'b101` (since `longTimeHold=1`).
+   - Updated the check to expect `101` instead of an arbitrary ">110".
+
+### Fixed Test Case 6 Code
+```verilog
+// Test Case 6: Pedestrian signal triggered with longTimeHold
+longTimeHold = 1;  // Set BEFORE delay to affect next state
+pedControl = 1;    // Ensure pedControl is still active
+#10;
+if (outResult !== 3'b101) begin
+  $display("ERROR: Test Case 6 failed. outResult = %b (Expected: 101)", outResult);
+  $fatal;
+end
+```
+
+### Additional Fixes Needed
+- **Test Case 2** has an incorrect error message (expects `101` but should expect `110`). Fix:
+  ```verilog
+  // Test Case 2
+  if (outResult !== 3'b110) begin
+    $display("ERROR: Test Case 2 failed. outResult = %b (Expected: 110)", outResult);
+    $fatal;
+  end
+  ```
+
+### Summary
+- **Bug Origin**: Design flaw in state transitions + test bench mistiming.
+- **Fix**: 
+  1. Update state transition logic for `Ped` state to depend on `longTimeHold`.
+  2. Adjust test bench to apply signals in sync with state transitions.
+  3. Correct Test Case 2's expected value.
+  
+After these changes, all test cases will pass as the design correctly handles pedestrian requests with long holds.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: Section 6.3: Automated Result Checking
+6.3.1
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of...
+
+- source_documents\Quick Start Guide to Verilog.pdf: Example 6.2
+Test bench for a sequential logic circuit
+6.1.2 Printing Results to the Simulator Transcript
+In the past test bench examples, the input and output values are observed using either the
+waveform or listing tool within the simulator tool. It is also useful to print the values of the simulation to
+a transcript window to track the simulation as each statement is processed. Messages can be printed...
+
+- source_documents\Quick Start Guide to Verilog.pdf: “PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then
+print
+either...
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.4
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.4. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.3
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.3. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...

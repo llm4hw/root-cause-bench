@@ -1,0 +1,3 @@
+The error is occurring because the code attempts to perform a procedural assignment (using "<=" inside an always block) to something declared as a wire. In Verilog, only variables declared as registers (of type reg) can be modified within an always block using such assignments. Thus, the tool complains that you're trying to update a non-register (wire) variable in a procedural context.
+
+This bug happens because your signal "data" is declared as a wire, yet you're using it on the left side of a nonblocking assignment within the clocked always block. To resolve this, the data type of "data" must be changed to a register type so that it can legally be driven by the procedural block.

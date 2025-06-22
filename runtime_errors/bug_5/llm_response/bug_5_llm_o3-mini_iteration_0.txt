@@ -1,0 +1,11 @@
+The problem is that the code is updating the output “min” with every candidate that is smaller than the current value. In other words, once a candidate that is smaller than a is found (for example, when comparing c), the subsequent comparison (with d) can overwrite that value even if the requirement is to stick with the first candidate that is smaller than a.
+
+In Test Case 3 the inputs are:
+ a = 10, b = 15, c = 8, d = 7.
+The code first sets min to a (10). Then it checks b (10 > 15 is false) and moves on. It then sees that 10 is greater than c (8), so min is updated to 8. But then the code continues and sees 8 > 7, and updates min to 7. According to the requirement, once a candidate (c = 8) is chosen because it is the first value smaller than a, later candidates—even if they are even smaller—should not be used. The error message shows that test case 3 expected min to remain 8.
+
+The bug is occurring because the comparisons are performed using separate if statements rather than an if–else if chain that stops checking once a smaller-than-a candidate has been identified. The error stems from the logic: the design allows later comparisons to override a valid candidate without stopping.
+
+To fix the bug the design should be adjusted so that the comparisons follow the required order: check b first, then if b is not smaller than a, check c, and then, only if no valid candidate was found, check d. This prevents overwriting a previously selected candidate, thus satisfying the condition “assign the 1st value smaller than a in the order of b–c–d.”
+
+This explanation should help clarify why test case 3 fails and what logical change is needed without providing any fixed code.

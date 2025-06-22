@@ -1,0 +1,5 @@
+The bug in the provided code is in the instantiation of the first half adder `h1` in the `full_half_add_1bit` module. The inputs `i_a` and `i_b` are directly connected as inputs to the `half_adder h1` module, which results in `i_b` being driven by two different sources, violating the Verilog single-source rule.
+
+This violation causes incorrect values to propagate through the design, leading to incorrect results in the test cases that involve an `i_b` input value of 1. Specifically, Test Case 3 is affected because `i_b` is being affected by the result of `h1`.
+
+To fix this bug, the output `w_sum1` from the first half adder `h1` should be used as the input `h_b` for the second half adder `h2`, rather than directly using `i_b`. By correcting the input connection in the instantiation of `h2`, the issue of multiple drivers for `i_b` and hence wrong test case outputs can be resolved.

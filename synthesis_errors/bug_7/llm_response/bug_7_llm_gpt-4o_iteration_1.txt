@@ -1,0 +1,19 @@
+The error message you are encountering is due to the misuse of concurrency and sequential elements in your VHDL code. Specifically, the issue is arising because the `process` statement has both a sensitivity list and a `wait` statement within it. 
+
+Here is why this is a problem:
+
+1. **Sensitivity List and Wait Statement Incompatibility**: In VHDL, a process can either have a sensitivity list or one or more `wait` statements, but not both. The purpose of a sensitivity list is to specify on which signals the process should be re-evaluated when there is an event. When you have a `wait` statement, it already controls the execution flow by specifying a delay or an event to wait for, making the sensitivity list redundant and confusing.
+
+2. **Error Location**: The error points out that it's not permissible to have both at the same time. In the provided code, the process is defined with a sensitivity list `(clk)`, which means the process is supposed to execute every time there is a change on the `clk` signal. However, the `wait for 10 ns;` inside the process contradicts this by introducing a specific timing delay independent of signal changes.
+
+To explain why this is a bug:
+- The synthesis or simulation tool is confused about how and when the process should be executed because it receives conflicting information: should it react to `clk` changes or should it just wait for 10 ns? This ambiguity causes a synthesis error.
+
+Here’s how you can understand the situation better:
+- If your intent is to have a clock-driven process with a timed delay, you will need to carefully consider restructuring your process logic to avoid this conflict. Generally, in synthesizable VHDL code, timing delays like `wait for 10 ns;` are not used in conjunction with clock-driven processes.
+
+To "fix" the issue conceptually (without presenting code changes, per your instruction):
+- You can remove the sensitivity list `(clk)` from the process if you're using the `wait` statement to control the execution flow.
+- However, if this process is intended to model hardware that toggles a signal every clock cycle, you should remove the `wait for 10 ns;` line, and allow the sensitivity list driven by `clk` to control the signal toggling.
+
+This conceptual adjustment will help you align the process to adhere to VHDL standards by either focusing on event-driven or time-driven execution, but not both in the way currently implemented.

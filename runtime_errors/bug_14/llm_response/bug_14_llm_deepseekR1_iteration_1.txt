@@ -1,0 +1,5 @@
+The bug arises because the state transitions in the FSM are not synchronized to the clock. The sequential logic block (`always @(posedge reset)`) only triggers on the rising edge of `reset`, not the clock. Consequently, after `reset` is deasserted, the FSM never updates its state or outputs again, leaving them stuck at initial values. 
+
+The testbench applies a valid input (`num_in=3`) after `reset` is released, but since the FSM isn't clocked, it ignores this input. The `valid` signal remains `0` because the `else` block (which sets `valid=1`) is never executed after `reset`. The output logic depends on `state`, which is never updated from `S0`, leading to incorrect `output_data` and `valid`.
+
+**Fix:** Modify the sequential logic block to trigger on the clock edge (e.g., `always @(posedge clk or posedge reset`), ensuring state transitions and output updates occur on each clock cycle. This aligns the FSM with standard synchronous design practices.

@@ -1,0 +1,20 @@
+The error occurs because the code attempts to assign a value to an input port (`input1`), which violates fundamental VHDL port mode rules. Here's why:
+
+1. **Port Mode Violation**:  
+   `input1` is declared as `in STD_LOGIC` in the entity port list. Input ports (`in`) are **read-only** within their own entity architecture. They represent external signals driven into the module and cannot be modified internally.
+
+2. **Illegal Assignment**:  
+   The line `input1 <= '0';` attempts to drive the input port from inside the architecture. This is equivalent to trying to force a value onto an external signal feeding into the module, which is:
+   - Syntactically invalid in VHDL
+   - Electrically impossible in hardware (would create driver conflicts)
+
+3. **Hardware Mismatch**:  
+   In physical terms, an input port corresponds to a pin receiving signals from outside the chip/module. The code incorrectly tries to make this pin behave like an output driver.
+
+**Fix Required**:  
+The assignment must be removed or redirected:
+- If the goal is to drive a default value to `output`, change the assignment to `output <= '0';`
+- If the intent was to propagate the input, use `output <= input1;`
+- If bidirectional control is needed (unlikely for simple logic), the port mode must change to `inout` and external driver conflicts must be resolved
+
+The testbench likely failed because it tried to drive `input1` while the module simultaneously attempted to override it, causing unresolved signal contention.

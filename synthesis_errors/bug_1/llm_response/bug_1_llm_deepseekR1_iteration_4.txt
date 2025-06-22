@@ -1,0 +1,16 @@
+The syntax error occurs because the assignment statement within the `if` branch is missing a required semicolon (`;`) at the end. Specifically:
+
+1. **Missing Semicolon**:  
+   The line `data_out <= (others => '0')` under the `rst = '1'` condition lacks a terminating semicolon. In VHDL, **every signal assignment must end with a semicolon**.
+
+2. **Parser Confusion**:  
+   Without the semicolon, the VHDL parser continues reading the next token (`elsif`) as part of the current assignment statement. Since `elsif` is invalid in this context, the parser throws a syntax error at the `elsif` keyword.
+
+3. **Impact**:  
+   The error prevents the code from compiling/synthesizing because the parser cannot interpret the structure correctly after the incomplete assignment. The `elsif` clause is incorrectly treated as part of the reset logic rather than a new conditional branch.
+
+**Fix**:  
+Add a semicolon to the reset assignment:  
+`data_out <= (others => '0');`  
+
+This ensures the assignment is properly terminated, allowing the `elsif` to be recognized as the start of a new conditional branch.

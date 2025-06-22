@@ -1,0 +1,7 @@
+The bug in the code is due to incorrect handling of the carry input (`i_cin`) in the `half_adder` module instantiation within the `full_half_add_1bit` module. 
+
+In Test Case 3, where inputs are `i_a=1, i_b=1, i_cin=0`, the expected outputs should be `o_sum=0, o_carry=1`. However, the issue arises in the connection between the `i_cin` input and the second half adder (`h2` instantiation) in the `full_half_add_1bit` module. 
+
+The fix for this bug would involve correcting how the `i_cin` is passed from `full_half_add_1bit` to the second half adder `h2` instantiation. Ensure that `i_cin` (`h_b` input of `h2`) is connected to the correct input signal containing the carry from the first half adder.
+
+By correcting this connection, the simulation should produce the expected result for Test Case 3 and this bug can be resolved.

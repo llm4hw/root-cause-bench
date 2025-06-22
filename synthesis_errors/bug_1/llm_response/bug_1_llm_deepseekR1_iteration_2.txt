@@ -1,0 +1,13 @@
+The bug is a **missing semicolon** at the end of the concurrent assignment in the reset clause. Here's why this causes the error:
+
+1. **VHDL Syntax Rule**: Every statement in VHDL must terminate with a semicolon (`;`). The line `data_out <= (others => '0')` lacks this terminator.
+
+2. **Parser Confusion**: Without the semicolon, the parser continues reading the next token (`elsif`) as part of the same statement. Since `elsif` isn't valid after a signal assignment, the tool throws a syntax error at `elsif`.
+
+3. **Error Location**: The error appears at `elsif` (line 47) because that's where the parser first encounters invalid syntax, but the root cause is the missing semicolon in the preceding line.
+
+**Fix Required**:  
+Add a semicolon after the reset assignment:  
+`data_out <= (others => '0');`
+
+This follows VHDL's fundamental syntax rules and clearly separates the reset assignment from the subsequent clocked logic.

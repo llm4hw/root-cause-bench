@@ -1,0 +1,23 @@
+The error occurs due to a mismatch between the reset edge sensitivity in the event control and the condition check in the `if` statement. Here's the breakdown:
+
+1. **Event Control Mismatch**:  
+   The sensitivity list `@(posedge clk or negedge reset)` declares an asynchronous active-low reset. This means:
+   - `negedge reset` triggers the block when reset transitions from high to low (active-low reset)
+   - The hardware expects the reset condition to be checked as `reset == 0` (active when low)
+
+2. **Inverted Reset Condition**:  
+   The problematic line `if (!reset == 0)` evaluates as:
+   - `!reset` inverts the signal (1 becomes 0, 0 becomes 1)
+   - `== 0` checks if this inverted value is 0  
+   This is logically equivalent to `if (reset == 1)`, which:
+   - Checks for reset being **high** (inactive state)
+   - Contradicts the `negedge reset` declaration (which expects active-low behavior)
+
+3. **Synthesis Error Cause**:  
+   Synthesis tools require the reset condition to directly match the edge sensitivity:
+   - `negedge reset` must pair with `if (!reset)` or `if (reset == 0)`  
+   - `posedge reset` must pair with `if (reset)`  
+   The current condition `if (!reset == 0)` implements an active-*high* check while the sensitivity list expects active-*low*, causing a template mismatch.
+
+**Fix Direction**:  
+Modify the reset condition to match the active-low behavior implied by `negedge reset`. Replace the condition with one that checks for the active state (reset low) without the double inversion. The reset action should trigger when `reset` is low (0), not high (1).

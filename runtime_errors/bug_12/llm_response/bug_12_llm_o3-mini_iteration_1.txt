@@ -1,0 +1,5 @@
+The bug stems from using an incorrect condition in the always block. Instead of comparing the two input signals, the code compares one of them to a literal 5-bit constant, which is both the wrong value and a mismatched bit width compared to the 4-bit input. This causes the simulation to never meet the intended condition when a equals b, triggering the error message from the test bench.
+
+Specifically, the module incorrectly checks if a equals a 5-bit constant (representing the value 21 in decimal) rather than comparing a to b. Since the test bench expects the result to be 1 when a and b are equal (such as when both are 9 or both are 15), the condition fails. Moreover, even if a were meant to be compared to some constant, comparing a 4-bit input to a 5-bit literal is problematic and likely unintended.
+
+The fix involves correcting the comparison so that the two inputs (a and b) are compared directly. This resolves both the logical error in the condition and the bit-width mismatch.

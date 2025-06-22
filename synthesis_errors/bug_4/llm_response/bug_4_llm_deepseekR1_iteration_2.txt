@@ -1,0 +1,21 @@
+The bug is a **width mismatch** in the assignment `output <= input1;`. Here's why:
+
+1. **Signal Widths Mismatch**:
+   - `input1` is declared as `std_logic_vector(2 downto 0)` (3 bits).
+   - `output` is declared as `STD_LOGIC_VECTOR(3 downto 0)` (4 bits).
+   - VHDL requires both sides of an assignment to have identical bit widths for direct signal assignment.
+
+2. **Synthesis Error**:
+   - The synthesis tool detects that a 3-bit vector (`input1`) is being assigned to a 4-bit vector (`output`). This creates ambiguity about what value should be assigned to the missing bit (bit 3 of `output`).
+
+3. **Root Cause**:
+   - The assignment attempts to map a smaller bus (3 bits) to a larger bus (4 bits) without specifying how to handle the extra bit. VHDL does not implicitly pad or truncate signals during direct assignment.
+
+**How to Fix**:
+- **Option 1**: Resize `input1` to match `output`'s width by explicitly setting the missing bit. For example:
+  - Use concatenation: `output <= '0' & input1;` (zero-pads MSB)
+  - Or: `output <= input1 & '0';` (zero-pads LSB)
+- **Option 2**: Modify port declarations to ensure both signals have the same width (e.g., change `output` to 3 bits if feasible).
+- **Option 3**: Use a conditional assignment to manually map bits (e.g., assign `input1` to specific bits of `output` and set the remaining bit explicitly).
+
+**Key Insight**: The assignment must account for all bits in the target signal. The fix requires explicit handling of the width discrepancy through bit manipulation or port adjustments.

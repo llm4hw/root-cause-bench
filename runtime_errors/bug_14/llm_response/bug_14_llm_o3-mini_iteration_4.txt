@@ -1,0 +1,10 @@
+The problem is in the way the sequential (state-updating) process is written. The process is only sensitive to the rising edge of the reset signal rather than the clock. This means the block only executes when reset transitions from low to high, but it never runs on clock edges. As a result, after reset goes low, the state, output_data, and valid signals are never updated with the new input (3 in test 1), so they remain at their reset values (0).
+
+In other words, since the process never triggers on clock transitions (only on reset edges), the intended state transitions dictated by the value of num_in do not occur. That is why the test bench sees state=0, output_data=0, valid=0 rather than the expected values.
+
+To summarize:
+• The bug is that the sequential always block is sensitive only to posedge reset.
+• It is occurring because the designer intended it to trigger on clock edges (and possibly asynchronous reset) but omitted the clock from the sensitivity list.
+• The fix is to modify the block’s sensitivity list so that it triggers on the positive edge of the clock (along with the reset). 
+
+This explanation identifies the root cause without providing the direct code fix.

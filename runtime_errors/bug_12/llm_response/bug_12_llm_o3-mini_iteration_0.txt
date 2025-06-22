@@ -1,0 +1,13 @@
+The issue here is that the comparator module is not comparing the two inputs as intended. Instead of comparing whether input a is equal to b (or whether a equals a certain value when both inputs are the same), the module is erroneously comparing a with a fixed constant value (a 5-bit constant representing 21). This mistake is the root of why the test case expecting result = 1 when a equals b fails.
+
+More specifically, consider the following points:
+
+• The condition in the always block checks if a is equal to a constant (5'b10101). However, a is only 4 bits wide, so even if the intention was to compare a with b, comparing a with a constant that is 5 bits wide does not logically match the intended operation.
+
+• Because the number represented by 5'b10101 is 21 (which is outside the possible range of a 4-bit signal, 0 to 15), the if-condition will never be true when a is assigned any valid value of a 4-bit signal—even if a and b are supposed to be equal.
+
+• The test bench expects a condition where the result is set to 1 when input a matches b. Since the comparator logic never checks the relationship between a and b, the test bench raises an error when it does not see the expected output.
+
+Thus, the bug occurs because the wrong comparison is made: instead of evaluating whether a is equal to b (or some valid condition involving both a and b), it erroneously evaluates whether a is equal to an extraneous constant value that cannot ever match a's expected values in a correct 4-bit comparison.
+
+The fix would involve changing the condition inside the always block to correctly compare a and b, and also ensuring that any constants used in comparisons are consistent with the bit widths of the signals involved.

@@ -1,0 +1,103 @@
+The bug is that blocking assignments (using “=”) are used inside a clocked (sequential) always block rather than nonblocking assignments (“<=”). When blocking assignments are used, each assignment executes immediately in order during the same clock edge. This causes the new value of data[0] to be used in the assignment to data[1], and so on, so that by the end of the clock cycle, all bits are driven by the newly assigned value (in this case, all of them become 1). This behavior produces the output 1111 instead of the expected shifting register behavior (e.g., 0001).
+
+To fix the issue, you need to change the assignments inside the always block from blocking (“=”) to nonblocking (“<=”). Nonblocking assignments ensure that all registers are updated concurrently based on the values at the beginning of the clock edge. Here’s the corrected section of code:
+
+-------------------------------------------------
+always @(posedge clk or posedge reset) begin
+    if (reset) begin
+        data <= 4'b0000; // Clear the register on reset
+    end else if (shift_en) begin
+        data[0] <= serial_in;
+        data[1] <= data[0];
+        data[2] <= data[1];
+        data[3] <= data[2];
+    end
+end
+-------------------------------------------------
+
+By making this change, your shift register will now hold and shift data as expected, and the test bench error (“Expected 0001 got 1111”) will be resolved.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: eﬀect on a circuit.
+1. Consider the shift register from Figure 2. If you place = assignments inside of an always@(posedge
+Clock) block to produce the shift register, you instead get the parallel registers shown in Figure 4
+and Program 15.
+You might also get one register, whose output is tied to B, C and D.
+Both
+possible outcomes are equivelent. These circuit make sense, but don’t create shift registers! (As...
+
+- source_documents\verilog_fsm.pdf: shift registers are common construct, we assume that you wanted to create a shift register)
+Figure 4 Parallel registers
+A
+Clock
+B
+C
+D
+Program 15 Parallel registers, using = assignments inside of an always@(posedge Clock) block
+1 always @(posedge
+Clock) begin
+2
+B = A;
+3
+C = B;
+4
+D = C;
+5 end
+2. The opposite example (shown in Program 16), where we place <= assignments inside of always@(
+* ) is less pronounced. In this case, just consider what type of circuit you want to create: do you...
+
+- source_documents\Quick Start Guide to Verilog.pdf: register is disabled (EN ¼ 0), the input clock is ignored. At all other times, the output holds its last value.
+Example 7.6
+RTL model of an 8-bit register in Verilog
+7.2.2 Shift Registers
+A shift register is a circuit which consists of multiple registers connected in series. Data is shifted
+from one register to another on the rising edge of the clock. This type of circuit is often used in serial-to-...
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\verilog_fsm.pdf: Figure 2 A shift register
+A
+Clock
+B
+C
+D
+Program 12 A shift register, using <= assignments inside of an always@(posedge Clock) block
+1 always @(posedge
+Clock) begin
+2
+B <= A;
+3
+C <= B;
+4
+D <= C;
+5 end
+4.3.6
+always@( * ) Blocks
+always@( * ) blocks are used to describe Combinational Logic, or Logic Gates. Only = (blocking)
+assignments should be used in an always@( * ) block.
+Never use <= (non-blocking) assignments in...
+
+- source_documents\Quick Start Guide to Verilog.pdf: appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should read in a
+new input pattern every 10 ns. Your test bench
+should
+write
+the
+input
+pattern
+and
+the
+corresponding output of the DUT to an external
+ﬁle called “output.txt.”
+6.4.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench read in the input patterns from an
+external ﬁle called “input.txt.” This ﬁle should...

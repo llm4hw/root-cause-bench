@@ -1,0 +1,5 @@
+The error message indicates that the identifier "data" is referenced in a procedural assignment, but it has never been declared anywhere in your module. In other words, the synthesis tool doesn't know what "data" is, which is why the error occurs.
+
+This bug is happening because the code tries to assign the value of an undeclared signal to "out1". Since there is no declaration for "data", the simulator and synthesis tool cannot resolve it, leading to the error.
+
+To fix the bug, you need to declare "data" with an appropriate type (e.g., wire or reg) in your module. This will allow the simulator and synthesis tool to properly track and connect the signal, resolving the error.

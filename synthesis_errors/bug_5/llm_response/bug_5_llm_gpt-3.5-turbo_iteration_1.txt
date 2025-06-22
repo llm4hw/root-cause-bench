@@ -1,0 +1,9 @@
+The bug in the code is occurring because the `to_unsigned` function is converting the `counter` signal which is of type `integer` into an unsigned vector of length 8 bits. When `to_unsigned(counter, 8)` is used, it creates an 8-bit unsigned vector where the left-most bit is indexed as 0, instead of 7.
+
+In the line `out1 <= std_logic_vector(to_unsigned(counter, 8))(7);`, the attempt is to assign the 8th index (index 7) of the converted unsigned vector to `out1`. However, since the conversion creates a vector of 8 bits with indexes from 0 to 7, trying to access the 8th index (index 7) is causing the error.
+
+To fix this issue, you should update the line to directly fetch the desired bit from the converted unsigned vector without trying to index it. This can be done by simply converting `to_unsigned(counter, 8)` to `std_logic_vector` without indexing it further:
+
+```out1 <= std_logic_vector(to_unsigned(counter, 8));``` 
+
+By making this change, the code will assign the entire 8-bit unsigned vector to `out1` without attempting to index it at an out-of-bound location.

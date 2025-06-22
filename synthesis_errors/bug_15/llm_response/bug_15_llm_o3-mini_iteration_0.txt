@@ -1,0 +1,3 @@
+The issue is that the signal “data” is declared as a wire, but it is being used on the left-hand side of a procedural (clocked) assignment inside an always block. In Verilog, only signals declared as registers (or logic in SystemVerilog) can be assigned using procedural assignments. The synthesis tool therefore complains because it is not permitted to update a wire in that manner.
+
+The fix is to change the declaration of “data” so that it is a register instead of a wire. This change will match the assignment semantics in the always block and eliminate the error.

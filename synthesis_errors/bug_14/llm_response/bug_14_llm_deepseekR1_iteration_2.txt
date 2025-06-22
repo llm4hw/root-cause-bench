@@ -1,0 +1,46 @@
+### Bug Explanation:
+The error occurs because the identifier `data` is used in the assignment `out1 <= data;` but **has not been declared** anywhere in the module. Verilog requires all identifiers (signals, wires, registers) to be explicitly declared before use. Here’s why:
+
+1. **Scope Issue**:  
+   The `data` signal is referenced in the `always` block (line 29), but it is not:
+   - Defined as an **input/output port** in the module declaration.
+   - Declared as a **local signal** (e.g., `reg` or `wire`) within the module.
+
+2. **Tool Behavior**:  
+   The synthesis tool ([Synth 8-1031]) checks for valid identifiers during compilation. Since `data` is undeclared, the tool throws an error because it cannot resolve what `data` refers to (e.g., is it a register? a wire? an input?).
+
+3. **Impact**:  
+   The assignment `out1 <= data;` is invalid because `data` has no defined source, bit-width, or type. This breaks the fundamental rule of unambiguous signal references in HDL.
+
+---
+
+### Fix Approach:
+To resolve this, **declare `data` explicitly** based on its intended role:
+
+1. **If `data` is an external input**:  
+   Add it to the port list:  
+   ```verilog
+   module top14(
+       input wire clk,
+       input wire data, // Declare as input
+       output reg out1
+   );
+   ```
+
+2. **If `data` is an internal register**:  
+   Declare it locally as a `reg`:  
+   ```verilog
+   module top14(
+       input wire clk,
+       output reg out1
+   );
+       reg data; // Local register declaration
+   ```
+
+3. **If `data` is driven by combinational logic**:  
+   Declare it as a `wire` and add the driving logic (e.g., an `assign` statement or another `always` block).
+
+---
+
+### Key Mistake:
+The code attempts to use `data` **without declaring its existence**, violating Verilog's scoping rules. All signals must be declared in the module's port list or as internal signals before being referenced.

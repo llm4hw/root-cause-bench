@@ -1,0 +1,10 @@
+The bug occurs because the state machine becomes stuck in the `Ped` state indefinitely. 
+
+**Root Cause:**  
+In the combinational `always` block determining the `next` state, the `Ped` state unconditionally sets `next = Ped`, regardless of the `pedControl` input. This means once the state machine enters `Ped`, it never exits, even if `pedControl` is deasserted. The testbench expects the state to transition from `Ped` to `Green` after one clock cycle, but this transition is never implemented in the logic.
+
+**Why the Error Occurs:**  
+When `pedControl` is asserted (1), the state transitions from `Red` to `Ped`. However, since `next` is always `Ped` in this state, the state machine remains in `Ped` indefinitely. The testbench checks for `Green` after two clock cycles (when `pedControl` is still 1), but the design is still in `Ped`, causing the output `11` instead of `01`.
+
+**Required Fix:**  
+Modify the transition logic for the `Ped` state to conditionally exit based on `pedControl` (e.g., transition to `Green` when `pedControl` is deasserted). The combinational logic for the `Ped` state must evaluate `pedControl` to determine the next state.

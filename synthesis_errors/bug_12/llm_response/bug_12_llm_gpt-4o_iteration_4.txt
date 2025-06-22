@@ -1,0 +1,16 @@
+This error in the VHDL code indicates a type mismatch between `std_logic` and a string literal. The specific problem lies in the initialization of `signal a`. Here's why this issue occurs:
+
+1. **Signal Declaration and Initialization**: 
+   - `signal a : std_logic := "0";` is incorrect because `std_logic` expects a single character value ('0') rather than a string ("0"). The `std_logic` type should be initialized with a single character, such as `a : std_logic := '0';`.
+
+2. **VHDL Typing Rules**: 
+   - In VHDL, `std_logic` represents a single bit, which can take on nine different values. Initializing it with a string is a type mismatch because VHDL expects a single quote for a single `std_logic` value.
+
+3. **Error Manifestation**: 
+   - The error `[Synth 8-2772]` indicates a synthesis problem related to type mismatch on line 41. Although the error is reported adjacent to the `end entity;` line, it's caused by the initialization line for `signal a`. This is common when the syntactical context or parser aligns the error with the entity's overall declarations closing, where mismatches propagate to that level or context in reporting.
+
+**How to Address the Issue**:
+- Correct the initialization of `signal a` by using a character literal instead:
+  - Change `signal a : std_logic := "0";` to `signal a : std_logic := '0';`
+
+By making this change, you ensure that `signal a` is defined correctly as a `std_logic`, resolving the type mismatch issue seen during the simulation. Fixing the initialization will eliminate the synthesis error related to a type mismatch.

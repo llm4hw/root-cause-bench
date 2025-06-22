@@ -1,0 +1,7 @@
+The bug occurs because the shift register's assignments use **blocking assignments** (=) instead of **non-blocking assignments** (<=). Here's why:
+
+1. **Blocking assignments** execute sequentially, immediately updating `data[0]` before subsequent lines use the new value. This causes all bits to take the `serial_in` value in the same clock cycle (e.g., `1111` instead of `0001` after the first shift).
+
+2. **Non-blocking assignments** (<=) would ensure all right-hand-side values are read first (from the pre-shift state) before updating. This allows proper shifting where each bit moves to the next position in one clock cycle.
+
+**Fix:** Replace `=` with `<=` in the shift logic to preserve the previous state during shifting. The testbench expects sequential shifting, but the current code propagates the new value to all bits instantly due to blocking assignments.

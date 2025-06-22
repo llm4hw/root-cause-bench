@@ -1,0 +1,7 @@
+The bug in the code is caused by an infinite loop in the always block. In Verilog, the always block containing the while loop is continuously executing without any changes to the condition 'flag' that should break the loop.
+
+The error message "loop limit (65536) exceeded" indicates that the synthesis tool detected an infinite loop in the code. The while loop in the always block lacks an exit condition to break out of the loop, which causes the simulation to reach the loop limit and terminate with an error.
+
+To fix this issue, you need to modify the code inside the always block to include a way to exit the while loop. Depending on the intended behavior, you can add a condition that changes the value of 'flag' or use a different looping construct like a for loop with a predefined iteration count.
+
+It's important to ensure that the code logically makes sense and that the looping construct has a clear exit condition to prevent infinite loops and avoid errors during simulation and synthesis.

@@ -1,0 +1,5 @@
+The bug in this code is likely occurring due to a mistake in the way the expected value is being compared in Test Case 6 of the testbench. In the Verilog code, the condition `outResult <= 3'b110` is used to check if `outResult` is greater than `3'b110`, which is incorrect.
+
+The correct way to compare if `outResult` is greater than `3'b110` is to use the condition `outResult > 3'b110` in Test Case 6.
+
+Therefore, the bug can be fixed by updating the comparison condition in Test Case 6 to `outResult > 3'b110`. By making this change, the test case should be able to properly check if `outResult` is greater than `3'b110`, as expected.

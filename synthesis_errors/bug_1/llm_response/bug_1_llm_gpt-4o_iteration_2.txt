@@ -1,0 +1,10 @@
+The error message you are encountering indicates there is a syntax issue in your VHDL code regarding the use of the `elsif` keyword. Specifically, the error points to the line where you are trying to check the rising edge of the clock signal.
+
+In VHDL, the correct conditional structure for handling synchronous reset and clock events is to use an `if` statement to check if the reset condition is met, and then use another `if` statement (not `elsif`) in the case where reset is not active to check for the rising edge of the clock. The crucial point is that for checking a clock edge, you must use `if rising_edge(clk)` instead of `elsif rising_edge(clk)`. The `elsif` keyword is generally used to add additional conditions after an existing `if` or another `elsif` condition, and is not appropriate for the clock edge condition.
+
+Here's a breakdown of why this is problematic:
+- `elsif` is intended to extend the primary conditional `if` with additional conditions and is used when chaining multiple conditional checks that are not mutually exclusive.
+- The `rising_edge(clk)` condition is not a logical extension or alternative of the `if rst = '1'` condition, but rather a separate condition that is evaluated when reset is not active.
+- By using `elsif` in this context, the logic of checking for a rising edge is improperly sequenced as part of the reset condition chain, leading to the syntax error you observed.
+
+To fix this issue, you'll need to replace the `elsif` with an `if` statement for the rising edge condition. Doing so will separate reset logic from clocked logic properly inside your process block.

@@ -1,0 +1,18 @@
+The issue you're experiencing stems from the incorrect use of an `always @(posedge reset)` block for your finite state machine (FSM) sequential logic. In an FPGA or digital design, using `always @(posedge clk)` or `always @(posedge clk or posedge reset)` is the standard approach for handling synchronous logic that updates the state of the circuit.
+
+### Problem Explanation:
+
+1. **Incorrect Sensitivity List:**
+   - The `always @(posedge reset)` block is designed to trigger only on the rising edge of the reset signal. This means that the state is only updated when a reset signal occurs, which is not the intended behavior of a clocked FSM. Typically, state transitions should occur on the rising edge of a clock signal.
+
+2. **Behavior During Simulation:**
+   - During your simulation, after the reset is released (`reset = 0`), the state machine does not update its state based on the input (`num_in`), because there is no clock edge triggering the state update. As a result, the state (`state`), output data (`output_data`), and valid signal (`valid`) remain at their initial reset values of 0, causing the failure in your test case.
+
+### How to Fix:
+
+- **Use `posedge clk`:** The FSM sequential logic should trigger on the rising edge of the clock to ensure that state transitions occur synchronously with the clock signal. You need an `always @(posedge clk or posedge reset)` block to handle both clock and asynchronous reset.
+
+- **Proper Handling of Reset:**
+  - The reset logic should ensure that the state is initialized to the default state when reset is asserted, but afterwards, the normal state transitions should depend on the clock.
+
+By updating the sensitivity list to include the clock, the FSM will correctly handle state transitions on clock edges, resolving the issue seen in the testbench where the expected state, output data, and valid signal aren't updating as intended.

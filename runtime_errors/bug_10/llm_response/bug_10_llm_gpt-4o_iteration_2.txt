@@ -1,0 +1,29 @@
+The issue here stems from a typical mistake in sequential logic involving shifting operations. The error message specifically highlights that when the testbench expected the output `0001`, it received `1111` instead. This suggests that the shifting mechanism isn't functioning as anticipated. 
+
+In the `always` block of the `shift_register` module, the shifting logic intends to shift the bits to the left, with `data[0]` taking in `serial_in`, and subsequent bits taking the value of the previous bit. However, the assignment of `data` bits is not happening in parallel due to how the assignments are written in Verilog:
+
+```verilog
+data[0] = serial_in;
+data[1] = data[0];
+data[2] = data[1];
+data[3] = data[2];
+```
+
+The reason this is problematic is because each assignment is effectively occurring sequentially within a single clock cycle rather than simultaneously, as would be expected with shift registers. Here’s the issue broken down:
+
+1. `data[0]` is assigned `serial_in`.
+2. Then, `data[1]` is immediately assigned the new value of `data[0]`, which is `serial_in`, not its previous assigned value, which was the intention.
+3. This continues such that `data[2]` gets the new value of `data[1]`, and `data[3]` gets the new `data[2]`, all within the same clock edge.
+
+Thus, when `serial_in` is `1`, all bits of `data` turn to `1` because they are not holding their previous values. That's why the simulation results in `1111` instead of the expected `0001`.
+
+In essence, the assignments should be parallel and not dependent on each other immediately within the same clock. This problem arises because non-blocking assignments (`<=`) are not being used. In digital design, especially when assigning signals in sequential logic, using non-blocking assignments ensures that all the right-hand side evaluations occur before any left-hand side changes, which mimics real register behavior during a clock transition. This synchronization is crucial for proper shift register operation.
+
+To fix this problem, you'd maintain the order of data updates within a single clock cycle by using non-blocking assignments (`<=`):
+
+- `data[0] <= serial_in;`
+- `data[1] <= data[0];`
+- `data[2] <= data[1];`
+- `data[3] <= data[2];`
+
+This adjustment would ensure that all assignments are considered to happen simultaneously in a single clock cycle, thereby properly implementing the intended serial shift mechanism.

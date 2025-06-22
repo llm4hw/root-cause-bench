@@ -1,0 +1,26 @@
+The issue here is related to a concept in digital design involving combinational and sequential logic, specifically regarding how registers are inferred and toggled.
+
+### Description of the Bug:
+
+The error message "Cannot extract Asynchronous Set/Reset for register 'out1_reg'" indicates a conflict arises when the synthesis tool is trying to infer an asynchronous reset behavior for a register but is unable to do so based on the code written in Verilog. The critical line in the code causing this is the assignment `out1 = data;` within the always block.
+
+### Explanation:
+
+1. **Blocking vs. Non-Blocking Assignments**: The line `data = ~data;` uses a blocking assignment (`=`), while the line `data <= 1'b0;` uses a non-blocking assignment (`<=`). In Verilog, blocking assignments are executed immediately and can cause unexpected behavior when mixed with non-blocking assignments within the same always block that is meant to model sequential logic. This is because blocking assignments do not wait for the end of the time step like non-blocking assignments do.
+
+2. **Register Inference**: The tool is attempting to infer registers for both `data` and `out1`, but because `out1` is assigned using `=`, it behaves more like a combinational assignment within the block. The intended behavior is likely to have `out1` be driven by `data` after it is updated, but the mixed use of blocking and non-blocking assignments with a reset signal causes synthesis to misinterpret the need for proper sequential inference.
+
+3. **Asynchronous Reset**: The reset signal is asynchronous in nature. In correct digital design practices, all outputs that need a reset should properly align with the synchronous behavior and effectively isolate their asynchronous parts. The current design doesn't distinguish how `out1` should react to the asynchronous reset adequately due to blocking assignments.
+
+### Why the Bug Occurs:
+
+- By using blocking assignments, the logic meant to represent the flip-flop updates is misrepresented, leading to a situation where the tool cannot properly infer how `out1` should be driven especially under the `rst` condition.
+- The `out1 = data;` assignment provides an immediate update without considering the non-blocking paradigm required for proper sequential logic.
+
+### How It Can Be Rubricated:
+
+- Align register updates (`out1` and `data`) using non-blocking assignments (`<=`), enforcing consistent sequential logic within the `always` block.
+- Ensure the reset logic is clear and correctly sequentializes alongside the clock edge to ensure the desired register behavior.
+- Reconsider how reset logic is integrated and ensure it synchronizes with `cause` to infer the registers properly according to design intent.
+
+By addressing these aspects, the synthesis tools should correctly infer the register with the intended behavior including handling asynchronous resets without introducing errors.

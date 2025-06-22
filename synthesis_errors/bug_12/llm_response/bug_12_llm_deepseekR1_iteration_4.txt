@@ -1,0 +1,18 @@
+The error occurs due to a type mismatch between a `std_logic` signal and a string literal in the initialization of signal `a`. Here's why:
+
+1. **Core Issue**:  
+   `signal a : std_logic := "0";` incorrectly uses **double quotes** (`"0"`) to initialize a `std_logic` signal. In VHDL:
+   - `std_logic` (single-bit) requires a **character literal** with *single quotes* (`'0'`)
+   - `std_logic_vector` (multi-bit) uses *double quotes* (`"0000"`)
+
+2. **Why the Error Points to `end entity;`**:  
+   The compiler detects the type mismatch later during elaboration (after parsing the architecture), causing a delayed error report at a syntactically valid line (`end entity;`). This is common in HDL compilers when semantic errors propagate.
+
+3. **Effect**:  
+   The tool expects a single-bit value (`'0'` or `'1'`) but receives a string literal, which is treated as an array type. This violates VHDL's strong typing rules for `std_logic`.
+
+4. **Testbench Impact**:  
+   During simulation, the initialization fails because `"0"` is incompatible with the scalar type `std_logic`, causing the error during elaboration (before simulation starts).
+
+**Fix**:  
+Replace `"0"` with `'0'` for the `std_logic` signal initialization. The `std_logic_vector` signal `c` is correctly initialized with `"0000"` since it uses double quotes appropriately.

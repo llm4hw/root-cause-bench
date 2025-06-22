@@ -1,0 +1,20 @@
+The error you're encountering is related to the syntax of your VHDL code, specifically at the line containing `elsif rising_edge(clk) then`. VHDL uses the keyword `elsif` within a conditional structure, but it's intended to be used only when there is a preceding `if ... then` construct that is not already concluded by an `end if`.
+
+In your process statement, you have the structure:
+
+```vhdl
+if rst = '1' then
+    data_out <= (others => '0')
+elsif rising_edge(clk) then
+    data_out <= data_in;
+end if;
+```
+
+The issue here is not in the logic but in VHDL syntax rules. The `elsif` clause can only be used when you are continuing a single `if` statement. Since `rising_edge(clk)` is not part of an `if` statement but provided as an afterthought to the reset condition, this is incorrect usage in VHDL.
+
+To correct this error, you need to adhere strictly to VHDL syntax requirements. When using clocked processes (like those sensitive to `rising_edge(clk)`), this kind of conditional logic should be separated properly, particularly:
+
+- Any asynchronous condition (such as a reset) should remain distinct and separate from synchronous conditions (those involving the clock edge).
+- Correct the logic sequence to ensure each conditional is properly nested and conforms to VHDL's conditional syntax.
+
+Remember, the goal is to ensure that the logic is structured in accordance with VHDL's strict syntax rules and reflects the design intent by carefully separating asynchronous and synchronous logic conditions.

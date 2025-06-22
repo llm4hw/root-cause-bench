@@ -1,0 +1,3 @@
+The error stems from a syntax mistake in the process. In VHDL every sequential statement must be terminated with a semicolon. In the given code, the assignment that resets data_out when rst is high is missing its terminating semicolon. Because the parser doesn’t see the semicolon, it assumes the statement hasn’t ended and then encounters the "elsif" keyword unexpectedly. This results in the syntax error near "elsif". 
+
+The fix involves ensuring that each assignment statement in the process is properly ended with a semicolon so that the parser can correctly recognize the boundaries of each statement.

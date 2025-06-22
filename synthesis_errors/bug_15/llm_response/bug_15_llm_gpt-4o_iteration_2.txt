@@ -1,0 +1,20 @@
+The error you're encountering is related to the data type of the `data` signal in your Verilog module `top15`. The error message indicates a procedural assignment to a non-register data type, specifically to a signal declared as `wire`.
+
+### Explanation of the Bug:
+
+1. **Nature of the `data` Declaration**: In Verilog, signals declared as `wire` cannot store values over time. They are used for combinatorial logic, which implies they can't hold state and thus can't be assigned values inside an `always` block with edge sensitivity (i.e., triggered by `posedge clk` or `posedge rst`).
+
+2. **Procedural Assignments**: The `always` block in which you're trying to manipulate `data` requires it to be a type that can hold a value across clock cycles, because you're using it to store a state (`1'b0` on reset, toggle on clock edges). This is typically done using `reg` data type, which is specifically designed for such purposes.
+
+3. **Current Behavior**: The current declaration of `data` as a `wire` type is what causes this error. When the synthesizer encounters the procedural assignment within the `always` block, it flags an error because the `wire` type cannot be used in this context to hold state.
+
+### Why the Error Occurs:
+
+- The synthesizer expects a `reg` type when encountering a signal that needs to hold a value between clock cycles and is assigned inside an `always` block.
+- Attempting to use a `wire` in a procedural block implies an unsupported usage according to Verilog's rules, thus triggering the specific error message.
+
+### Explanation of the Correction (not a code fix):
+
+To address this issue, you need to alter the definition of `data` so that it can legally hold a state within your `always` block. Specifically, `data` should be declared as a `reg` type instead of a `wire`. This allows `data` to retain its value across clock cycles and be properly controlled by the logic you intended, resolving the error.
+
+The issue results from a misunderstanding or misapplication of Verilog data types and their intended use, particularly regarding storage elements (`reg`) versus continuous assignment and net declarations (`wire`).

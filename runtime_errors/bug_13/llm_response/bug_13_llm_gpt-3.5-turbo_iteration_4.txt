@@ -1,0 +1,8 @@
+The bug in the code is in the instantiation of the full_add_4bit module in the testbench. The error occurs due to the incorrect calculation of the expected sum in the check task. The issue lies in the way the expected value is being computed. 
+
+In the check task, the expected sum is calculated by simple addition of the inputs a, b, and cin. However, the expected value should be constructed by concatenating the carry output (cout) with the sum output (sum) of the full_add_4bit module. To fix this bug, modify the expected computation line as follows:
+
+Replace: `expected = a_t + b_t + cin_t;`
+With: `expected = {1'b0, a_t} + {1'b0, b_t} + cin_t;`
+
+By making this change, the expected value will be generated correctly by combining the carry and sum outputs from the full_add_4bit module, and the error message should no longer be triggered during simulation of the testbench.

@@ -1,0 +1,17 @@
+The bug occurs because the `+` operator is being used directly on `std_logic_vector` signals without proper type conversion. Here's why:
+
+1. **Missing Operator Definition**: The `ieee.numeric_std` package provides arithmetic operations for `unsigned`/`signed` types, but **not** for `std_logic_vector`. The `+` operator isn't inherently defined for `std_logic_vector` in the included libraries.
+
+2. **Type Mismatch**: Signals `a` and `b` are declared as `std_logic_vector`, but the `+` operator expects numeric types like `unsigned` or `signed` when using `numeric_std`.
+
+3. **Synthesis Error**: During synthesis, the tool searches for a matching `+` operator definition for `std_logic_vector` and finds none (0 definitions), causing the reported error.
+
+**How to Fix**:
+Convert the `std_logic_vector` signals to a numeric type before addition:
+- Use `unsigned()` or `signed()` conversion for inputs `a` and `b`
+- Convert the result back to `std_logic_vector` for output `c`
+- Example pseudo-code:  
+  `c <= std_logic_vector(unsigned(a) + unsigned(b));`
+
+**Additional Consideration**:
+The addition of two 4-bit values may produce a 5-bit result. Since `c` is only 4 bits, this will truncate the carry-out. If overflow handling is needed, the output port width should be increased to 5 bits.

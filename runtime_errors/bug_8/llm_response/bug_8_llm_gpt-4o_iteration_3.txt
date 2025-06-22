@@ -1,0 +1,18 @@
+The code is implementing a finite state machine (FSM) to control the transitions of traffic lights, with consideration for pedestrian control. The error message you observed, "pedControl 2 - ERROR: Expected Green (01), but got 11", indicates an issue in the expected state transitions when pedestrian control is active.
+
+**The issue:**
+The FSM is expected to transition from the `Ped` state back to the `Green` state after one clock cycle when `pedControl` is active. However, the error indicates that the FSM remains in the `Ped` state instead of switching to the `Green` state as expected by the testbench.
+
+**Why the bug is occurring:**
+The current design of the state transition logic in the `always@(state or pedControl)` block does not facilitate this transition. The following part of the state transition logic is crucial:
+
+```verilog
+Ped: next = Ped;
+```
+
+This line ensures that the FSM stays in the `Ped` state indefinitely unless reset. There is no condition provided to transition from the `Ped` state to the `Green` state, which is what the testbench expects after activating pedestrian control for one cycle.
+
+**Explanation for a fix:**
+To address this issue, the state transition logic should be revised to allow for a transition from the `Ped` state back to `Green` under specified conditions. You may need to introduce a mechanism, such as timers, counters, or additional conditions, to control the timing of such a transition. The testbench expects that the FSM will accept the pedestrian button press, transition to the `Ped` state, and then move to the `Green` state on the next clock cycle, which is not currently accounted for in the design. 
+
+Ensure the FSM logic reflects these requirements appropriately; otherwise, the design will not meet the testbench expectations, and similar errors will persist.

@@ -1,0 +1,19 @@
+The bug originates from the FSM implementation in the `fsm_mealy_0_to_9` module. The critical issue is that the FSM only sets the `state` and `valid` signals based directly on the `num_in` input without checking for input validity. The Verilog code always assigns `num_in` to the `state` and sets `valid` to high (1), regardless of whether the input value is a valid digit (0 through 9).
+
+### Why the Bug Occurs:
+1. **Unconditional State Assignment**: In the sequential logic inside the `always @(posedge clk or posedge reset)` block, the `state` is assigned directly from `num_in`. This means any value of `num_in` from 0 to 15 gets mapped directly to the state, regardless of validity.
+   
+2. **Unconditional Valid Signal**: The `valid` signal is set to high (1) for any value of `num_in`. There's no logic that checks if `num_in` falls outside the valid range (0 to 9) and, as a result, it doesn't go low (0) for invalid values of the input.
+
+3. **Lack of Default Case**: In the `always @(state)` block for setting `output_data`, no cases are defined for when `state` should be invalid or behavior for states `S10` to `S15`. These states are assigned when `num_in` is in the range of 10 to 15.
+
+### Explanation of the Error:
+The testbench is designed to expect that the `valid` signal becomes low (0) when an invalid number is input (e.g., when `num_in` is 10 or 15, which are outside the expected 0-9 range). Similarly, for invalid inputs, the `output_data` is expected to be 0. However, because `valid` is always set to 1 and there's no default handling for outputs linked to invalid states, it causes the testbench to fail due to unmet expectations.
+
+### How to Fix It:
+To resolve the error and ensure proper functioning, implement the following:
+- **Add Input Validation**: Modify the FSM sequential logic to set `valid` to 1 only when `num_in` is within the correct range (0 to 9). If `num_in` is not in the valid range, `valid` should be 0, and the `state` should not be affected.
+  
+- **Default State Behavior**: Include a default case or extend the case statements in the `always @(state)` block to handle states outside the 0 to 9 range (either explicitly or by ensuring output defaults such as 0).
+
+By implementing these changes, the FSM will correctly manage valid and invalid inputs as expected by the testbench, allowing the simulation to pass without errors.

@@ -1,0 +1,5 @@
+The error message is stating that the instance of the child module is trying to connect to a port named "b," but no such port exists in the module definition. In the ChildModule, only ports "a" and "c" are declared. The bug occurs because the top-level module is instantiating the child module and attempting to use a named connection for a port "b," which is undefined in the child.
+
+This happens during simulation because the tool checks that every named connection in an instantiation matches an actual port in the module definition. When it finds the "b" port but doesn't see a corresponding declaration in ChildModule, it flags an error.
+
+To fix the issue, you would need to update the instantiation so that only declared port names (such as "a" and "c") are used. The error message came from the test bench simulation because it is sensitive to such mismatches between the instance and module interface definitions.

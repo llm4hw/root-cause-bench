@@ -1,0 +1,156 @@
+The bug occurs because a procedural assignment is being used on a `wire` type signal (`data`), which is not permitted in Verilog. Procedural assignments (inside `always` blocks) can only be applied to variable types like `reg`, not net types like `wire`.
+
+**Root Cause Analysis:**
+1. In the code, `data` is declared as `wire data;`
+2. The `always` block contains procedural assignments to `data`:
+   ```verilog
+   data <= 1'b0; // Reset assignment
+   data <= ~data; // Normal operation
+   ```
+3. Procedural assignments (`<=` or `=`) can only target `reg` types, not `wire` types
+4. This violates Verilog synthesis rules, causing the "[Synth 8-2576] procedural assignment to a non-register" error
+
+**Fix:**
+1. Change the declaration of `data` from `wire` to `reg`
+2. Additionally, fix the reset behavior for `out1` to avoid undefined values during reset by explicitly assigning it in the reset branch
+
+**Corrected Code:**
+```verilog
+`timescale 1ns / 1ps
+
+module top15(
+    input wire clk,
+    input wire rst,
+    output reg out1
+);
+    reg data;  // Changed from wire to reg
+
+    always @(posedge clk or posedge rst)
+    begin
+        if (rst) begin
+            data <= 1'b0;  // Initialize data
+            out1 <= 1'b0;  // Initialize out1 (added to prevent undefined value)
+        end else begin
+            data <= ~data; // Toggle data
+            out1 <= data;  // Assign current data value to out1
+        end
+    end
+endmodule
+```
+
+**Explanation of Fix:**
+1. Changing `data` to `reg` allows it to be legally assigned in procedural blocks
+2. The added `out1 <= 1'b0` in the reset branch ensures:
+   - Both signals are properly initialized during reset
+   - Prevents `out1` from getting an undefined value (since it would otherwise get the pre-reset value of `data` during the reset cycle)
+3. Maintains the original behavior where:
+   - `out1` follows the previous value of `data`
+   - `data` toggles its value each clock cycle
+   - Both signals reset synchronously to 0
+
+**Additional Improvement Option:**
+If you want `out1` to always match the current value of `data` (rather than the previous value), you could implement:
+```verilog
+// Alternative implementation with continuous assignment
+module top15(
+    input wire clk,
+    input wire rst,
+    output wire out1  // Now a wire
+);
+    reg data;
+
+    assign out1 = data;  // Continuous assignment
+
+    always @(posedge clk or posedge rst)
+    begin
+        if (rst) data <= 1'b0;
+        else data <= ~data;
+    end
+endmodule
+```
+
+🔍 Related Documents:
+
+- source_documents\verilog_2001_ref_guide.pdf: for (i=0; i<=255; i=i+1)
+                @(negedge clk)
+                  data_bus = RAM[i];
+            end
+    default:$display(“illegal opcode in module %m”);
+  endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: signal_assignment_1
+signal_assignment_2
+:
+end
+Let’s look at a simple model of how an initial block is used to model the reset line in a test bench. In
+the following example, the signal “Reset_TB” is being driven into a DUT. At the beginning of the
+simulation, the initial value of Reset_TB is set to a logic zero. The second assignment will take place
+after a delay of 15 time units. The second assignment statement sets Reset_TB to a logic one. The...
+
+- source_documents\verilog_fsm.pdf: generation. If you don’t assign every element that can be assigned inside an always@( * ) block
+every time that always@( * ) block is executed, a latch (similar to a register but much harder to
+work with in FPGAs) will be inferred for that element. This is never what you want and is a
+terrible place for bugs. As this is subtle, it is somewhat hard to visualize. Consider Program 17.
+Program 17 An always@( * ) block that will generate a latch for C
+1 wire Trigger , Pass;
+2 reg A, C;
+3...
+
+- source_documents\Quick Start Guide to Verilog.pdf: assignments will be attempted for addresses outside of the deﬁned range of the ROM array. This enable
+line can now be used in the behavioral model for the ROM as follows:
+always @ (posedge clock)
+begin
+if (EN)
+data_out ¼ ROM[address];
+end
+11.3.3.2 Data Memory Implementation in Verilog
+The data memory is created using a similar strategy as the program memory. An array signal is
+declared with an address range corresponding to the memory map for the computer system (i.e., 128 to...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 5.1 Procedural Assignment
+Verilog uses procedural assignment to model signal assignments that are based on an event. An
+event is most commonly a transition of a signal. This provides the ability to model sequential logic circuits
+such as D-ﬂip-ﬂops and ﬁnite state machines by triggering assignments off of a clock edge. Procedural
+assignments can only drive variable data types (i.e., reg, integer, real, and time); thus, they are ideal for...
+
+- source_documents\verilog_fsm.pdf: Figure 5 The circuit generated by Program 17 (this is an erroneous circuit!)
+Pass
+Trigger
+C
+A
+1'b0
+0
+1
+Latch
+C
+Program 18 An always@( * ) block that will not generate latches
+1 wire Trigger , Pass;
+2 reg A, C;
+3
+4 always @( * ) begin
+5
+A = 1’b0;
+6
+C = 1’b1;
+7
+if (Trigger) begin
+8
+A = Pass;
+9
+C = Pass;
+10
+end
+11 end
+Figure 6 The circuit generated by Program 18 (this is correct!)
+Pass
+Trigger
+C
+A
+1'b0
+0
+1
+1
+0
+1'b1
+11...

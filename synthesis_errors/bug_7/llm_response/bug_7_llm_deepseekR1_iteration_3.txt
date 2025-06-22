@@ -1,0 +1,25 @@
+### Bug Explanation:
+The error occurs because the VHDL process contains both a **sensitivity list** (`(clk)`) and a **`wait` statement** (`wait for 10 ns;`). This violates VHDL synthesis rules.  
+
+### Why It Happens:
+1. **Mutually Exclusive Constructs**:  
+   VHDL requires processes to use **either**:  
+   - A sensitivity list (e.g., `process(clk)`) **OR**  
+   - Explicit `wait` statements (e.g., `wait for 10 ns;`),  
+   but **never both**.  
+
+2. **Synthesis Limitation**:  
+   The sensitivity list implies the process wakes up **only when `clk` changes**. The `wait for 10 ns;` attempts to add a fixed-time delay, which conflicts with the sensitivity-driven triggering. Hardware synthesis tools cannot map this mixed behavior to real logic.
+
+3. **Simulation vs. Synthesis**:  
+   While simulation *might* tolerate this (with undefined behavior), synthesis tools strictly reject it. The error `[Synth 8-2578]` explicitly flags this illegal combination.
+
+### Fix Approach:
+- **Remove the `wait` statement**:  
+  Since the process uses a clock-edge check (`rising_edge(clk)`), it is designed for synchronous logic. The `wait for 10 ns;` is redundant and unsynthesizable. Delete it to align with synchronous design rules.  
+  **OR**  
+- **Rewrite the process without a sensitivity list**:  
+  If the delay is critical (e.g., in testbenches), restructure the process to use only `wait` statements (e.g., `wait until rising_edge(clk);` followed by `wait for 10 ns;`). **Note**: This is only valid for simulation, not synthesis.
+
+### Root Cause:
+The process mixes **event-triggered** (sensitivity list) and **time-triggered** (`wait`) semantics, creating ambiguous behavior that cannot be synthesized into hardware. The tool enforces strict separation of these paradigms.

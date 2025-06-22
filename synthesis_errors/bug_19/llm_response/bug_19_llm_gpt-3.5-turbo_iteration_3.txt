@@ -1,0 +1,3 @@
+The bug in the code is the assignment `y = 2'b2;` in the else statement of the always block. The issue here is that the binary number `2` in Verilog should be specified using only `0` or `1` digits as it represents a two-bit value. However, in this case, `2'b2` contains an illegal character, which is causing the error.
+
+To fix this bug, the binary number for a two-bit value should be specified correctly with either `0` or `1`. Changing `y = 2'b2;` to `y = 2'b10;` or `y = 2'b11;` based on the intended logic will resolve this error. Make sure that the syntax used for binary representation in Verilog adheres to the standard.

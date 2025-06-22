@@ -1,0 +1,27 @@
+The bug in the provided design stems from a misunderstanding of the ordering logic for assigning the first smaller value to `min` in the order of `b`, `c`, `d`, else `min = a`. The current logic in the `always` block checks sequentially which of the inputs `b`, `c`, or `d` is the smallest compared to the already stored minimum value, but it does not prioritize assigning the value from `b`, `c`, `d` in that specific order if they are less than `a`.
+
+**Explanation of the Bug:**
+
+In Test Case 3: 
+- Inputs are set as `a = 10`, `b = 15`, `c = 8`, `d = 7`.
+- The logic evaluates the minimum value without respecting the specified order:
+  - First, it assigns `min = a` (min = 10).
+  - Since `min > c`, it updates `min = c` (min = 8).
+  - Next, even though `min > d`, it should not update `min` to `d` (7) because `c` was already found to be less than `a` and appears earlier in the order specified (`b-c-d`).
+
+Contrary to what the code currently does, the requirement is to assign the **first value** smaller than `a` encountered in the specific order `b`, `c`, `d`, not the smallest value overall.
+
+**Why the Bug Occurs:**
+
+The current code logic switches to the next lowest value regardless of input priority. It always finds the overall minimum from `a`, `b`, `c`, `d`, which does not satisfy the requirement of specific order checking.
+
+**Explanation for Fix:**
+
+To implement the requirement correctly:
+- Start by defaulting `min` to `a`.
+- Check if `b` is less than `a`. If true, assign `b` to `min`.
+- If `b` is not less than `a`, check `c`. If `c` is less than `a`, assign `c` to `min`.
+- If both `b` and `c` are not less than `a`, check `d`. If `d` is less than `a`, assign `d` to `min`.
+- If none of `b`, `c`, `d` are less than `a`, `min` should remain `a`. 
+
+The ordering of these checks ensures that the assignment respects the required order of `b-c-d`.

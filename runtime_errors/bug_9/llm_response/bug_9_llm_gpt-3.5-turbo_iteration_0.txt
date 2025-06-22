@@ -1,0 +1,5 @@
+The bug in the code is in the state transitions related to the letter 'O' (O_DASH1, O_DASH2, O_DASH3). Upon selecting 'O', the state transitions to O_DASH1, O_DASH2, and O_DASH3 in sequence, aiming to output three dashes for 'O'. However, the condition to transition back to IDLE state after generating the required number of dashes is incorrect. 
+
+The bug is occurring because after the completion of generating the required dashes for 'O', the code is missing the transition back to the IDLE state. As a result, the state remains stuck in the last O_DASH state, causing the output to be incorrect.
+
+To fix this bug, ensure that after generating the required dashes for 'O', the state transitions back to the IDLE state. This correction will allow the module to reset to the initial state and be ready for the next input accordingly.

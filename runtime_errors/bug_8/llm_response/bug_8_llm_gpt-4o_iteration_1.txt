@@ -1,0 +1,19 @@
+The error message "pedControl 2 - ERROR: Expected Green (01), but got 11" indicates that during the simulation, the `outResult` signal was expected to be `2'b01` (Green), but it unexpectedly remained `2'b11` (Pedestrian).
+
+### Root Cause of the Bug:
+
+1. **State Transition Logic in FSM**: The state machine is set to move from the Red state to the Pedestrian state directly when `pedControl` is asserted. However, there is no transition logic provided to move directly from the Pedestrian state back to the main traffic light states like Green without manual intervention.
+
+2. **Handling the Pedestrian State**: When the state machine enters the Pedestrian (Ped) state, it remains in this state indefinitely (`Ped: next = Ped;`).
+
+3. **Lack of Exit Condition from Ped State**: There are no conditions specified to exit from the Ped state, hence the state machine persists in this state, outputting `2'b11`.
+
+4. **Testbench Assumption**: The testbench assumes that after entering the Ped state, the FSM would transition back to the Green state, but the module under test does not follow this assumption because of the lack of a transition.
+
+### Explanation of the Bug:
+
+When the pedestrian control is activated, the FSM transitions to the Ped state correctly. However, because the state machine lacks logic to exit this Ped state, it remains in it indefinitely. Thus, when the test expects a transition from the Ped state to the Green state, it does not happen, causing the `outResult` to be `2'b11` instead of `2'b01`.
+
+### How the Issue can be Resolved:
+
+Changes need to be made in the state transition logic to allow the FSM to exit the Pedestrian state. An additional condition or state logic should be implemented to move from the Ped state back to another state, typically the Red state, before continuing the normal cycle through Red, Green, and Yellow. The solution involves allowing the FSM to transition out of the Ped state after a specific condition like a clock cycle count or the deactivation of the pedestrian control signal.

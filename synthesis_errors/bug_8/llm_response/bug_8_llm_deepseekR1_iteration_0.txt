@@ -1,0 +1,18 @@
+The error occurs because the signal `signal2` is referenced in the design but has not been declared. Here's a breakdown:
+
+1. **Root Cause**:
+   - In the architecture's declarative section (between `architecture` and `begin`), only `signal1` is declared.
+   - The line `signal2 <= '0';` attempts to assign a value to `signal2`, which has never been declared anywhere in the code.
+   - VHDL requires all signals to be explicitly declared before use. The synthesizer detects this as an undeclared identifier.
+
+2. **Why This Breaks**:
+   - The reset logic (`if rst = '1'`) tries to drive `signal2`, but the compiler has no knowledge of what `signal2` is.
+   - This violates VHDL's strict typing and declaration rules, causing a synthesis error.
+
+3. **Likely Design Intent**:
+   - Given that `out1` is assigned from `signal1`, and `signal1` is the only signal used in the clocked process (`signal1 <= not signal1`), `signal2` appears to be a mistake.
+   - The reset clause probably intended to reset `signal1` (the actual flip-flop in the design), not a non-existent `signal2`.
+
+**Fix Direction**:
+- **Option 1**: If `signal2` is truly needed, declare it in the architecture's signal declarations alongside `signal1`.
+- **Option 2 (Most Probable)**: Replace `signal2` with `signal1` in the reset assignment to correctly initialize the only signal that exists and drives the output. This would make the reset logic functional for `signal1`.

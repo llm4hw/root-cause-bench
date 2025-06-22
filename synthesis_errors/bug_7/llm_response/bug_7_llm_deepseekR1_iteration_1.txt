@@ -1,0 +1,26 @@
+The error occurs because the process combines a sensitivity list (`process (clk)`) with a `wait` statement (`wait for 10 ns;`). This violates fundamental VHDL rules for process construction. Here's why:
+
+1. **Mutually Exclusive Constructs**:  
+   VHDL processes must be **either**:
+   - **Sensitivity-list driven**: Activated by signals in the sensitivity list (e.g., `process(clk)`). No `wait` statements are allowed.
+   - **Wait-statement driven**: Explicitly controlled by `wait` (e.g., `wait on/until/for`). No sensitivity list is permitted.
+
+2. **Synthesis Conflict**:  
+   The `wait for 10 ns` statement is **non-synthesizable**. Synthesis tools cannot map arbitrary time delays to hardware. Even in simulation, mixing these constructs causes undefined behavior.
+
+3. **Behavioral Conflict**:  
+   The sensitivity list triggers the process on every `clk` event, while the `wait` statement tries to suspend execution for 10 ns. These conflicting triggering mechanisms create ambiguity in execution flow.
+
+**Root Cause Analysis**:  
+The process attempts to behave as both a **clock-triggered sequential process** (via `rising_edge(clk)`) and a **timed delay process** (via `wait for 10 ns`). Hardware does not support this hybrid approach. Time-based delays (`wait for`) exist solely for simulation and cannot coexist with sensitivity-list-driven logic.
+
+**Resolution Path**:  
+- **Remove the `wait for 10 ns` statement** to retain the clock-triggered behavior.  
+  OR  
+- **Convert to a pure `wait`-driven process** by removing the sensitivity list and redesigning the logic to use explicit synchronization (not recommended for synthesis).  
+
+**Key Principle**:  
+Synthesizable processes must use *only one triggering mechanism*:  
+- Edge-sensitive (sensitivity list + `rising_edge`/`falling_edge`) for registers.  
+- Level-sensitive (sensitivity list) for combinational logic.  
+- `wait` statements are strictly for testbenches and non-synthesizable models.

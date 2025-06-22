@@ -1,0 +1,19 @@
+The bug is due to an **incorrect carry chain connection** between the 1-bit full adder instances in the 4-bit adder. Here's the breakdown:
+
+1. **Cyclic Carry Dependency**:  
+   - `fa2` (bit 1) uses `w_carry3` (the carry-out from `fa4`, the **last** adder) as its carry-in. This creates a loop where `fa2` depends on `fa4`, but `fa4` hasn't computed its carry yet. This breaks the sequential ripple-carry logic.
+
+2. **Skipped Carry Propagation**:  
+   - `fa3` (bit 2) incorrectly uses `w_carry1` (the carry-out from `fa1`, the **first** adder) as its carry-in instead of `w_carry2` (the carry-out from `fa2`). This skips the carry from the second bit entirely.
+
+3. **Premature Final Carry**:  
+   - The module's `o_carry` is connected to the carry-out of `fa3` (bit 2), not `fa4` (bit 3). This causes the final carry to be one stage too early, missing the actual last bit's carry.
+
+**Why This Causes the Error**:  
+When adding `a=3` (`0011`) and `b=5` (`0101`), the incorrect carry connections disrupt the sum calculation. For example, `fa2` uses the uninitialized `w_carry3` (from `fa4`), leading to invalid intermediate sums/carries. The final output is corrupted because the carry chain does not ripple sequentially from bit 0 to bit 3.
+
+**Fix**:  
+Reconnect the carry signals to follow a proper ripple-carry chain:
+- `fa1` → `fa2` → `fa3` → `fa4`.  
+- Ensure `o_carry` comes from `fa4` (not `fa3`).  
+- Remove cyclic dependencies (e.g., `fa2` should use `w_carry1`, not `w_carry3`).

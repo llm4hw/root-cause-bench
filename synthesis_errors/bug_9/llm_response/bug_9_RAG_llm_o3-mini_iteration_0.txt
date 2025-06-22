@@ -1,0 +1,99 @@
+The error occurs because port b is declared as output (out), which means it is not allowed to be read inside the architecture. In VHDL, you cannot directly use an out port as an input in an expression—reading its value is not permitted. In your code, the expression "a and b" attempts to read b, causing the error.
+
+To fix this, you have two commonly used options:
+
+1. If you really need to read the value of b, change its mode to buffer (or inout, if appropriate). For example:
+
+   • Replace "b : out std_logic;" with "b : buffer std_logic;"  
+     
+2. If the intention was to use another signal (or if b is meant to be an input), change its port mode accordingly (for example, to in):
+
+   • Change the port declaration to "b : in std_logic;"
+
+Choose the solution that best matches the intended design.
+
+🔍 Related Documents:
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\verilog_2001_ref_guide.pdf: 10
+   Verilog HDL Quick Reference Guide
+   
+  
+Port Declaration Examples
+Notes
+input a,b,sel; 
+three scalar (1-bit) ports
+input signed [15:0] a, b; 
+two 16-bit ports that pass 2’s 
+complement values, little 
+endian convention
+output signed [31:0] result;
+32-bit port; values passed 
+through the port are in 2’s 
+complement form
+output reg signed [32:1] sum; 32-bit port; the internal 
+signal connected to the port 
+is a signed reg data type
+inout [0:15] data_bus; 
+big endian convention...
+
+- source_documents\Quick Start Guide to Verilog.pdf: ¼ 8’h42;
+//-- A <¼ A + B
+parameter BRA
+¼ 8’h20;
+//-- Branch Always
+parameter BEQ
+¼ 8’h23;
+//-- Branch if Z¼1
+Now the program memory can be declared as an array type with initial values to deﬁne the program.
+The following Verilog shows how to declare the program memory and an example program to perform a
+load, store, and a branch always. This program will continually write x“AA” to port_out_00.
+160
+•
+Chapter 11: Computer System Design...
+
+- source_documents\verilog_2001_ref_guide.pdf: `ifdef RTL 
+    wire  y = a & b; 
+`else 
+    and #1 (y,a,b); 
+`endif 
+`include “file_name” 
+File inclusion. The contents of another Verilog HDL source file is inserted
+where the `include directive appears.
+`celldefine 
+`endcelldefine 
+Flags the Verilog source code between the two directives as a cell.  Some
+tools, such as a delay calculator for an ASIC, need to distinguish between a
+module that represents an ASIC cell and other modules in the design.
+`default_nettype net_data_type...
+
+- source_documents\Quick Start Guide to Verilog.pdf: 6.1.3
+Can a test bench be simulated?
+6.1.4
+Can a test bench be synthesized?
+6.1.5
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should use a pro-
+cedural
+block
+and
+individual
+signal
+assignments for each pattern. Your test bench
+should change the input pattern every 10 ns.
+Fig. 6.1...
+
+- source_documents\verilog_fsm.pdf: is assigned the and of A and B. A very common bug is to introduce an incomplete sensitivity list. See
+Program 14 for two examples of incomplete sensitivity lists.
+In Program 14, the ﬁrst example produces an and gate that only updates its output C when A changes.
+If B changes, but A does not change, C does not change because the always@(A) block isn’t executed.
+8...

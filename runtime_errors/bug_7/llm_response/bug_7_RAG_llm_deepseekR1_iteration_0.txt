@@ -1,0 +1,119 @@
+The bug occurs because the state transition from `Ped` (pedestrian) state is incorrectly set to transition back to `Red` state, skipping the `Green` and `Yellow` states entirely. This causes the state machine to oscillate only between `Red` and `Ped` states.
+
+**Why it occurs:**
+- In the combinational `always` block, the `case` statement for `Ped` state assigns `next = Red` (line 18)
+- This creates a loop: `Red → Ped → Red → Ped...`
+- The intended sequence should be `Red → Ped → Green → Yellow → Red`
+
+**Fix:**
+Change the `Ped` state transition to move to `Green` instead of `Red`:
+
+```verilog:top_module.v
+always@(state) begin
+    case (state)
+        Red: next = Ped;
+        Ped: next = Green;  // Fix: Transition to Green instead of Red
+        Green: next = Yellow;
+        Yellow: next = Red;
+        default: next = 2'bxx;
+    endcase
+end
+```
+
+**Explanation:**
+1. After reset, state enters `Red` correctly
+2. Next cycle: `Red → Ped` (correct)
+3. **Fixed transition:** `Ped → Green` (previously incorrectly went back to Red)
+4. Subsequent transitions: `Green → Yellow → Red` (correct cycle)
+
+The testbench timing remains valid since it checks states every 10ns (one clock cycle), but note that the first check at 20ns now expects `Ped` (11) instead of `Red` (00) due to the corrected transitions. The testbench assertions would need corresponding updates to match the new timing:
+- 20ns: `Ped` (11)
+- 30ns: `Green` (01)
+- 40ns: `Yellow` (10)
+- 50ns: `Red` (00)
+
+This fix implements the required 4-state traffic light sequence while maintaining the original module interface and reset behavior.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: The general topology and module deﬁnition for
+the design are shown in Example 4.8. Design a
+Verilog test bench to exhaustively verify this
+design under all input conditions. Your test
+bench should use two nested for loops within
+a procedural block to generate all of the stimu-
+lus patterns automatically. Your test bench
+should change the input pattern every 30 ns
+in order to give sufﬁcient time for the signals to
+ripple through the adder.
+100
+•
+Chapter 6: Test Benches...
+
+- source_documents\Quick Start Guide to Verilog.pdf: a signal called TIMEOUT when 15 s has
+passed. Once TIMEOUT is asserted, you will
+change the highway trafﬁc light back to green.
+Your system will have three outputs GRN,
+YLW, and RED, which control when the high-
+way facing trafﬁc lights are on (1 ¼ ON,
+0 ¼ OFF). Model the states in this machine
+with parameters. Choose any state encoding
+approach you wish.
+Fig. 8.5
+Trafﬁc Light Controller Port Deﬁnition
+Exercise Problems
+•
+127...
+
+- source_documents\RTL error analysis.pdf: case(state)
+S0:             y_out = 0; 
+S1,S2,S3:   y_out = ~x_in;
+endcase
+endmodule
+HDL model for state diagram...
+
+- source_documents\Quick Start Guide to Verilog.pdf: case statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output.
+5.2.7
+Design a Verilog model to implement the
+behavior described by the 4-input truth table
+in Fig. 5.4. Use procedural assignment and an
+if-else statement. Declare the module to match
+the block diagram provided. Use the type wire
+for the inputs and type reg for the output. Hint:
+Notice that there are far more input codes pro-...
+
+- source_documents\verilog_fsm.pdf: 24
+STATE_1 = 3’d1 ,
+25
+STATE_2 = 3’d2 ,
+26
+STATE_3 = 3’d3 ,
+27
+STATE_4 = 3’d4 ,
+28
+STATE_5_PlaceHolder = 3’d5 ,
+29
+STATE_6_PlaceHolder = 3’d6 ,
+30
+STATE_7_PlaceHolder = 3’d7;
+31 //
+--------------------------------------------------------------------
+32
+33 //
+--------------------------------------------------------------------
+34 // State reg
+Declarations
+35 //
+--------------------------------------------------------------------
+36 reg [2:0]
+CurrentState;
+37 reg [2:0]
+NextState;
+38 //...
+
+- source_documents\RTL error analysis.pdf: endcase
+assign y_out = state; 
+endmodule
+HDL model for state diagram...

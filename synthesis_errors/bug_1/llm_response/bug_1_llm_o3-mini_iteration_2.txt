@@ -1,0 +1,3 @@
+The error stems from a syntax issue in the VHDL process. In VHDL, every sequential statement (like a signal assignment) must be terminated with a semicolon. In this code, the assignment inside the reset branch is missing its terminating semicolon. As a result, when the parser reaches the following elsif clause, it isn’t expecting it, which leads to the syntax error near "elsif."
+
+The bug is occurring because the VHDL compiler is unable to properly separate the reset assignment from the next conditional branch due to the missing semicolon. To fix the issue, the assignment statement for the reset condition must end with a semicolon so that the if-elsif structure is syntactically complete.

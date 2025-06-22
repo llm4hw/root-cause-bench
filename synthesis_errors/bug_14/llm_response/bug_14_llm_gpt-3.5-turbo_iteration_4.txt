@@ -1,0 +1,5 @@
+The error message "ERROR: [Synth 8-1031] data is not declared [D:/chip chat/new_structure/bug_14/rtl/top14.v:29]" is occurring because the signal `data` is being used in the always block without being declared or defined anywhere in the code. 
+
+In Verilog, every signal that is being used needs to be declared before it can be used. To fix this issue, you need to declare `data` as either an input or internal signal within the `top14` module, depending on your design requirements. 
+
+Make sure to add a declaration for `data` in the module, either as an input or as an internal signal, before using it in the assignment statement inside the always block.

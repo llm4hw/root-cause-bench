@@ -1,0 +1,144 @@
+The bug in the `faulty_comparator` module is caused by an incorrect comparison in the logic. Here's the breakdown:
+
+**Why it's occurring:**
+1. The comparator checks `if (a == 5'b10101)` (which equals decimal 21)
+2. Inputs `a` and `b` are defined as 4-bit values (range 0-15)
+3. The comparison can never be true (21 > 15), so `result` is always 0
+4. The test case `a = 4'd9; b = 4'd9` fails because the design isn't comparing `a` and `b`
+
+**Fix:**
+```verilog
+always @(*) begin
+    if (a == b) begin  // Changed from 5'b10101 to actual comparison
+        result = 1;
+    end else begin
+        result = 0;
+    end
+end
+```
+
+**Explanation:**
+- The original code was comparing against a fixed 5-bit value instead of input `b`
+- The corrected version properly compares the two 4-bit inputs `a` and `b`
+- This matches the intended functionality of setting `result=1` when inputs are equal
+
+This fix addresses the root cause by implementing the actual comparison between the two inputs rather than checking against an unreachable constant value.
+
+🔍 Related Documents:
+
+- source_documents\Quick Start Guide to Verilog.pdf: Section 6.3: Automated Result Checking
+6.3.1
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.1. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of...
+
+- source_documents\RTL error analysis.pdf: HDL for module with two four bit inputs A and B and 
+three outputs
+One output (A_lt_B) is logic 1 if A is less than B, a second 
+output (A_eq_B) is logic 1 if A is equal to B. A third 
+output (A_gt_B) is logic 1 if A is greater than B
+module
+mag_compare(
+output A_lt_B, A_eq_B, A_gt_B,
+input    [3:0]            A,B);
+assign
+A_lt_B =  (A<B);
+assign
+A_gt_B =  (A>B);
+assign
+A_eq_B =  (A==B);
+endmodule
+Dataflow modeling...
+
+- source_documents\RTL error analysis.pdf: Binary numbers in Verilog are specified with letter b preceded 
+by a apostrophe. The size of the number is written first and 
+then its value. 
+// Behavioural description of four-to-one line multiplexer
+module mux_2X1_beh
+(output reg m_out,
+input
+in_0,in_1,in_2,in_3,
+input [1:0]   select);
+always @ (in_0, in_1,in_2,in_3,select)
+case(select)
+2’b00:    m_out = in_0;
+2’b01:    m_out = in_1;
+2’b10:    m_out = in_2;
+2’b11:    m_out = in_3;
+endcase
+endmodule
+Behavioural modeling...
+
+- source_documents\Quick Start Guide to Verilog.pdf: each
+input
+pattern
+and
+then
+print
+either
+“PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.4
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.4. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then...
+
+- source_documents\Quick Start Guide to Verilog.pdf: “PASS” or “FAIL” depending on the output of
+the DUT.
+6.3.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench should drive in each input code for
+the vector ABCD in the order they would
+appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should change
+the input pattern every 10 ns. Your test bench
+should include automatic result checking for
+each
+input
+pattern
+and
+then
+print
+either...
+
+- source_documents\Quick Start Guide to Verilog.pdf: appear in a truth table (i.e., “0000,” “0001,”
+“0010,” . . .). Your test bench should read in a
+new input pattern every 10 ns. Your test bench
+should
+write
+the
+input
+pattern
+and
+the
+corresponding output of the DUT to an external
+ﬁle called “output.txt.”
+6.4.2
+Design a Verilog test bench to verify the func-
+tional operation of the system in Fig. 6.2. Your
+test bench read in the input patterns from an
+external ﬁle called “input.txt.” This ﬁle should...

@@ -1,0 +1,13 @@
+The error you're encountering in your VHDL code arises because variables in VHDL have specific rules about where they can be declared. The error message specifically points out that "variable outside of subprogram or process must be 'shared'", indicating a misunderstanding of variable scope and declaration rules in VHDL.
+
+In VHDL, variables need to be declared inside a process, procedure, or function. This allows them to be used locally within that block and provides significant flexibility for temporary data storage during the sequential operation of that particular block. However, when you declare a variable at the architecture level (outside any specific process or subprogram), VHDL expects them to be declared as `shared` variables since they can be accessed from multiple processes, which can lead to race conditions if not handled properly.
+
+In your code, you have declared `variable1` at the architecture level, which is not allowed unless it is declared as `shared`. However, `shared variable` usage is not recommended for most designs due to potential concurrency issues and is less common in synthesizable code.
+
+The fix involves ensuring `variable1` is declared within a process where it is intended to be used:
+
+1. **Declare the variable inside the process**: Move the declaration of `variable1` inside the process where it is used. This ensures that `variable1` is local to the process and prevents issues with scope.
+
+2. **Understanding Variable Use**: Since `variable1` is used only within the process, there's no need to declare it at the architecture level. Instead, declaring it inside the process will avoid the error and fit more appropriately with the intended use, which appears to be for intermediate computation or temporary storage purpose.
+
+By addressing these points, you can eliminate the error and ensure the correct and intended usage of variables in your VHDL design.

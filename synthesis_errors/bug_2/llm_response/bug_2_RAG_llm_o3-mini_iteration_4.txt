@@ -1,0 +1,173 @@
+The bug is that you are trying to use the "+" operator on signals that are declared as std_logic_vector. In VHDL, the arithmetic operator "+" is not defined for std_logic_vector types, even if you include the IEEE.NUMERIC_STD package. Instead, the "+" operator is defined for arithmetic types like unsigned or signed.
+
+Why it’s occurring:
+• The error "0 definitions of operator '+' match here" means that the compiler cannot find a version of the "+" operator that takes two std_logic_vector arguments.
+• Although IEEE.NUMERIC_STD is included, it only provides "+" for types declared as unsigned or signed—not for std_logic_vector.
+
+How to fix it:
+• Either change the types of your ports from std_logic_vector to unsigned (or signed) if that fits the design.
+• Alternatively, cast your std_logic_vector inputs to unsigned (or signed) before performing the addition, and then cast the result back to std_logic_vector if needed.
+  
+For example, you can modify the process like this:
+
+-------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity top2 is
+    Port (
+        a : in  std_logic_vector(3 downto 0);
+        b : in  std_logic_vector(3 downto 0);
+        c : out std_logic_vector(3 downto 0)
+    );
+end top2;
+
+architecture Behavioral of top2 is
+begin
+    process (a, b)
+    begin
+        c <= std_logic_vector(unsigned(a) + unsigned(b));
+    end process;
+end Behavioral;
+-------------------------------------------------
+
+In this fixed version:
+• The std_logic_vector signals a and b are converted to unsigned.
+• The addition is performed on the unsigned values.
+• The result is then converted back to std_logic_vector for assignment to c.
+
+This resolves the error by ensuring that the correct operator version is used.
+
+🔍 Related Documents:
+
+- source_documents\RTL error analysis.pdf: Verilog HDL provides 30 
+different operators
+// module
+decoder_2x4_df(
+output [0:3]   D, 
+input              A,B,enable);
+assign
+D[0] = ~A&~B&enable,
+D[1] = ~A&B&enable,
+D[2] =  A&~B&enable,
+D[3] =  A&B&enable;
+endmodule
+Symbol
+Operation
++
+binary addition
+-
+Binary subtraction
+&
+Bitwise AND
+|
+Bitwise OR
+^
+Bitwise XOR
+~
+Bitwise NOT
+==
+Equality
+>
+Greater than
+<
+Less than
+{  }
+Concatenate
+? :
+Conditional
+// module
+binary_adder(
+output [3:0]   sum, 
+output           C_out,
+input [3:0]     A,B...
+
+- source_documents\verilog_fsm.pdf: case with simulation tools (like ModelSim), however. ModelSim will not correct your sensitivity
+list bugs, and your simulations will be plagued with odd errors. Furthermore, the synthesis tools
+catching your errors is not guarenteed. An easy way to avoid these potential problems is to use
+always@( * ) as opposed to always@(Input1 or Input 2 or ...).
+4. Lastly, a very subtle point which perhaps has the potential to cause the most frustration is latch...
+
+- source_documents\Quick Start Guide to Verilog.pdf: always @ (A, B, ALU_Sel)
+begin
+case (ALU_Sel)
+3’b000
+: begin //-- Addition
+//-- Sum and Carry Flag
+{NZVC[0], Result} ¼ A + B;
+//-- Negative Flag
+NZVC[3] ¼ Result[7];
+//-- Zero Flag
+if (Result ¼¼ 0)
+NZVC[2] ¼ 1;
+else
+NZVC[2] ¼ 0;
+//-- Two’s Comp Overflow Flag
+if ( ((A[7]¼¼0) && (B[7]¼¼0) && (Result[7] ¼¼ 1)) ||
+((A[7]¼¼1) && (B[7]¼¼1) && (Result[7] ¼¼ 0)) )
+NZVC[1] ¼ 1;
+else
+NZVC[1] ¼ 0;
+end
+:
+//-- other ALU operations go here...
+:
+default
+: begin
+Result ¼ 8’hXX;
+NZVC
+¼ 4’hX;
+end
+endcase
+end...
+
+- source_documents\Quick Start Guide to Verilog.pdf: made?
+F ¼ {3{4'hA}};
+3.1.7
+When adding two unsigned vectors of different
+sizes using the + numerical operator, what
+happens to the smaller vector prior to the
+addition?
+3.1.8
+What operation has the highest precedence
+operation in Verilog?
+Section
+3.2:
+Continuous
+Assignment
+with Logical Operators
+3.2.1
+Design a Verilog model to implement the
+behavior described by the 3-input minterm list
+shown in Fig. 3.1. Use continuous assignment
+with logical operators. Declare your module...
+
+- source_documents\Quick Start Guide to Verilog.pdf: // Nested conditional statements.
+((A ¼¼ 1’b0) && (B ¼¼ 1’b1)) ? 1’b’1 :
+//
+This models an XOR gate.
+((A ¼¼ 1’b1) && (B ¼¼ 1’b0)) ? 1’b’1 :
+((A ¼¼ 1’b1) && (B ¼¼ 1’b1)) ? 1’b’0;
+F ¼ ( !C && (!A || B) ) ? 1’b1 : 1’b0;
+// This models the logic expression
+//
+F ¼ C’(A’+B).
+3.1.8 Concatenation Operator
+In Verilog, the curly brackets (i.e., {}) are used to concatenate multiple signals. The target of this
+operation must be the same size of the sum of the sizes of the input arguments.
+Example:...
+
+- source_documents\verilog_2001_ref_guide.pdf: always @(a, b, ci)
+  sum = a + b + ci;
+// In this example, the sensitivity list infers combinational logic,
+// (the @* token infers sensitivity to any signal read in the statement or
+// statement group which follows it, which are sel, a and b)
+always @*
+  begin
+    if (sel==0) y = a + b;
+    else        y = a * b;
+  end
+// This example using illustrates several programming statements
+always @(posedge clk) begin
+  casez (opcode)   //casez makes Z a don't care...

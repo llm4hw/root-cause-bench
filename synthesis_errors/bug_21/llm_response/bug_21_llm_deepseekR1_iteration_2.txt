@@ -1,0 +1,24 @@
+The bug arises from a mismatch between the edge sensitivity in the event control and the reset condition logic. Here's why:
+
+1. **Event Control Mismatch**:  
+   The `always` block uses `@(posedge clk or negedge reset)`, implying:  
+   - `negedge reset` indicates an *active-low* asynchronous reset (resets when `reset=0`).  
+
+2. **Incorrect Reset Condition**:  
+   The condition `if (!reset == 0)` is equivalent to `if (reset == 1)`. This:  
+   - Checks for *reset inactive* (`reset=1`) instead of *active* (`reset=0`)  
+   - Contradicts the `negedge reset` sensitivity (which expects reset logic to trigger when `reset=0`).  
+
+3. **Synthesis Rule Violation**:  
+   Synthesis tools require strict correspondence between:  
+   - Edge sensitivity (`negedge reset`)  
+   - Reset condition (`if (condition)` must directly test for the *active state* of the reset signal).  
+   Here, the condition tests the *inactive state* (`reset=1`), causing the error.
+
+**Fix Principle**:  
+Change the reset condition to directly test for the active-low state:  
+- Use `if (!reset)` or `if (reset == 0)` to align with `negedge reset`.  
+This ensures the reset logic activates when `reset=0`, matching the sensitivity list.  
+
+**Side Note**:  
+The logic also contains a functional issue where `led` is set to `1'b1` in the non-reset path, but this doesn't contribute to the reported synthesis error. The primary issue is the reset condition mismatch.

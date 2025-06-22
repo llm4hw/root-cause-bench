@@ -1,0 +1,15 @@
+The bug arises from a duplicate case item in the Verilog `case` statement and a bit-ordering mismatch in the input `x`.
+
+1. **Duplicate Case Item**:  
+   The `case` statement has two entries for `4'h1`:  
+   - The first `4'h1: f = 0` incorrectly assigns `f = 0` for `x = 1`.  
+   - The second `4'h1: f = 1` is unreachable because the first match takes priority.  
+   This causes `f = 0` for `x = 1` instead of the expected `f = 1`.
+
+2. **Input Bit Ordering Mismatch**:  
+   The input `x` is declared as `[4:1]`, where the bits are `x[4], x[3], x[2], x[1]`. However, the testbench assigns `x` using `i[3:0]`, which corresponds to bits `i[3], i[2], i[1], i[0]`. This reverses the bit order. For example, when the testbench sets `i = 1` (binary `0001`), `x` becomes `4'b0001` (interpreted as `4'h1`), but the actual input bits are `x[4]=0, x[3]=0, x[2]=0, x[1]=1`. The case items use `4'h` values, which assumes `x[4:1]` is treated as a 4-bit value. While this does not directly cause the reported error (since the case items are labeled correctly for `x`), it could lead to confusion and errors if the testbench's bit ordering does not align with the design's expectations.
+
+**Fix Steps**:  
+- Remove the duplicate `4'h1: f = 0` entry in the `case` statement.  
+- Ensure the case items match the expected `f` values for each `x` input.  
+- Verify the bit ordering between the testbench and design aligns correctly (e.g., `x` declaration and testbench assignment should use consistent bit numbering).

@@ -1,0 +1,5 @@
+The bug in the code is that the comparison condition in the `always` block of the `faulty_comparator` module is incorrect. The condition `a == 5'b10101` is checking if `a` is equal to decimal 21, which is not equivalent to binary 10101. The correct binary representation for 21 is `5'b010101`. Because of this, the result is not being set to 1 when `a` is equal to binary 10101 (decimal 21), leading to the error message during simulation.
+
+To fix this issue, update the condition in the `always` block to `a == 5'b010101`. This change will correctly compare the 4-bit input `a` with the binary value 10101 (decimal 21), resolving the bug and ensuring that the proper result is assigned when `a` equals binary 10101.
+
+After making this correction, the error message should not occur during simulation, and the test cases in the testbench should pass as expected.

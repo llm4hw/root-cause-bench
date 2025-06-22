@@ -1,0 +1,3 @@
+The error message indicates a syntax error near the `endmodule` keyword in the Verilog code. The issue in this case is that there is a missing semicolon (`;`) at the end of the line where you assign the output `c`.
+
+To resolve this bug, you need to add a semicolon at the end of the line where you assign `c = a & b`. The correct line should be `assign c = a & b;`. This will correctly terminate the assignment statement and resolve the syntax error.

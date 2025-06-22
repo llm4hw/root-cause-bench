@@ -1,0 +1,18 @@
+The bug occurs due to an **infinite combinational loop** in the `always @*` block. Here's why:
+
+1. **Combinational Loop Issue**:  
+   The `always @*` block is combinational and re-evaluates whenever any of its inputs change. Since `flag` is always `1` (initialized and never modified), the `while (flag)` loop runs indefinitely during simulation/synthesis.
+
+2. **Synthesis Failure**:  
+   Synthesis tools attempt to unroll loops statically. With `flag` permanently high, the loop has no exit condition, causing the tool to hit its iteration limit (65536) and fail.
+
+3. **Simulation Hang**:  
+   In simulation, this would cause a hang as the loop runs endlessly in zero time without advancing simulation time.
+
+4. **Critical Problems**:
+   - No timing control (e.g., `#delay` or `@(posedge clk)`) inside the loop
+   - `flag` never toggled to break the loop
+   - Blocking assignment (`=`) would be required for immediate feedback in combinational loops, but even then it would be unstable
+
+**Fix Approach**:  
+Replace the combinational `always @*` block with a **clocked sequential process** (`always @(posedge clk)`). Move the toggle logic there and remove the `while` loop entirely. Initialize `out` properly and consider adding a reset mechanism to control initial states. Never use unbounded loops in combinational blocks without guaranteed exit conditions.

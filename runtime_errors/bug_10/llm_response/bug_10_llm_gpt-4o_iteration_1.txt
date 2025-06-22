@@ -1,0 +1,36 @@
+The error message "ERROR: Expected 0001, got 1111" indicates a problem with the expected behavior of the shift register during the simulation. Let’s break down what’s happening:
+
+### Explanation of the bug:
+
+The bug lies in the way the shifting of data occurs within the `always` block in the Verilog module for the shift register. Specifically, the lines:
+```verilog
+data[0] = serial_in;
+data[1] = data[0];
+data[2] = data[1];
+data[3] = data[2];
+```
+are executed in a way that causes incorrect shifting because these assignments happen sequentially but within the same clock cycle. It means the assignments affect each other in real time during the same positive edge of the clock. So, when the line `data[1] = data[0];` executes, it uses the updated value of `data[0]` from `data[0] = serial_in;`, and similarly for the subsequent assignments.
+
+In effect, the values intended to be propagated through the register stages do not reach their expected positions because the operations are not correctly capturing the intended staggered shift due to these immediate right-hand side evaluations.
+
+### Why the error is occurring:
+
+Let's use the example where:
+- The initial state of `data` right after reset is `0000`.
+- `serial_in` is `1`.
+
+When the first positive clock edge hits:
+- `data[0]` gets the value `1` from `serial_in`.
+- `data[1]`, `data[2]`, and `data[3]` all ripple through with the newly-assigned value, resulting in `1111`.
+
+This behavior continues for each cycle, causing the entire register to fill up with repeated bits from the first cycle itself, which does not match the expected staggered shifting behavior:
+
+### Potential Fix Explanation:
+
+To achieve the expected operational behavior as a shift register, you should modify the assignments so they are based on the previous value of the register rather than the sequential logic happening within the same clock cycle.
+
+However, since the question specifies not to provide code, conceptually, what needs to happen is each bit within the register should be assigned based on the previous value of the bit at that position in the prior cycle (or less advanced position for a true shift on each clock).
+
+The misunderstanding stems from not inserting delays or a dedicated shift-right operation that respects propagating the old values, essentially meaning you need to ensure past data flows rightwards in exact concert with advancing time (the concept of latched memory at each stage).
+
+This clarifies why your shifts did not achieve the intended results and sets a direction for restructuring the code logic to facilitate expected outcomes.

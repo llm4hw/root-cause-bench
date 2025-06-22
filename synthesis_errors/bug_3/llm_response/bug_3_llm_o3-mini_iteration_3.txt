@@ -1,0 +1,5 @@
+The error is happening because the design is trying to drive an input port. In VHDL, an input object (declared with the keyword in) is meant to be driven externally (for example, by a test bench or another module) and cannot be updated inside the architecture. Here, the code is attempting to assign a value ('0') to the input port "input1", which violates the intended read-only nature of inputs.
+
+This occurs because VHDL enforces that input ports are not eligible targets for signal assignment within the entity's architecture. The simulation (or synthesis) tool is reporting this issue to indicate that you are erroneously trying to update a signal that is supposed to be driven by external logic.
+
+To fix this bug, you'll need to either remove the assignment from the architecture if "input1" is meant only to be an external signal, or change the port declaration (for example, to an output or inout) if the intention is to have the entity drive this signal.

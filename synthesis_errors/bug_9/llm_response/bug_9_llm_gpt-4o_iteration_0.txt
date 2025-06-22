@@ -1,0 +1,23 @@
+The issue in the provided VHDL code stems from the incorrect usage of the port mode for signal `b`. In VHDL, the port mode specifies the direction in which data can flow through a port:
+
+- `in`: The port can be read by the entity but cannot be written to.
+- `out`: The port can be driven by the entity but is generally not intended to be read back.
+- `inout`: The port can be both read and written.
+- `buffer`: Similar to `out`, but allows reading the value driven onto the port within the same architecture.
+
+In your code:
+
+- Port `b` is declared as `out`, which means it can be driven within the architecture (`rtl`) but not read.
+- The assigned expression `temp_signal <= a and b;` attempts to read from `b`, which is not permitted because it is declared as `out`.
+
+The error message is indicating that you cannot read from an `out` port. This is because `out` ports are meant only for driving signals outside the entity and should be treated as write-only ports within the architecture. 
+
+To address this issue:
+
+- If `b` needs to be used both for output and as part of logic operations within the architecture, its mode must be changed to either `inout` or `buffer`.
+
+The choice between `inout` and `buffer` should be guided by your design requirements:
+- Use `buffer` if `b` is driven only internally within the entity and read internally.
+- Use `inout` if `b` is connected to other entities that may drive it as well, allowing both reading and writing from/to the port.
+
+By making the appropriate change to the port mode, the error can be resolved without changing the underlying design logic.

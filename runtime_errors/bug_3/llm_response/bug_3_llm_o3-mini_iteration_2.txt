@@ -1,0 +1,5 @@
+The root cause of the problem is that the final carry output is being computed using an AND operation instead of the correct OR operation. In a full adder constructed from two half adders, the intermediate carry signals (from the first half adder and from the second half adder) must be combined in such a way that if either of them is asserted, the final carry is asserted. Using an AND operator means that both intermediate carry outputs must be high for the final carry to be high, which is not the desired behavior.
+
+For example, in Test Case 3 (inputs: 1, 1, and 0), the first half adder produces a carry of 1, while the second half adder produces a carry of 0. Since 1 AND 0 is 0, the resulting final carry is 0, which does not match the expected result of 1. The bug is occurring because the wrong logical operation is used to combine the half adder carry signals.
+
+The fix is to change the combination of the carry signals so that an OR operation is used instead of an AND. This ensures that if either half adder produces a carry, the final carry will be set.

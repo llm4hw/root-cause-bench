@@ -1,0 +1,9 @@
+The bug in the provided code is issue with the logic in the always block of the `shift_register` module. 
+
+1. The assignment statements inside the `shift_en` condition are incorrect. Instead of shifting the data in the `data` register, the code is overwriting the values starting with `data[0]`. This causes the data to be set incorrectly, leading to the mismatch in the test bench.
+
+2. Additionally, the assignments should be sequential and not parallel (using `=` instead of `<=`) as the intended behavior is to shift the values of `data`.
+
+To fix this bug, the sequential assignment in the always block should be modified to correctly shift the values in the `data` register. Ensure that `data[3]` is assigned the previous value of `data[2]`, `data[2]` is assigned the previous value of `data[1]`, and so on, until `data[0]` is assigned the value of `serial_in`.
+
+After making these corrections, simulate the testbench again to verify that the corrected shift register functionality works as intended.

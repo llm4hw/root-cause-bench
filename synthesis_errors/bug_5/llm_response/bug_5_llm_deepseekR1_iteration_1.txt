@@ -1,0 +1,20 @@
+The error occurs because of incorrect syntax when trying to index the result of a type conversion function in VHDL. Specifically:
+
+1. **Root Cause**: The expression `std_logic_vector(to_unsigned(counter, 8))(7)` attempts to directly index the result of the `std_logic_vector()` type conversion function. VHDL syntax does not allow indexing function results in this manner because:
+   - Type conversions (`std_logic_vector()` in this case) are treated as function calls
+   - Function return values cannot be directly indexed in the same expression where they are called
+   - The extra closing parenthesis after `8))` creates invalid syntax for indexing
+
+2. **Tool Limitation**: The synthesis tool explicitly states it "cannot index the result of a type conversion," which is consistent with VHDL's grammar rules where function calls cannot be directly indexed.
+
+3. **Logical Intent**: The code aims to extract bit 7 (MSB) of an 8-bit unsigned representation of `counter`. However, the current syntax violates VHDL's operator precedence and indexing rules.
+
+**Fix Approach**:
+- Instead of indexing the type-converted result, index the `unsigned` vector *before* conversion
+- Use: `to_unsigned(counter, 8)(7)` which:
+  - Creates an 8-bit unsigned vector
+  - Indexes bit 7 (std_logic)
+  - Avoids unnecessary type conversion
+- Alternatively, use a temporary signal or variable to hold the converted vector and index that signal
+
+This resolves both the syntax error and the tool limitation by eliminating direct indexing of a type conversion result.

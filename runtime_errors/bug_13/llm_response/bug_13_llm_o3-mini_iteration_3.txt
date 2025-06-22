@@ -1,0 +1,9 @@
+The error isn’t in the arithmetic or in the construction of each one‐bit adder but in how the carry signals are chained between them. In your top‐level 4‑bit adder the wires that should connect the carry out of each stage to the carry in of the next bit are mis‐assigned.
+
+For example, the first full adder (fa1) correctly produces a carry through w_carry1. But instead of passing that as the carry input to the second bit’s adder, the code routes the second bit’s carry input from w_carry3 (which comes from the fourth stage). Similarly, the third adder uses w_carry1 as its carry input, even though w_carry1 came from the first stage—not the second stage’s output. In other words, the intended daisy chain (fa1’s carry → fa2’s input, fa2’s carry → fa3’s input, and so on) is interrupted because the wires (w_carry1, w_carry2, w_carry3) are connected out of sequence.
+
+The result is that for the test case with a = 3 and b = 5 (which should sum to 8 and yield {carry, sum} = 01000) the wrong routes for the intermediate carry signals produce an incorrect sum (10010 in your error message).
+
+The fix is to rearrange the interconnections so that the carry output of the first stage feeds directly into the carry input of the second stage, the second stage’s carry feeds into the third stage, and so on. This correct sequencing ensures that the carry is propagated in the proper order and the final result is computed correctly.
+
+Remember, you are not required to provide corrected code here but only understand that the underlying bug is in the improper wiring of the intermediate carry signals causing the error.

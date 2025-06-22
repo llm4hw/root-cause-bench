@@ -1,0 +1,5 @@
+The error is stating that the identifier "data" is not declared within the module. In this module, the always block is using "data" on the right-hand side of the assignment, but there is no signal, variable, or port named "data" declared anywhere in the code. Because the synthesis tool (or simulator) cannot find a declaration for "data," it flags this as an error.
+
+This bug is occurring because you are referencing an undeclared identifier. The tool, during its elaboration of the design, expects every used signal to be defined explicitly, either as an input, output, internal signal, or constant. Since "data" is missing its declaration, it doesn’t know what value to assign to out1.
+
+The fix is to declare "data" correctly. You need to either add "data" as an appropriate port, define it as an internal signal with the desired type (wire or reg), or correct your intended signal if "data" was a typo or reference to another signal.

@@ -1,0 +1,33 @@
+### Bug Explanation:
+The error occurs because of a **width mismatch** in the assignment `output <= input1;`. Here's why:
+
+1. **Signal Widths**:
+   - `input1` is declared as `std_logic_vector(2 downto 0)` (3 bits).
+   - `output` is declared as `STD_LOGIC_VECTOR(3 downto 0)` (4 bits).
+
+2. **Assignment Issue**:
+   - The assignment attempts to directly connect a 3-bit signal (`input1`) to a 4-bit port (`output`). 
+   - VHDL requires both sides of an assignment to have identical bit widths for direct assignment. 
+
+3. **Synthesis Failure**:
+   - Synthesis tools cannot infer how to handle the extra bit in `output`. Should it be:
+     - Tied to `'0'` or `'1'` (zero/sign extension)?
+     - Connected to a specific bit of `input1`?
+     - Left unconnected?
+   - This ambiguity triggers the width mismatch error during synthesis.
+
+### Root Cause:
+The fundamental issue is **inconsistent port sizing** in the entity declaration. The design assumes `input1` and `output` have the same width, but their vector declarations differ:
+- `input1`: 3 bits (`2 downto 0`)
+- `output`: 4 bits (`3 downto 0`)
+
+### Fix Required:
+Resolve the width mismatch by **explicitly mapping the bit widths**. Options include:
+1. **Zero/Sign Extension** (e.g., assign `output(3)` separately and map `output(2 downto 0) <= input1`).
+2. **Port Redesign**:
+   - Modify `input1` to 4 bits, or
+   - Modify `output` to 3 bits, or
+   - Add logic to handle the width conversion.
+
+### Key Insight:
+VHDL does **not** implicitly resize vectors. You must explicitly define how to handle mismatched widths in assignments. The fix depends on the intended functionality (e.g., padding, truncation, or error correction).

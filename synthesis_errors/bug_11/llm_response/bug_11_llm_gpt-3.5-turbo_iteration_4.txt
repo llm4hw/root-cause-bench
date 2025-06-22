@@ -1,0 +1,9 @@
+The bug in the code is caused by missing case choices in the case statement. The error message specifically mentions that the choice 32'b00000000000000000000000000000011 is missing. This error occurs because the case statement is using a `std_logic_vector` type for the `sel` variable, but the cases specified in the code are in binary string format ("00", "01", "10").
+
+To fix this issue, you need to update the case statement to match the `std_logic_vector` type of `sel`. You can either update the cases to match the binary representation of the `std_logic_vector` values (e.g., "00" -> "00", "01" -> "01", "10" -> "10"), or change the type of `sel` to a binary string type (e.g., `std_logic_vector(1 downto 0)` to `std_logic_vector(3 downto 0)`).
+
+Make sure that the case choices in the case statement align with the type of `sel` to resolve this bug. 
+
+Additionally, when updating the cases, ensure that the representation matches the `std_logic_vector` format (e.g., "00"/"01"/"10" in binary string format). 
+
+These changes should help in resolving the error and allow the simulation to run successfully in the test bench.

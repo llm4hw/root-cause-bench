@@ -1,0 +1,5 @@
+The bug in the provided code is occurring because the states for generating the Morse code for the letter 'O' (characterized by the select input being 2'b01) are not correctly implemented. 
+
+In the state transition logic for encoding the Morse code for 'O', there are three states defined, O_DASH1, O_DASH2, and O_DASH3. However, these states are not properly updated in sequence to generate the correct Morse code pattern for the letter 'O'. The issue lies in the state transitions between these states, which is causing the Morse code for 'O' to be incorrect during simulation.
+
+To fix this bug, the state transition logic for encoding the Morse code for 'O' (select input 2'b01) should be revised to ensure the sequence of states and transitions align with the correct Morse code pattern for 'O' (---). By updating the state transitions in these O_DASH states accordingly, the correct Morse code for the letter 'O' can be generated during simulation.

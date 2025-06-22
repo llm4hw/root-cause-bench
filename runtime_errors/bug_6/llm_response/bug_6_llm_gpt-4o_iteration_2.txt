@@ -1,0 +1,22 @@
+The issue in the code arises from the incorrect handling of the `outResult` value when `longTimeHold` is asserted along with the `pedControl` signal. Specifically, the problem lies in Test Case 6 in the testbench, which expects `outResult` to be greater than `3'b110` (i.e., greater than decimal 6) when both `pedControl` and `longTimeHold` are active. However, the code sets `outResult` to `3'b101` (or decimal 5) under these conditions, which fails the test because 5 is not greater than 6.
+
+Upon examining the code, we'll focus on this block:
+```verilog
+always@(state, longTimeHold) begin
+	case (state)
+		Red: outResult = 3'b100;
+		Ped: if(longTimeHold) outResult = 3'b101;  // Issue occurs here
+		else outResult = 3'b110;
+		Green: if(longTimeHold) outResult = 3'b011;
+		else outResult = 3'b010;
+		Yellow: outResult = 3'b001;
+		default: outResult = 3'b000;
+	endcase
+end
+```
+
+In the `Ped` state, when `longTimeHold` is `1`, the `outResult` is set to `3'b101`, which contradicts the expectation of the testbench. The testbench expects `outResult` to be greater than `3'b110`, which implies a value of either `3'b111` or a higher multi-bit value. However, such a value is not being set anywhere in the code inside the state handling of `Ped`.
+
+The error is occurring because the expectation set in Test Case 6 does not match what the code is actually doing, and there seems to be a misunderstanding or misalignment in terms of the expected behavior for this scenario.
+
+To resolve this issue, the logic in the combinational block handling `outResult` for the `Ped` state when `longTimeHold` is asserted should be modified to output a value greater than `3'b110`. This would align the implementation with the testbench's expectations. While not providing the exact code solution, it's essential to ensure that for the `Ped` state with `longTimeHold=1`, a value greater than `3'b110` is indeed returned by the `outResult`.

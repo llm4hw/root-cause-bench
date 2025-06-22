@@ -1,0 +1,13 @@
+The error message you encountered indicates a misunderstanding of how variables are used in VHDL. The specific error, "variable outside of subprogram or process must be 'shared'", arises because in VHDL, variables declared outside of a process, function, or procedure must be shared to be valid. However, you have declared `variable1` outside of any such construct, while variables are intended to be used locally within processes or subprograms to store temporary values.
+
+Here's why the error occurs:
+
+1. **Context of Variable Declaration**: In your code, `variable1` is declared within the architecture, but outside of any process or subprogram. In VHDL, variables outside processes must be declared as `shared` variables, which is a construct that allows global access. However, `shared` variables have specific use cases and synchronization requirements, different from regular variables.
+
+2. **Variables vs. Signals**: Variables are meant to be used inside processes in VHDL, and changes made to them are reflected immediately within the process. They are not intended for use at the architecture level unless they are shared, which is not the typical usage scenario.
+
+To fix this bug, you'll need to ensure that the variable is used in an intended context:
+
+- **Declare Variable Inside a Process**: Move the declaration of `variable1` inside the process where it is used. This is generally how VHDL variables are used, as they operate like local storage within a process and are recalculated every time the process is executed.
+
+By following these guidelines, you'll ensure that the VHDL code adheres to the language standards and simulation will run without throwing this error.

@@ -1,0 +1,5 @@
+The error is caused by an infinite loop in your combinational always block. The while loop uses a condition (flag) that remains true throughout execution, so there is no break condition to let the loop finish. As a result, the simulator runs the loop repeatedly until it exceeds the internal iteration limit (65536 iterations) and aborts the simulation.
+
+This bug occurs because a combinational block (sensitive to any input change) is not allowed to have unbounded looping behavior. Infinite loops in such cases prevent the simulator from advancing time and thus lead to errors during simulation.
+
+To address the issue, you would need to change the design so that the loop terminates properly. One common approach is to avoid using an infinite while loop in a combinational block, and instead implement the intended behavior using proper sequential logic or a finite state machine.

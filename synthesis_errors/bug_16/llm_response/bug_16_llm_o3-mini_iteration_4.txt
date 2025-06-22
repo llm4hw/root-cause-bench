@@ -1,0 +1,9 @@
+The error comes from the fact that the register driving the output (out1) is updated in a way that prevents the synthesis tool from recognizing a proper asynchronous reset. In the always block there is mixed use of assignment styles and the reset handling is not applied uniformly to every register in the block.
+
+What’s happening is that one internal register (out1_reg) is being assigned with a blocking assignment ("out1 = data;") while another register (data) is updated with a nonblocking assignment in the reset branch ("data <= 1'b0;") and a blocking assignment in the clocked branch. Because the always block has an asynchronous reset in its sensitivity list, the synthesis tool expects that all registers within that block will follow a consistent style (typically nonblocking) so that their reset behavior can be clearly extracted. When one of these registers (in this case out1) does not have a clearly defined asynchronous reset behavior—because its assignment is placed outside the conditional branch—it causes the tool to issue an error saying it “cannot extract Asynchronous Set/Reset” for that register.
+
+In summary, the bug is occurring because:
+1. There is a mixture of blocking and nonblocking assignments in a sequential block with an asynchronous reset.
+2. The register out1 is updated in a manner where its reset behavior isn’t explicitly defined or consistent with the other register, confusing the extraction of asynchronous reset logic.
+
+The fix (without showing corrected code) involves making sure that all assignments within the clocked block are done consistently (usually with nonblocking assignments) so that the reset branch applies to every register in the block. This uniform approach allows the synthesis tool to correctly determine the asynchronous reset behavior for each register, including the one driving out1.

@@ -1,0 +1,15 @@
+The error message you are encountering suggests a type mismatch issue related to the assignment of literals to signals in your VHDL code. Specifically, it states, "type std_logic does not match with a string literal," which points to an incorrect assignment of a string literal to a `std_logic` type signal.
+
+Let's break down the issue in the provided code:
+
+1. In VHDL, a `signal` of type `std_logic` should be assigned a single character literal, denoted with single quotes, such as `'0'` or `'1'`. Similarly, a `std_logic_vector` can be assigned a multi-character string literal with double quotes, like `"0000"`.
+
+2. In your code, the signal `a` is declared as `std_logic` and initialized with the string literal `"0"`, which is incorrect. Instead, it should be initialized with the character literal `'0'`.
+
+3. The same type consistency applies to the vector `c`, which is correctly assigned using a string literal `"0000"` since it is a `std_logic_vector`.
+
+Understanding these concepts resolves the mismatch:
+
+- `signal a : std_logic := "0";` should be `signal a : std_logic := '0';`
+
+This mismatch is the root cause of the error message you are seeing. By correcting this initialisation to use a single character literal enclosed in single quotes for `std_logic` signals, you can ensure type consistency and mitigate the error during synthesis and simulation.

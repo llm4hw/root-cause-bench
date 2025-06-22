@@ -1,0 +1,5 @@
+The problem is that the module never distinguishes between valid and invalid input values. In the sequential process, the valid signal is always set to indicate a valid input. This means that even when the input number (num_in) is outside the expected range (0–9), valid remains asserted and the output logic does not produce the expected “invalid” behavior. 
+
+Because the design simply assigns num_in to the state and then immediately asserts valid, any input such as 10 or 15 is treated as if it were a proper state. In addition, the combinational assignments that use case statements cover only the valid states available (S0 to S9) and have no default branch to catch out‐of-range values. As a result, when num_in exceeds 9, the FSM never deactivates the valid signal or forces output_data to the “default” 0 value as the test bench expects.
+
+In summary, the bug is occurring because the design logic lacks a check for inputs outside the allowed range. Without a condition to mark states as invalid and to provide a safe default output when an unexpected value is assigned to state, the simulation fails when the test bench uses values like 10 or 15.

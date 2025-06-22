@@ -1,0 +1,30 @@
+The bug occurs because the `case` statement in the VHDL code is **not exhaustive** for all possible values of the `sel` input signal. Here's why:
+
+1. **Signal Range Issue**:  
+   `sel` is declared as `std_logic_vector(1 downto 0)`, meaning it has 4 possible values:  
+   `"00"`, `"01"`, `"10"`, and `"11"`.  
+   The `case` statement only handles `"00"`, `"01"`, and `"10"`, but **omits `"11"`**.
+
+2. **Synthesis Requirement**:  
+   VHDL synthesis tools require `case` statements to cover all possible values of the selector signal.  
+   The missing `"11"` case violates this rule, causing the error:  
+   `missing choice(s) 32'b00000000000000000000000000000011`.  
+   (The 32-bit representation is the tool's internal encoding of `"11"`).
+
+3. **Consequence**:  
+   Without handling `"11"`, the logic for `out1` is undefined when `sel="11"`.  
+   This creates an **inferred latch** during synthesis (unintended memory element), which the tool flags as an error.
+
+---
+
+### How to Fix:
+- **Add explicit handling for `"11"`** in the `case` statement, e.g.:  
+  ```vhdl
+  when "11" => out1 <= '0';  -- Or your intended value
+  ```
+- **Use `when others`** to catch all unhandled cases:  
+  ```vhdl
+  when others => out1 <= '0';  -- Handles "11" and any invalid states
+  ```
+
+**Note**: Since `sel` is only 2 bits, `when others` would cover only `"11"` in this case. Choose the method that fits your design intent.
