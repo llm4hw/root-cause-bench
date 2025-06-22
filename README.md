@@ -4,7 +4,7 @@ This is the official repository for the paper:
 
 > **"Towards LLM-based Root Cause Analysis of Hardware Design Failures"**  
 > _Siyu Qiu, Muzhi Wang, Raheel Afsharmazayejani, Mohammad Moradi Shahmiri, Benjamin Tan, Hammond Pearce_  
-> [IEEE Xplore Link] | [arXiv Link Coming Soon]
+> [IEEE Xplore Link coming soon] | [arXiv Link Coming Soon]
 
 ---
 
